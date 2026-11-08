@@ -6,11 +6,10 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowRight, Eye, EyeOff, GraduationCap, Info, Loader2, LockKeyhole, UserRound } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, Info, Loader2, LockKeyhole, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { SchoolLevel } from "@/lib/demo-constants";
 import { setDemoLevelCookie } from "@/lib/demo-session";
 import styles from "./login.module.css";
 
@@ -23,7 +22,6 @@ type LoginValues = z.infer<typeof schema>;
 
 export function LoginForm() {
   const router = useRouter();
-  const [level, setLevel] = useState<SchoolLevel>("primary");
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(true);
   const [formError, setFormError] = useState<string | null>(null);
@@ -45,7 +43,7 @@ export function LoginForm() {
       setFormError("Emel atau kata laluan tidak sah. Sila cuba lagi.");
       return;
     }
-    setDemoLevelCookie(level, remember);
+    setDemoLevelCookie("primary", remember);
     router.push("/");
   }
 
@@ -55,29 +53,9 @@ export function LoginForm() {
         <Info aria-hidden="true" />
         <div>
           <span className={styles.demoTitle}>Mod demo</span>
-          <p>Pilih profil dan log masuk dengan sebarang emel atau ID pelajar dan kata laluan (8+ aksara).</p>
+          <p>Log masuk dengan sebarang emel atau ID pelajar dan kata laluan (8+ aksara) untuk membuka profil demo.</p>
         </div>
       </div>
-      <fieldset className={styles.profilePicker} disabled={isSubmitting}>
-        <legend>Pilih profil pembelajaran</legend>
-        <div className={styles.profileOptions}>
-          {([
-            { id: "primary", title: "Pelajar Rendah", icon: GraduationCap },
-            { id: "secondary", title: "Pelajar Menengah", icon: GraduationCap },
-          ] as const).map((option) => (
-            <button
-              key={option.id}
-              type="button"
-              onClick={() => setLevel(option.id)}
-              aria-pressed={level === option.id}
-              className={styles.profileOption}
-            >
-              <option.icon size={20} aria-hidden="true" />
-              <strong>{option.title}</strong>
-            </button>
-          ))}
-        </div>
-      </fieldset>
 
       <form onSubmit={handleSubmit(onSubmit)} className={styles.form} noValidate aria-busy={isSubmitting}>
         <div className={styles.field}>

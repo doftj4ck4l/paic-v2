@@ -11,8 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
-import type { SchoolLevel } from "@/lib/demo-constants";
 import { setDemoLevelCookie } from "@/lib/demo-session";
 
 const schema = z.object({
@@ -26,7 +24,6 @@ type RegisterValues = z.infer<typeof schema>;
 
 export function RegisterForm() {
   const router = useRouter();
-  const [level, setLevel] = useState<SchoolLevel>("primary");
   const [showPassword, setShowPassword] = useState(false);
 
   const {
@@ -41,7 +38,7 @@ export function RegisterForm() {
   async function onSubmit() {
     // Demo build: creates the demo session instead of a real account (Phase 1).
     await new Promise((r) => setTimeout(r, 600));
-    setDemoLevelCookie(level);
+    setDemoLevelCookie("primary");
     router.push("/");
   }
 
@@ -50,39 +47,12 @@ export function RegisterForm() {
       <div className="rounded-xl bg-[#E7F6F4] px-4 py-3">
         <p className="text-xs font-bold text-teal">Mod demo</p>
         <p className="mt-0.5 text-xs leading-relaxed text-slate-600">
-          Pendaftaran sebenar disambung dalam Fasa 1. Pilih profil demo dan daftar dengan
-          sebarang butiran yang sah.
+          Pendaftaran sebenar disambung dalam Fasa 1. Daftar dengan sebarang butiran yang sah
+          untuk membuka profil demo.
         </p>
       </div>
 
-      <fieldset className="mt-4">
-        <legend className="sr-only">Pilih profil demo</legend>
-        <div className="grid grid-cols-2 gap-1.5 rounded-xl bg-secondary p-1.5">
-          {(
-            [
-              { id: "primary", title: "Pelajar Rendah" },
-              { id: "secondary", title: "Pelajar Menengah" },
-            ] as const
-          ).map((option) => (
-            <button
-              key={option.id}
-              type="button"
-              onClick={() => setLevel(option.id)}
-              aria-pressed={level === option.id}
-              className={cn(
-                "rounded-lg px-3 py-2 text-sm font-semibold transition-all",
-                level === option.id
-                  ? "bg-card text-foreground shadow-soft"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {option.title}
-            </button>
-          ))}
-        </div>
-      </fieldset>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-5 flex flex-col gap-4" noValidate>
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-4 flex flex-col gap-3.5" noValidate>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="fullName">Nama penuh</Label>
           <div className="relative">

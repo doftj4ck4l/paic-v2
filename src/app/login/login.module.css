@@ -10,7 +10,7 @@
 .page::before, .page::after { content: ""; position: absolute; z-index: -1; pointer-events: none; }
 .page::before { top: -120px; right: -110px; width: 290px; height: 370px; border-radius: 0 0 50% 45%; rotate: 12deg; background: linear-gradient(150deg, #edd4ff, #c5b6ff); }
 .page::after { bottom: -215px; left: -110px; width: 550px; height: 310px; border-radius: 44% 52% 0 0; rotate: 15deg; background: linear-gradient(120deg, #92f2d9, #e8ff92); }
-.layout { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 34px; width: 100%; max-width: 1600px; margin: auto; padding: 58px 4.3%; min-height: 900px; }
+.layout { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 34px; width: 100%; max-width: 1600px; margin: auto; padding: 40px 4.3%; }
 .story { position: relative; display: flex; flex-direction: column; min-width: 0; }
 .brand { position: relative; display: inline-flex; align-items: center; gap: 16px; width: fit-content; font-size: 30px; font-weight: 800; letter-spacing: -1.4px; line-height: 1.05; }
 .brandMark { display: flex; align-items: center; justify-content: center; width: 54px; height: 54px; flex-shrink: 0; border-radius: 15px; background: linear-gradient(130deg, #00cda7, #00af92); color: #fff; box-shadow: inset 0 0 10px #ffffff18; }
@@ -19,17 +19,17 @@
 .brandSubtitle { display: block; margin-top: 5px; font-size: 20px; font-weight: 500; letter-spacing: -.6px; }
 .brandSparkle { position: absolute; right: -44px; top: -15px; color: #ffd33c; width: 30px; height: 30px; stroke-width: 2.7; }
 .paperPlane { position: absolute; width: 245px; height: 150px; right: -7px; top: 26px; }
-.storyContent { position: relative; z-index: 2; margin-top: 76px; }
+.storyContent { position: relative; z-index: 2; margin-top: 44px; }
 .story h2 { width: fit-content; font-size: clamp(44px, 4.1vw, 65px); font-weight: 800; letter-spacing: -2.7px; line-height: 1.16; }
 .highlight { position: relative; white-space: nowrap; isolation: isolate; }
 .highlight::before { content: ""; position: absolute; z-index: -1; inset: 8% -4% 0 -3%; border-radius: 35% 21% 29% 12%; background: #e4ff78; rotate: -2deg; }
 .highlight i::before, .highlight i::after { content: ""; position: absolute; width: 8px; height: 25px; background: #ffd32c; border-radius: 10px; right: -18px; top: -14px; rotate: 26deg; }
 .highlight i::after { right: -35px; top: 6px; height: 27px; rotate: 76deg; }
-.storyDescription { margin-top: 22px; max-width: 500px; font-size: clamp(16px, 1.35vw, 21px); line-height: 1.6; letter-spacing: -.4px; }
-.features { display: flex; flex-direction: column; gap: 26px; margin-top: 40px; list-style: none; }
+.storyDescription { margin-top: 16px; max-width: 500px; font-size: clamp(16px, 1.35vw, 21px); line-height: 1.6; letter-spacing: -.4px; }
+.features { display: flex; flex-direction: column; gap: 18px; margin-top: 30px; list-style: none; }
 .features li { display: flex; align-items: center; gap: 18px; width: fit-content; }
-.featureIcon { display: grid; place-items: center; width: 53px; height: 53px; flex-shrink: 0; border-radius: 16px; border: 1px solid #eeedf7; background: #fffdf4; color: #ffc327; box-shadow: 0 3px 6px #2923410b; }
-.featureIcon svg { width: 31px; height: 31px; stroke-width: 2.4; }
+.featureIcon { display: grid; place-items: center; width: 46px; height: 46px; flex-shrink: 0; border-radius: 16px; border: 1px solid #eeedf7; background: #fffdf4; color: #ffc327; box-shadow: 0 3px 6px #2923410b; }
+.featureIcon svg { width: 26px; height: 26px; stroke-width: 2.4; }
 .features li:nth-child(2) .featureIcon { background: #f8f5ff; color: #a17aff; }
 .features li:nth-child(3) .featureIcon { background: #fcfff1; color: #04bd94; }
 .features h3 { font-size: clamp(14px, 1.25vw, 18px); font-weight: 800; letter-spacing: -.5px; }
@@ -41,7 +41,7 @@
 .heroRays i { display: block; width: 9px; height: 28px; border-radius: 10px; background: #ffd329; rotate: 55deg; }
 .heroRays i + i { height: 24px; position: absolute; top: 30px; right: -10px; rotate: 99deg; }
 .main { display: flex; align-items: center; min-width: 0; position: relative; z-index: 3; }
-.formContent { position: relative; width: 100%; padding: 34px 37px 36px; border-radius: 32px; border: 1px solid #ece9fc; background: #ffffffed; box-shadow: 0 4px 8px #a49ddd0a, 0 12px 45px #7671c51c; }
+.formContent { position: relative; width: 100%; padding: 26px 32px 28px; border-radius: 32px; border: 1px solid #ece9fc; background: #ffffffed; box-shadow: 0 4px 8px #a49ddd0a, 0 12px 45px #7671c51c; }
 .formContent h1 { font-size: clamp(26px, 2.5vw, 40px); font-weight: 800; letter-spacing: -1.7px; line-height: 1.3; white-space: nowrap; }
 .wave { display: inline-block; font-size: .9em; vertical-align: 2px; margin-left: 3px; }
 .formSubtitle { margin-top: 8px; color: #555a7c; font-size: clamp(12px, 1.13vw, 17px); letter-spacing: -.4px; line-height: 1.6; }
@@ -50,19 +50,11 @@
 .cardRays i { position: absolute; width: 7px; height: 22px; background: #ffd32a; border-radius: 8px; rotate: 10deg; }
 .cardRays i:nth-child(2) { left: 20px; top: 12px; rotate: 45deg; }
 .cardRays i:nth-child(3) { left: 29px; top: 35px; height: 19px; rotate: 85deg; }
-.demo { display: flex; align-items: flex-start; gap: 13px; padding: 14px 17px; margin-top: 25px; border-radius: 20px; background: #e4f7f3; }
+.demo { display: flex; align-items: flex-start; gap: 12px; padding: 13px 16px; margin-top: 20px; border-radius: 20px; background: #e4f7f3; }
 .demo > svg { color: #00b59c; margin-top: 5px; flex-shrink: 0; width: 21px; height: 21px; fill: #00b59c; stroke: #fff; }
 .demoTitle { font-size: 13px; font-weight: 750; color: #046b69; }
 .demo p { margin-top: 1px; font-size: 11px; line-height: 1.7; color: #4e5975; }
-.profilePicker { border: 0; margin-top: 24px; min-width: 0; }
-.profilePicker legend { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.profileOptions { display: grid; grid-template-columns: 1fr 1fr; background: #f0eff8; border-radius: 18px; }
-.profileOption { display: flex; align-items: center; justify-content: center; gap: 10px; min-width: 0; padding: 14px 8px; border-radius: 18px; color: #383d64; cursor: pointer; transition: background 150ms, color 150ms; }
-.profileOption:hover { background: #e5e1f5; }
-.profileOption[aria-pressed="true"] { color: #fff; background: linear-gradient(110deg, #00c99d, #00a88c); box-shadow: 0 3px 8px #00ac8c1b; }
-.profileOption svg { width: 21px; height: 21px; flex-shrink: 0; }
-.profileOption strong { font-size: 12px; font-weight: 750; white-space: nowrap; letter-spacing: -.3px; }
-.form { display: flex; flex-direction: column; gap: 16px; margin-top: 21px; }
+.form { display: flex; flex-direction: column; gap: 14px; margin-top: 18px; }
 .field { display: flex; flex-direction: column; gap: 6px; }
 .field label { font-size: 12px; font-weight: 650; letter-spacing: -.3px; color: #191b3e; }
 .inputWrap { position: relative; }
@@ -87,31 +79,28 @@
 .submit:hover { background: linear-gradient(105deg, #00958f, #00ad88); }
 .submit > svg:last-child { position: absolute; right: 18px; }
 .submit > span:first-child { margin-inline: 20px; }
-.divider { display: flex; align-items: center; gap: 13px; margin-top: 21px; color: #696d88; font-size: 11px; font-weight: 650; }
+.divider { display: flex; align-items: center; gap: 13px; margin-top: 16px; color: #696d88; font-size: 11px; font-weight: 650; }
 .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: #e2e1ee; }
-.socialOptions { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 17px; }
+.socialOptions { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
 .socialButton { width: 100%; height: 46px; border: 1px solid #e4e3ee; border-radius: 17px; background: white; color: #25264b; font-size: 13px; font-weight: 600; box-shadow: 0 3px 5px #37315c0a; }
 .socialButton:disabled { opacity: .75; cursor: not-allowed; }
 .socialButton svg { width: 21px; height: 21px; }
 .socialHint { margin-top: 7px; text-align: center; color: #74788f; font-size: 9px; }
-.register { margin-top: 21px; text-align: center; font-size: 13px; color: #636787; }
+.register { margin-top: 16px; text-align: center; font-size: 13px; color: #636787; }
 .register > a { font-weight: 750; color: #008c78; }
 .page a:focus-visible, .page button:focus-visible, .remember input:focus-visible { outline: 3px solid #00a98d; outline-offset: 4px; }
 
 @media (min-width: 1500px) {
-  .layout { min-height: 990px; gap: 40px; }
-  .formContent { padding: 34px 40px 35px; }
+  .layout { gap: 36px; }
+  .formContent { padding: 30px 38px 32px; }
   .storyContent { margin-top: 78px; }
-  .features { gap: 27px; margin-top: 42px; }
+  .features { gap: 20px; margin-top: 32px; }
   .featureIcon { width: 58px; height: 58px; }
   .scene { width: 540px; height: 560px; right: -80px; bottom: 0; }
   .heroBlob { width: 460px; height: 480px; }
-  .demo { margin-top: 26px; padding: 15px 18px; }
+  .demo { margin-top: 22px; padding: 14px 17px; }
   .demo p { font-size: 12px; }
-  .profilePicker { margin-top: 26px; }
-  .profileOption { padding-block: 16px; }
-  .profileOption strong { font-size: 14px; }
-  .form { gap: 18px; margin-top: 22px; }
+        .form { gap: 18px; margin-top: 22px; }
   .field label, .formOptions { font-size: 14px; }
   .inputWrap input { height: 49px; font-size: 15px; }
   .submit { height: 55px; font-size: 25px; }
@@ -124,14 +113,14 @@
   .paperPlane { width: 180px; right: -10px; top: 40px; }
   .brand { font-size: 25px; }
   .brandSubtitle { font-size: 17px; }
-  .storyContent { margin-top: 85px; }
+  .storyContent { margin-top: 52px; }
   .storyDescription { font-size: 16px; }
   .desktopBreak { display: none; }
   .formContent { padding-inline: 26px; }
   .formContent h1 { font-size: 28px; }
   .scene { width: 340px; height: 350px; right: -25px; bottom: -25px; }
   .heroBlob { width: 300px; height: 310px; }
-  .features { gap: 22px; }
+  .features { gap: 16px; }
   .features li { gap: 12px; }
   .features h3 { font-size: 14px; }
   .features p { font-size: 10px; }
@@ -150,9 +139,7 @@
   .formContent h1 { font-size: 30px; }
   .formSubtitle { font-size: 14px; }
   .demo p { font-size: 12px; }
-  .profileOption { padding-block: 15px; }
-  .profileOption strong { font-size: 13px; }
-  .form { gap: 20px; }
+      .form { gap: 20px; }
   .field label { font-size: 13px; }
   .inputWrap input { font-size: 16px; height: 50px; }
   .formOptions { font-size: 12px; }
@@ -166,10 +153,7 @@
   .formSubtitle { font-size: 12px; }
   .demo { padding: 13px; gap: 10px; }
   .demo p { font-size: 11px; }
-  .profileOption { gap: 7px; }
-  .profileOption strong { font-size: 11px; }
-  .profileOption svg { width: 18px; }
-  .formOptions { font-size: 11px; }
+        .formOptions { font-size: 11px; }
   .socialOptions { gap: 10px; }
   .socialButton { font-size: 12px; }
   .register { font-size: 12px; }
@@ -178,8 +162,5 @@
   .layout { padding-inline: 12px; }
   .formContent { padding-inline: 16px; }
   .formContent h1 { font-size: 24px; }
-  .profileOption strong { font-size: 10px; }
-  .profileOption svg { width: 16px; }
-  .profileOption { gap: 4px; }
-  .formOptions { font-size: 10px; }
+        .formOptions { font-size: 10px; }
 }

@@ -1,0 +1,268 @@
+.page {
+  position: relative;
+  isolation: isolate;
+  min-height: 100dvh;
+  overflow: clip;
+  color: #10112f;
+  background: radial-gradient(ellipse at 90% 35%, #f1eeff7a, transparent 45%), radial-gradient(ellipse at 10% 85%, #eff2ff9c, transparent 42%), #fafbff;
+}
+.page::before, .page::after { content: ""; pointer-events: none; position: absolute; z-index: -1; }
+.page::before { width: 230px; height: 210px; top: 560px; right: -135px; border-radius: 44% 52% 44% 65%; rotate: -30deg; background: linear-gradient(130deg, #e4ff92, #f0ffc0); }
+.page::after { width: 210px; height: 330px; bottom: 28px; left: -160px; border-radius: 48%; rotate: 43deg; background: linear-gradient(150deg, #cbb3ff, #f2eaff); }
+.main { width: 100%; max-width: 1140px; margin-inline: auto; padding: 0 32px 60px; }
+.hero { position: relative; display: grid; grid-template-columns: 1fr 1fr; align-items: center; min-height: 350px; margin-block: 18px 22px; }
+.heroCopy { position: relative; z-index: 2; padding: 16px 0 22px 18px; }
+.classBadge { display: inline-flex; padding: 6px 14px; border-radius: 30px; background: #eee3ff; color: #7c39d8; font-size: 12px; font-weight: 700; }
+.hero h1 { margin-top: 14px; font-size: clamp(35px, 4vw, 47px); font-weight: 800; letter-spacing: -1.9px; line-height: 1.08; }
+.name { position: relative; white-space: nowrap; }
+.name::after { content: ""; position: absolute; left: -5px; right: -9px; bottom: -9px; height: 16px; border: 6px solid #bafb35; border-width: 6px 0 0; border-radius: 60% 65% 0 0; rotate: -2deg; }
+.wave { display: inline-block; font-size: .85em; vertical-align: 2px; }
+.heroCopy > p { margin-top: 16px; max-width: 465px; font-size: 16px; color: #61678b; line-height: 1.55; letter-spacing: -.4px; }
+.heroActions { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 22px; }
+.primaryButton, .secondaryButton, .continueButton { display: inline-flex; align-items: center; justify-content: center; gap: 9px; width: fit-content; height: 48px; padding: 0 22px; border-radius: 20px; font-size: 14px; font-weight: 700; transition: transform 150ms, box-shadow 150ms; }
+.primaryButton, .continueButton { background: linear-gradient(110deg, #00aaa6, #00bf9e); color: white; box-shadow: inset 0 0 6px #ffffff18; }
+.primaryButton:hover, .secondaryButton:hover, .continueButton:hover { transform: translateY(-2px); box-shadow: 0 5px 12px #4c45901a; }
+.secondaryButton { border: 1px solid #e4e6f6; background: #ffffffb0; box-shadow: 0 5px 10px #37375f07; }
+.secondaryButton svg { color: #8753df; fill: #b892ff44; }
+.playIcon { display: grid; place-items: center; width: 19px; height: 19px; border: 1.7px solid white; border-radius: 50%; }
+.playIcon svg { margin-left: 2px; }
+.heroArt { position: relative; align-self: stretch; min-width: 0; }
+.heroBlob { position: absolute; width: 440px; height: 310px; left: 18px; top: 12px; border-radius: 55% 40% 56% 37%; rotate: -18deg; background: linear-gradient(110deg, #efffba, #dfff73 80%); }
+.robot { position: absolute; width: 555px; max-width: none; height: auto; left: -3px; bottom: -6px; }
+.learningRow { display: grid; grid-template-columns: 1.4fr 1fr; gap: 22px; }
+.continueCard { position: relative; isolation: isolate; display: grid; grid-template-columns: 158px minmax(0, 1fr); align-items: center; min-height: 204px; overflow: hidden; border: 1px solid #aedaff; border-radius: 24px; background: linear-gradient(130deg, #f7fbff, #f5faff); box-shadow: inset 0 0 0 2px #ffffff70; }
+.continueCard::before, .continueCard::after { content: ""; position: absolute; z-index: -1; width: 210px; height: 120px; border-radius: 40% 55% 40% 60%; background: linear-gradient(130deg, #bdefff, #d6f0ff44); rotate: 25deg; }
+.continueCard::before { bottom: -88px; left: -10px; }
+.continueCard::after { top: -70px; right: -100px; }
+.waterArt { display: flex; align-items: center; justify-content: center; }
+.waterArt img { width: 185px; max-width: none; height: auto; }
+.workbookContent { padding: 22px 23px 20px 7px; }
+.eyebrow { color: #009c89; font-size: 12px; font-weight: 750; }
+.workbookContent h2 { margin-top: 4px; font-size: 23px; font-weight: 750; letter-spacing: -.8px; }
+.workbookDescription { margin-top: 3px; font-size: 13px; line-height: 1.6; color: #646d95; letter-spacing: -.2px; }
+.progressRow { display: flex; align-items: center; gap: 16px; margin-top: 13px; }
+.progressRow > strong { font-size: 14px; }
+.progressTrack { min-width: 0; flex: 1; height: 12px; overflow: hidden; border-radius: 20px; background: #e5eaf6; }
+.progressTrack > span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(110deg, #00b6a2, #00b6a9); box-shadow: inset 0 0 5px #ffffff45; }
+.continueButton { display: flex; margin-top: 14px; margin-left: auto; height: 38px; padding-inline: 18px; font-size: 13px; border-radius: 18px; }
+.aiCard { position: relative; isolation: isolate; display: flex; flex-direction: column; justify-content: center; overflow: hidden; min-width: 0; padding: 25px 26px; border: 1px solid #6550a3; border-radius: 24px; background: linear-gradient(125deg, #51408f, #382670); color: white; box-shadow: 0 8px 18px #42348014; scroll-margin-top: 100px; }
+.aiCard::before, .aiCard::after { content: ""; position: absolute; z-index: -1; width: 200px; height: 90px; background: #8e62db88; border-radius: 50%; rotate: 30deg; }
+.aiCard::before { right: -95px; top: -55px; }
+.aiCard::after { right: -85px; bottom: -75px; rotate: -25deg; background: #7a51cb77; }
+.aiCard h2 { position: relative; z-index: 1; display: flex; align-items: center; gap: 12px; font-size: 24px; font-weight: 750; letter-spacing: -.8px; }
+.aiCard h2 > svg { color: #ffd65b; fill: #ffd65b; stroke-width: 1.2; }
+.aiCard > p { margin-top: 10px; font-size: 15px; font-weight: 500; line-height: 1.5; }
+.aiStar { position: absolute; width: 65px; height: 65px; top: 12px; right: 36px; rotate: -15deg; opacity: .95; }
+.aiForm { display: flex; align-items: center; gap: 11px; margin-top: 16px; padding: 5px 6px 5px 15px; min-width: 0; border-radius: 30px; border: 1px solid #f1edff; background: white; color: #686b99; }
+.aiForm input { flex: 1; width: 0; min-width: 0; height: 33px; font-size: 14px; outline: none; background: transparent; color: #262345; }
+.aiForm input::placeholder { color: #737399; }
+.aiForm > svg { flex-shrink: 0; }
+.aiForm:focus-within { outline: 3px solid #bc9fff; outline-offset: 3px; }
+.aiForm button { display: grid; place-items: center; width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; background: linear-gradient(120deg, #00bd9c, #009b9b); box-shadow: inset 0 0 5px #ffffff66; color: white; cursor: pointer; }
+.subjects { margin-top: 35px; }
+.sectionHeading { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 17px; }
+.sectionHeading h2 { font-size: 26px; font-weight: 800; letter-spacing: -.9px; }
+.sectionHeading p { margin-top: 2px; color: #62688e; font-size: 14px; line-height: 1.5; }
+.textLink { display: inline-flex; align-items: center; gap: 7px; flex-shrink: 0; color: #009e8b; font-size: 12px; font-weight: 750; }
+.textLink:hover { text-decoration: underline; text-underline-offset: 4px; }
+.subjectGrid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; padding-inline: 10px 0; }
+.subjectCard { display: flex; flex-direction: column; align-items: center; min-width: 0; padding: 6px 8px 14px; border: 1px solid #d8c7ff; border-radius: 25px; background: linear-gradient(150deg, #fbf8ff, #f1eaff); box-shadow: inset 0 0 0 2px #ffffffc0; transition: transform 150ms, box-shadow 150ms; text-align: center; }
+.subjectCard:hover { transform: translateY(-4px); box-shadow: 0 7px 16px #5e4e9714, inset 0 0 0 2px #ffffffc0; }
+.subjectCard[data-subject="science"] { border-color: #00bfa7; background: linear-gradient(145deg, #edfbfa, #dff6f0); box-shadow: 0 3px 8px #00b6980e, inset 0 0 0 2px #ffffffd0; }
+.subjectCard[data-subject="language"] { border-color: #f6d5b2; background: linear-gradient(145deg, #fffcfa, #fff1e1); }
+.subjectCard[data-subject="english"] { border-color: #c6e1ff; background: linear-gradient(145deg, #fbfdff, #e8f3ff); }
+.subjectCard[data-subject="history"] { border-color: #f5cfc5; background: linear-gradient(145deg, #fffafa, #ffebe5); }
+.subjectCard[data-subject="geography"] { border-color: #dbedb8; background: linear-gradient(145deg, #fcfff8, #efffda); }
+.subjectIcon { display: block; flex-shrink: 0; width: 95px; height: 95px; background-image: url('/assets/home/subject-icons.png'); background-size: 300% 200%; background-repeat: no-repeat; }
+.subjectCard h3 { font-size: 15px; font-weight: 750; letter-spacing: -.6px; line-height: 1.5; }
+.subjectCard p { margin-top: 1px; font-size: 13px; color: #606b91; }
+.subjectCard[data-subject="science"] p { color: #008c7d; }
+.summaryRow { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 37px; }
+.summaryCard { min-width: 0; padding: 17px 22px 18px; border: 1px solid #d4dcfa; border-radius: 25px; background: #ffffffae; box-shadow: 0 9px 18px #9a9fce0c; }
+.cardHeading { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 15px; border-bottom: 1px solid #e7eafa; }
+.cardHeading h2 { display: flex; align-items: center; gap: 11px; font-size: 20px; font-weight: 750; letter-spacing: -.7px; }
+.cardHeading h2 > svg { width: 25px; height: 25px; color: #7453ce; filter: drop-shadow(1px 2px 0 #b9a5e344); }
+.assignment { display: flex; align-items: center; gap: 17px; min-width: 0; padding: 11px 3px; border-bottom: 1px solid #e8ebf7; }
+.assignment:last-child { border-bottom: 0; padding-bottom: 3px; }
+.assignment:hover .assignmentText > strong { color: #008b80; }
+.assignmentState { display: grid; place-items: center; flex-shrink: 0; width: 25px; height: 25px; border-radius: 50%; border: 1px solid #d6def5; background: #fff; color: #fff; box-shadow: 0 2px 5px #657bbd12; }
+.assignmentState[data-status="graded"] { border: 0; background: linear-gradient(120deg, #00c8ab, #00a792); }
+.assignmentState[data-status="in-progress"] > span { width: 10px; height: 10px; border-radius: 50%; background: #b5c8ec; }
+.assignmentText { display: flex; flex-direction: column; flex: 1; min-width: 0; gap: 3px; }
+.assignmentText > strong { font-size: 14px; font-weight: 700; letter-spacing: -.4px; }
+.assignmentText > span { font-size: 12px; line-height: 1.4; color: #666e95; letter-spacing: -.3px; }
+.statusBadge { flex-shrink: 0; padding: 5px 11px; border-radius: 20px; font-size: 11px; font-weight: 650; background: #fff0bd; color: #9b5805; }
+.statusBadge[data-tone="soon"] { background: #e9edf7; color: #5d6890; }
+.statusBadge[data-tone="done"] { background: #d9f6ef; color: #008d7f; }
+.levelRow { display: flex; align-items: center; gap: 14px; margin-top: 14px; }
+.trophy { display: grid; place-items: center; width: 70px; height: 66px; flex-shrink: 0; border-radius: 19px; background: #fff6e6; }
+.trophy img { width: 53px; height: 53px; }
+.levelContent { flex: 1; min-width: 0; }
+.levelHeading { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 7px; }
+.levelHeading h3 { font-size: 16px; font-weight: 750; letter-spacing: -.3px; }
+.levelHeading > span { font-size: 13px; color: #68739c; font-weight: 600; }
+.levelContent > p { display: flex; align-items: center; gap: 5px; margin-top: 6px; font-size: 12px; color: #626e95; }
+.levelContent > p > svg { color: #00a99a; }
+.achievements { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin-top: 18px; }
+.achievement { display: grid; place-items: center; min-width: 0; height: 62px; border-radius: 19px; border: 1px solid #f0e8de; background: #fff7ed; transition: transform 150ms; }
+.achievement:nth-child(2) { background: #f6f1ff; border-color: #e8e0fb; }
+.achievement:nth-child(3) { background: #f0f5ff; border-color: #e0e8fb; }
+.achievement:nth-child(4) { background: #f3f7ff; border-color: #e0e8fb; }
+.achievement:nth-child(5) { background: #f0fbed; border-color: #e3f2de; }
+.achievement[data-earned="false"] img { opacity: .5; filter: grayscale(.35); }
+.achievement:hover { transform: translateY(-3px); }
+.achievement img { width: 44px; height: 44px; }
+.srOnly { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.page a:focus-visible, .page button:focus-visible { outline: 3px solid #00ad99; outline-offset: 4px; }
+
+@media (min-width: 1400px) {
+  .main { max-width: 1240px; }
+  .hero { min-height: 385px; }
+  .hero h1 { font-size: 51px; }
+  .heroCopy > p { font-size: 17px; }
+  .heroBlob { width: 470px; height: 340px; }
+  .robot { width: 600px; }
+  .learningRow { grid-template-columns: 1.4fr 1fr; }
+  .continueCard { min-height: 220px; grid-template-columns: 175px minmax(0, 1fr); }
+  .waterArt img { width: 185px; }
+  .workbookContent h2 { font-size: 26px; }
+  .subjectIcon { width: 90px; height: 90px; }
+  .subjectCard h3 { font-size: 15px; }
+  .subjectCard p { font-size: 13px; }
+  .assignmentText > strong { font-size: 14px; }
+  .assignmentText > span { font-size: 12px; }
+}
+@media (max-width: 1050px) {
+  .main { padding-inline: 24px; }
+  .heroCopy { padding-left: 0; }
+  .hero h1 { font-size: 39px; }
+  .heroCopy > p { font-size: 14px; }
+  .heroArt .robot { width: calc(100% + 24px); left: 0; bottom: 5px; }
+  .heroBlob { width: 350px; height: 290px; }
+  .heroActions { gap: 10px; }
+  .primaryButton, .secondaryButton { padding-inline: 15px; font-size: 12px; }
+  .learningRow { gap: 16px; grid-template-columns: 1.2fr 1fr; }
+  .continueCard { grid-template-columns: 120px minmax(0, 1fr); }
+  .waterArt img { width: 140px; }
+  .workbookContent { padding-right: 18px; }
+  .workbookContent h2 { font-size: 22px; }
+  .workbookDescription { font-size: 11px; }
+  .aiCard { padding: 22px; }
+  .aiCard h2 { font-size: 22px; }
+  .aiCard > p { font-size: 12px; }
+  .aiStar { right: 14px; width: 50px; height: 50px; }
+  .subjectGrid { gap: 10px; padding: 0; }
+  .subjectCard h3 { font-size: 12px; }
+  .subjectCard p { font-size: 11px; }
+  .subjectIcon { width: 72px; height: 72px; }
+  .summaryRow { gap: 16px; }
+  .summaryCard { padding-inline: 17px; }
+  .assignment { gap: 10px; }
+  .assignmentText > strong { font-size: 12px; }
+  .assignmentText > span { font-size: 11px; }
+  .statusBadge { padding-inline: 8px; font-size: 10px; }
+  .cardHeading h2 { font-size: 17px; }
+  .achievements { gap: 9px; }
+}
+@media (max-width: 900px) {
+  .hero { min-height: 320px; margin-top: 12px; }
+  .hero h1 { font-size: 33px; }
+  .heroCopy > p { font-size: 13px; }
+  .heroArt .robot { width: 380px; left: -15px; bottom: 17px; }
+  .heroBlob { width: 280px; height: 240px; top: 34px; left: 3px; }
+  .heroActions { gap: 8px; }
+  .primaryButton, .secondaryButton { height: 43px; padding-inline: 12px; font-size: 11px; gap: 6px; }
+  .learningRow { grid-template-columns: 1fr; }
+  .continueCard { grid-template-columns: 155px minmax(0, 1fr); }
+  .waterArt img { width: 165px; }
+  .workbookDescription { font-size: 12px; }
+  .aiCard { padding: 24px; }
+  .aiCard > p { font-size: 14px; }
+  .desktopBreak { display: none; }
+  .aiStar { width: 65px; height: 65px; right: 30px; }
+  .subjectGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .subjectCard h3 { font-size: 15px; }
+  .subjectCard p { font-size: 12px; }
+  .subjectIcon { width: 85px; height: 85px; }
+  .summaryRow { grid-template-columns: 1fr; margin-top: 28px; }
+  .summaryCard { padding: 19px 22px 20px; }
+  .assignment { padding-block: 14px; gap: 15px; }
+  .assignmentText > strong { font-size: 13px; }
+  .assignmentText > span { font-size: 12px; }
+  .statusBadge { font-size: 11px; padding-inline: 11px; }
+  .cardHeading h2 { font-size: 20px; }
+  .achievements { gap: 14px; }
+}
+@media (max-width: 560px) {
+  .main { padding: 0 18px 32px; }
+  .hero { grid-template-columns: 1fr; margin-block: 17px 23px; }
+  .heroCopy { padding: 7px 3px 0; }
+  .classBadge { font-size: 11px; }
+  .hero h1 { font-size: clamp(33px, 8.8vw, 44px); letter-spacing: -1.7px; }
+  .heroCopy > p { margin-top: 17px; max-width: 390px; font-size: 14px; }
+  .heroActions { display: grid; grid-template-columns: 1.12fr 1fr; gap: 10px; margin-top: 19px; }
+  .primaryButton, .secondaryButton { width: 100%; height: 45px; padding-inline: 10px; font-size: 12px; gap: 7px; border-radius: 17px; }
+  .heroArt { height: 245px; margin-top: 14px; }
+  .heroArt .robot { width: 365px; left: 50%; transform: translateX(-50%); bottom: -9px; }
+  .heroBlob { width: 280px; height: 210px; top: 13px; left: 50%; transform: translateX(-50%); rotate: 0deg; }
+  .continueCard { grid-template-columns: 105px minmax(0, 1fr); min-height: 210px; border-radius: 22px; }
+  .waterArt img { width: 125px; }
+  .workbookContent { padding: 20px 17px 20px 3px; }
+  .eyebrow { font-size: 10px; }
+  .workbookContent h2 { font-size: 22px; }
+  .workbookDescription { font-size: 11px; }
+  .progressRow { gap: 10px; }
+  .progressRow > strong { font-size: 12px; }
+  .progressTrack { height: 11px; }
+  .continueButton { height: 36px; padding-inline: 14px; }
+  .aiCard { padding: 24px; border-radius: 22px; }
+  .aiCard h2 { font-size: 24px; }
+  .aiCard > p { font-size: 13px; }
+  .aiForm input { font-size: 16px; }
+  .sectionHeading { align-items: flex-start; gap: 10px; }
+  .sectionHeading h2 { font-size: 24px; }
+  .sectionHeading p { font-size: 12px; max-width: 250px; }
+  .sectionHeading > .textLink { margin-top: 8px; font-size: 10px; gap: 4px; }
+  .sectionHeading > .textLink svg { width: 13px; }
+  .subjects { margin-top: 28px; }
+  .subjectGrid { gap: 10px; }
+  .subjectCard { padding: 4px 4px 12px; border-radius: 21px; }
+  .subjectIcon { width: 77px; height: 77px; }
+  .subjectCard h3 { font-size: 12px; letter-spacing: -.6px; }
+  .subjectCard p { font-size: 10px; }
+  .summaryCard { padding: 18px 16px; border-radius: 23px; }
+  .cardHeading h2 { font-size: 18px; gap: 8px; }
+  .cardHeading h2 > svg { width: 22px; height: 22px; }
+  .textLink { font-size: 11px; }
+  .assignment { gap: 10px; }
+  .assignmentState { width: 22px; height: 22px; }
+  .assignmentText > strong { font-size: 12px; }
+  .assignmentText > span { font-size: 11px; }
+  .statusBadge { font-size: 10px; padding: 5px 8px; }
+  .levelHeading h3 { font-size: 15px; }
+  .levelHeading > span { font-size: 11px; }
+  .trophy { width: 60px; height: 60px; }
+  .levelRow { gap: 11px; }
+  .achievements { gap: 9px; margin-top: 16px; }
+  .achievement { height: 55px; border-radius: 16px; }
+  .achievement img { width: 38px; height: 38px; }
+}
+@media (max-width: 360px) {
+  .main { padding-inline: 12px; }
+  .heroActions { gap: 7px; }
+  .playIcon { display: none; }
+  .primaryButton, .secondaryButton { padding-inline: 11px; font-size: 11px; }
+  .heroArt .robot { width: 335px; }
+  .subjectGrid { gap: 8px; }
+  .subjectIcon { width: 69px; height: 69px; }
+  .subjectCard h3 { font-size: 11px; }
+  .sectionHeading p { font-size: 11px; }
+  .cardHeading h2 { font-size: 16px; }
+  .summaryCard { padding-inline: 13px; }
+  .assignment { gap: 8px; }
+  .assignmentText > strong { font-size: 11px; }
+  .assignmentText > span { font-size: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page a { transition: none; }
+}

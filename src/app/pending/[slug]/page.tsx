@@ -19,14 +19,21 @@ const SECTION_NAMES: Record<string, string> = {
   "quiz-kitaran-air": "Kuiz Kitaran Air",
   "quiz-pecahan": "Kuiz Pecahan Setara",
   "quiz-cerita": "Kuiz Cerita Rakyat",
+  pengumuman: "Pengumuman sekolah",
 };
 
 export default async function PendingPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ soalan?: string | string[] }>;
 }) {
   const { slug } = await params;
+  const query = await searchParams;
+  const question = slug === "tanya-ai" && typeof query.soalan === "string"
+    ? query.soalan.trim().slice(0, 1000)
+    : "";
   const student = await getDemoStudent();
   const name = SECTION_NAMES[slug] ?? slug.replaceAll("-", " ");
 
@@ -48,6 +55,12 @@ export default async function PendingPage({
             Buat masa ini kami membina dan mengesahkan reka bentuk papan pemuka utama. Bahagian
             ini menyusul selepas reka bentuk asas diluluskan.
           </p>
+          {question && (
+            <div className="mt-5 w-full rounded-xl border border-border bg-secondary/60 p-4 text-left">
+              <p className="text-xs font-semibold text-muted-foreground">Soalan anda</p>
+              <p className="mt-1 break-words text-sm leading-relaxed">{question}</p>
+            </div>
+          )}
           <Button asChild className="mt-6">
             <Link href="/">
               Kembali ke Utama <ArrowRight className="size-4" />
