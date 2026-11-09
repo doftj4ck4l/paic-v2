@@ -22,6 +22,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="ms" className={`${montserrat.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-xl focus:border focus:border-border focus:bg-card focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:shadow-soft-lg"
+        >
+          Langkau ke kandungan utama
+        </a>
         {children}
         <Toaster position="top-center" />
       </body>

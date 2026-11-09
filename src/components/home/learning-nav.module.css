@@ -2,14 +2,14 @@
 .inner { display: flex; align-items: center; gap: 26px; width: 100%; max-width: 1140px; min-height: 76px; margin: auto; padding: 10px 50px; }
 .brand { display: flex; align-items: center; gap: 9px; flex-shrink: 0; font-size: 16px; line-height: 1.05; letter-spacing: -.6px; font-weight: 800; }
 .brand small { display: block; margin-top: 4px; font-size: 9px; font-weight: 600; color: #55597f; letter-spacing: -.2px; }
-.brandMark { display: flex; align-items: center; justify-content: center; width: 36px; height: 34px; border-radius: 12px; color: white; background: linear-gradient(130deg, #00b6ad, #00a98d); box-shadow: inset 0 0 8px #ffffff22; }
+.brandMark { display: flex; align-items: center; justify-content: center; width: 36px; height: 34px; border-radius: 12px; color: white; background: linear-gradient(130deg, #007a66, #00856f); box-shadow: inset 0 0 8px #ffffff22; }
 .brandMark svg { width: 18px; height: 18px; stroke-width: 3.3; }
 .brandMark svg + svg { margin-left: -10px; }
 .nav { display: flex; align-items: center; gap: 4px; min-width: 0; }
 .navLink { display: flex; align-items: center; justify-content: center; gap: 8px; height: 45px; padding: 0 13px; border-radius: 18px; white-space: nowrap; font-size: 13px; font-weight: 600; letter-spacing: -.25px; transition: background 150ms; }
 .navLink:hover { background: #edf5f7; }
 .navLink[aria-current="page"] { background: #e0f6f2; box-shadow: 0 4px 7px #44527609; }
-.navLink[aria-current="page"] svg { color: #00a392; }
+.navLink[aria-current="page"] svg { color: #00786a; }
 .navIcon { position: relative; display: inline-flex; }
 .navIcon > svg { width: 18px; height: 18px; stroke-width: 1.8; }
 .navIcon > i, .notifications > i { position: absolute; width: 8px; height: 8px; border-radius: 50%; border: 1px solid #fff; background: #ff5b36; right: -5px; top: -4px; }
@@ -20,7 +20,7 @@
 .notifications > svg { width: 22px; height: 22px; stroke-width: 1.8; }
 .notifications > i { width: 9px; height: 9px; right: -1px; top: 0; }
 .account { position: relative; }
-.avatar { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; border: 1px solid #c7ede7; background: #dcf7f2; color: #009c8c; font-size: 14px; font-weight: 650; box-shadow: 0 2px 4px #38676f0c; cursor: pointer; }
+.avatar { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; border: 1px solid #c7ede7; background: #dcf7f2; color: #00786a; font-size: 14px; font-weight: 650; box-shadow: 0 2px 4px #38676f0c; cursor: pointer; }
 .backdrop { position: fixed; inset: 0; z-index: 41; width: 100vw; height: 100dvh; cursor: default; }
 .menu { position: absolute; z-index: 42; right: 0; top: calc(100% + 12px); width: 260px; overflow: hidden; padding: 6px; border: 1px solid #e2e4f1; border-radius: 19px; background: #fff; box-shadow: 0 12px 40px #33336120; }
 .menuProfile { display: flex; flex-direction: column; gap: 5px; padding: 13px 10px 17px; border-bottom: 1px solid #eceef6; margin-bottom: 5px; }
@@ -69,3 +69,13 @@
   .streak { font-size: 10px; }
   .navLink { font-size: 9px; }
 }
+
+.more { position: relative; }
+.moreButton { cursor: pointer; }
+.moreChevron { width: 13px !important; height: 13px !important; margin-left: -3px; }
+.moreButton[aria-current="page"] { background: #e0f6f2; box-shadow: 0 4px 7px #44527609; }
+.moreButton[aria-current="page"] .navIcon > svg { color: #00786a; }
+.moreMenu { position: absolute; z-index: 42; left: 50%; top: calc(100% + 10px); translate: -50% 0; width: 210px; overflow: hidden; padding: 6px; border: 1px solid #e2e4f1; border-radius: 19px; background: #fff; box-shadow: 0 12px 40px #33336120; }
+.moreMenu > a { display: flex; align-items: center; gap: 10px; width: 100%; padding: 11px; text-align: left; font-size: 13px; font-weight: 550; border-radius: 12px; cursor: pointer; }
+.moreMenu > a:hover { background: #f2f8f7; }
+.moreMenu > a[aria-current="page"] { background: #e0f6f2; color: #00786a; }

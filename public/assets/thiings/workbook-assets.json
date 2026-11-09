@@ -1,0 +1,35 @@
+{
+  "collection": "https://www.thiings.co/things",
+  "downloaded": "2026-11-09",
+  "terms": "https://www.thiings.co/terms",
+  "assets": [
+    {
+      "file": "workbook-flask.png",
+      "page": "https://www.thiings.co/things/erlenmeyer-flask",
+      "original": "https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-TrEo9XAy3RWLrV1whvQea4ZQVKXRcg.png",
+      "sha256": "a1a31f3eda0cdd60b17e076cdc8707f6ca7f0620584fc94bb08cf3a56ff09658",
+      "modified": false
+    },
+    {
+      "file": "workbook-calculator.png",
+      "page": "https://www.thiings.co/things/calculator",
+      "original": "https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-HCwnlHIkzR4wXtkTVAySMqAWigIejw.png",
+      "sha256": "9461e58a5c5aa886d648b129abdbc66cd158d2cb6b77aa298d9ff9ba2a0563f3",
+      "modified": false
+    },
+    {
+      "file": "workbook-pencil.png",
+      "page": "https://www.thiings.co/things/classic-yellow-pencil",
+      "original": "https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-bw4lff5DbMLnNcN5uvQFsiX7C7lN1Q.png",
+      "sha256": "c81ed9d8f4fdedebb6a5eb7b632b42a1174cdb20428005ca34cb8a86fdfc1904",
+      "modified": false
+    },
+    {
+      "file": "workbook-folder.png",
+      "page": "https://www.thiings.co/things/folder",
+      "original": "https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-6TJq3TblGrgJLKvMLFj3N2YcDEXG2A.png",
+      "sha256": "eb1f4632e07298e654e2c3857562e029800ed5cf8da6a9bafb807f5f0d8688a8",
+      "modified": false
+    }
+  ]
+}

@@ -1,7 +1,21 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { DEMO_LEVEL_COOKIE } from "@/lib/demo-constants";
 
-const PROTECTED = ["/", "/pending"];
+const PROTECTED = [
+  "/",
+  "/workbooks",
+  "/subjects",
+  "/quizzes",
+  "/explore",
+  "/creations",
+  "/progress",
+  "/profile",
+  "/settings",
+  "/notifications",
+  "/help",
+  "/search",
+  "/pending",
+];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -20,5 +34,19 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/pending/:path*"],
+  matcher: [
+    "/",
+    "/workbooks/:path*",
+    "/subjects/:path*",
+    "/quizzes/:path*",
+    "/explore/:path*",
+    "/creations/:path*",
+    "/progress/:path*",
+    "/profile/:path*",
+    "/settings/:path*",
+    "/notifications/:path*",
+    "/help/:path*",
+    "/search/:path*",
+    "/pending/:path*",
+  ],
 };

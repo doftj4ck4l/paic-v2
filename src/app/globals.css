@@ -43,28 +43,28 @@
 }
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: #fafbff;
+  --foreground: #10112f;
   --card: #ffffff;
-  --card-foreground: #0f172a;
+  --card-foreground: #10112f;
   --popover: #ffffff;
-  --popover-foreground: #0f172a;
-  --primary: #13b8a6;
+  --popover-foreground: #10112f;
+  --primary: #00b6a2;
   --primary-foreground: #ffffff;
-  --secondary: #f1f5f9;
-  --secondary-foreground: #0f172a;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --accent: #eef2ff;
-  --accent-foreground: #4f46e5;
-  --destructive: #e5484d;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #13b8a6;
+  --secondary: #f2f3fb;
+  --secondary-foreground: #10112f;
+  --muted: #f2f3fb;
+  --muted-foreground: #61678b;
+  --accent: #eee3ff;
+  --accent-foreground: #7c39d8;
+  --destructive: #d64550;
+  --border: #e4e6f6;
+  --input: #e4e6f6;
+  --ring: #00b6a2;
   --radius: 0.75rem;
 
-  --ink: #0f172a;
-  --teal: #13b8a6;
+  --ink: #10112f;
+  --teal: #00b6a2;
   --lime: #c6f432;
   --lilac: #a5b4fc;
 
@@ -99,6 +99,16 @@
   transition:
     transform 140ms ease,
     box-shadow 140ms ease;
+}
+
+/* Visible keyboard focus for custom interactive elements */
+@utility focus-ring {
+  outline: none;
+}
+
+.focus-ring:focus-visible {
+  outline: 3px solid #00786a;
+  outline-offset: 2px;
 }
 
 .press:hover {
