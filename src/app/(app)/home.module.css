@@ -9,7 +9,7 @@
 .page::before, .page::after { content: ""; pointer-events: none; position: absolute; z-index: -1; }
 .page::before { width: 230px; height: 210px; top: 560px; right: -135px; border-radius: 44% 52% 44% 65%; rotate: -30deg; background: linear-gradient(130deg, #e4ff92, #f0ffc0); }
 .page::after { width: 210px; height: 330px; bottom: 28px; left: -160px; border-radius: 48%; rotate: 43deg; background: linear-gradient(150deg, #cbb3ff, #f2eaff); }
-.main { width: 100%; max-width: 1140px; margin-inline: auto; padding: 0 32px 60px; }
+.main { padding-block: 0 60px; }
 .hero { position: relative; display: grid; grid-template-columns: 1fr 1fr; align-items: center; min-height: 350px; margin-block: 18px 22px; }
 .heroCopy { position: relative; z-index: 2; padding: 16px 0 22px 18px; }
 .classBadge { display: inline-flex; padding: 6px 14px; border-radius: 30px; background: #eee3ff; color: #7c39d8; font-size: 12px; font-weight: 700; }
@@ -116,7 +116,6 @@
 .page a:focus-visible, .page button:focus-visible { outline: 3px solid #00ad99; outline-offset: 4px; }
 
 @media (min-width: 1400px) {
-  .main { max-width: 1240px; }
   .hero { min-height: 385px; }
   .hero h1 { font-size: 51px; }
   .heroCopy > p { font-size: 17px; }
@@ -133,7 +132,6 @@
   .assignmentText > span { font-size: 12px; }
 }
 @media (max-width: 1050px) {
-  .main { padding-inline: 24px; }
   .heroCopy { padding-left: 0; }
   .hero h1 { font-size: 39px; }
   .heroCopy > p { font-size: 14px; }
@@ -194,7 +192,7 @@
   .achievements { gap: 14px; }
 }
 @media (max-width: 560px) {
-  .main { padding: 0 18px 32px; }
+  .main { padding-block: 0 32px; }
   .hero { grid-template-columns: 1fr; margin-block: 17px 23px; }
   .heroCopy { padding: 7px 3px 0; }
   .classBadge { font-size: 11px; }
@@ -248,7 +246,6 @@
   .achievement img { width: 38px; height: 38px; }
 }
 @media (max-width: 360px) {
-  .main { padding-inline: 12px; }
   .heroActions { gap: 7px; }
   .playIcon { display: none; }
   .primaryButton, .secondaryButton { padding-inline: 11px; font-size: 11px; }

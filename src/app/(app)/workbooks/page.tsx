@@ -5,13 +5,14 @@ import { Plus, Sparkles } from "lucide-react";
 import { WORKBOOKS } from "@/lib/demo-data";
 import { WorkbookList } from "./workbook-list";
 import styles from "./workbooks.module.css";
+import content from "@/components/studio/content-width.module.css";
 
 export const metadata: Metadata = { title: "Buku Kerja" };
 
 export default function WorkbooksPage() {
   return (
     <div className={styles.page}>
-      <main id="main" className={styles.main}>
+      <main id="main" className={`${content.container} ${styles.main}`}>
         <section className={styles.hero} aria-labelledby="workbooks-title">
           <div className={styles.heroCopy}>
             <div className={styles.titleRow}>

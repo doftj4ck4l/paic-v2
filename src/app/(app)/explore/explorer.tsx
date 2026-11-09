@@ -3,120 +3,62 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Search } from "lucide-react";
-import { Chip, EmptyState } from "@/components/studio/ui";
-import { WorkbookCard, SUBJECT_TINT } from "@/components/studio/cards";
+import { ArrowRight, BookOpen, Compass, ListChecks, Search, X } from "lucide-react";
+import { WorkbookCard } from "@/components/studio/cards";
 import { SUBJECTS, TOPICS, WORKBOOKS, subjectById, type SubjectId } from "@/lib/demo-data";
-import { cn } from "@/lib/utils";
+import styles from "./explore.module.css";
 
 export function Explorer() {
   const [query, setQuery] = useState("");
   const [subject, setSubject] = useState<SubjectId | "all">("all");
+  const words = useMemo(() => query.trim().toLocaleLowerCase("ms").split(/\s+/).filter(Boolean), [query]);
+  const matches = (text: string) => words.every((word) => text.toLocaleLowerCase("ms").includes(word));
 
-  const q = query.trim().toLowerCase();
+  const topics = TOPICS.filter((topic) => (subject === "all" || topic.subjectId === subject) && matches(`${topic.name} ${topic.blurb} ${subjectById(topic.subjectId).name}`));
+  const workbooks = WORKBOOKS.filter((workbook) => (subject === "all" || workbook.subjectId === subject) && matches(`${workbook.title} ${workbook.topic} ${workbook.teacherName} ${subjectById(workbook.subjectId).name}`));
 
-  const topics = useMemo(() => {
-    return TOPICS.filter((t) => {
-      const matchesSubject = subject === "all" || t.subjectId === subject;
-      const matchesQuery = q.length === 0 || `${t.name} ${t.blurb}`.toLowerCase().includes(q);
-      return matchesSubject && matchesQuery;
-    });
-  }, [q, subject]);
-
-  const workbooks = useMemo(() => {
-    return WORKBOOKS.filter((w) => {
-      const matchesSubject = subject === "all" || w.subjectId === subject;
-      const matchesQuery = q.length === 0 || `${w.title} ${w.topic}`.toLowerCase().includes(q);
-      return matchesSubject && matchesQuery;
-    });
-  }, [q, subject]);
+  function reset() { setQuery(""); setSubject("all"); }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-3">
-        <div className="relative sm:max-w-md">
-          <Search
-            className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-            aria-hidden="true"
-          />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Cari topik, subjek atau buku kerja…"
-            aria-label="Cari bahan pembelajaran"
-            className="h-11 w-full rounded-xl border border-input bg-card pl-10 pr-4 text-sm shadow-soft outline-none transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20"
-          />
+    <div className={styles.library} id="explore-library">
+      <div className={styles.searchRow}>
+        <div className={styles.search}>
+          <Search size={21} aria-hidden="true" />
+          <label htmlFor="explore-search" className={styles.srOnly}>Cari bahan pembelajaran</label>
+          <input id="explore-search" type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Cari topik, subjek atau buku kerja…" autoComplete="off" />
+          {query && <button type="button" onClick={() => setQuery("")} aria-label="Kosongkan carian"><X size={17} /></button>}
         </div>
-        <div className="flex flex-wrap gap-1.5" role="group" aria-label="Tapis mengikut subjek">
-          <button
-            type="button"
-            onClick={() => setSubject("all")}
-            className={cn(
-              "rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors",
-              subject === "all"
-                ? "border-transparent bg-foreground text-background"
-                : "border-border bg-card text-muted-foreground hover:text-foreground",
-            )}
-          >
-            Semua subjek
-          </button>
-          {SUBJECTS.map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              onClick={() => setSubject(s.id)}
-              className={cn(
-                "rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors",
-                subject === s.id
-                  ? "border-transparent bg-foreground text-background"
-                  : "border-border bg-card text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {s.name}
+        <p className={styles.resultCount} role="status" aria-live="polite" aria-atomic="true"><strong>{topics.length}</strong> topik <span>·</span> <strong>{workbooks.length}</strong> buku kerja</p>
+      </div>
+
+      <section role="group" aria-label="Tapis mengikut subjek" className={styles.subjectSection}>
+        <div className={styles.sectionHeading}>
+          <div><h2>Pilih destinasi anda</h2><p>Dari nombor hingga alam semula jadi. Apa yang ingin anda teroka?</p></div>
+          <button type="button" className={styles.allSubjects} aria-pressed={subject === "all"} onClick={() => setSubject("all")}>Semua subjek</button>
+        </div>
+        <div className={styles.subjectGrid}>
+          {SUBJECTS.map((item) => (
+            <button type="button" key={item.id} className={styles.subjectCard} data-subject={item.id} onClick={() => setSubject(item.id)} aria-pressed={subject === item.id}>
+              <Image src={item.asset} alt="" width={86} height={86} />
+              <strong>{item.name}</strong>
+              <span>{TOPICS.filter((topic) => topic.subjectId === item.id).length} topik</span>
             </button>
           ))}
         </div>
-      </div>
+      </section>
 
-      <section aria-labelledby="topics-title">
-        <h2 id="topics-title" className="mb-3 text-lg font-extrabold tracking-tight">
-          Topik pembelajaran
-        </h2>
-        {topics.length === 0 ? (
-          <EmptyState title="Tiada topik sepadan" description="Cuba kata kunci atau subjek lain." />
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {topics.map((t) => {
-              const s = subjectById(t.subjectId);
+      <section className={styles.topicsSection} aria-labelledby="topics-title">
+        <div className={styles.sectionHeading}><div><h2 id="topics-title">Topik untuk diteroka</h2><p>{subject === "all" ? "Satu idea kecil boleh membuka dunia yang besar." : `Terokai topik ${subjectById(subject).name} mengikut minat anda.`}</p></div><span className={styles.countPill}>{topics.length} topik</span></div>
+        {topics.length === 0 ? <div className={styles.empty}><Compass size={32} aria-hidden="true" /><h3>Tiada topik sepadan</h3><p>Cuba kata kunci atau subjek lain.</p><button type="button" onClick={reset}>Tetapkan semula carian</button></div> : (
+          <div className={styles.topicGrid}>
+            {topics.map((topic) => {
+              const item = subjectById(topic.subjectId);
               return (
-                <Link
-                  key={t.id}
-                  href={`/explore/topics/${t.id}`}
-                  className={cn(
-                    "group flex flex-col gap-3 rounded-[22px] border border-border p-4 shadow-soft transition-transform hover:-translate-y-1 hover:shadow-soft-lg",
-                    SUBJECT_TINT[t.subjectId],
-                  )}
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-card/80">
-                      <Image
-                        src={s.asset}
-                        alt=""
-                        width={36}
-                        height={36}
-                        className="drop-shadow-[0_6px_8px_rgba(16,17,47,0.16)]"
-                      />
-                    </span>
-                    <div className="min-w-0">
-                      <h3 className="truncate text-sm font-extrabold">{t.name}</h3>
-                      <p className="mt-0.5 text-xs text-muted-foreground">{s.name}</p>
-                    </div>
-                  </div>
-                  <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">{t.blurb}</p>
-                  <div className="mt-auto flex items-center gap-2">
-                    <Chip tone="neutral">{t.workbookCount} buku kerja</Chip>
-                    {t.quizCount > 0 && <Chip tone="purple">{t.quizCount} kuiz</Chip>}
-                  </div>
+                <Link key={topic.id} href={`/explore/topics/${topic.id}`} className={styles.topicCard} data-subject={item.id}>
+                  <span className={styles.topicSubject}>{item.name}</span>
+                  <Image src={item.asset} alt="" width={74} height={74} className={styles.topicArt} />
+                  <h3>{topic.name}</h3><p>{topic.blurb}</p>
+                  <span className={styles.topicFooter}><span><BookOpen size={13} />{topic.workbookCount} buku kerja</span>{topic.quizCount > 0 && <span><ListChecks size={13} />{topic.quizCount} kuiz</span>}<ArrowRight size={17} className={styles.topicArrow} aria-hidden="true" /></span>
                 </Link>
               );
             })}
@@ -124,22 +66,11 @@ export function Explorer() {
         )}
       </section>
 
-      <section aria-labelledby="workbooks-title">
-        <h2 id="workbooks-title" className="mb-3 text-lg font-extrabold tracking-tight">
-          Buku kerja komuniti sekolah
-        </h2>
-        {workbooks.length === 0 ? (
-          <EmptyState title="Tiada buku kerja sepadan" description="Cuba kata kunci atau subjek lain." />
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {workbooks.map((w) => (
-              <WorkbookCard key={w.id} workbook={w} />
-            ))}
-          </div>
+      <section className={styles.workbooksSection} aria-labelledby="community-title">
+        <div className={styles.sectionHeading}><div><h2 id="community-title">Belajar bersama komuniti</h2><p>Buku kerja yang dikongsi untuk membantu anda melangkah lebih jauh.</p></div><Link href="/workbooks" className={styles.textLink}>Buku kerja saya <ArrowRight size={17} /></Link></div>
+        {workbooks.length === 0 ? <div className={styles.empty}><BookOpen size={30} aria-hidden="true" /><h3>Tiada buku kerja sepadan</h3><p>Cuba kata kunci atau subjek lain.</p><button type="button" onClick={reset}>Tetapkan semula carian</button></div> : (
+          <div className={styles.communityGrid}>{workbooks.map((workbook) => <WorkbookCard key={workbook.id} workbook={workbook} variant="illustrated" />)}</div>
         )}
-        <p className="mt-4 text-xs text-muted-foreground">
-          Bahan awam yang diluluskan sekolah dipaparkan di sini · perkongsian penuh dalam Fasa 5.
-        </p>
       </section>
     </div>
   );

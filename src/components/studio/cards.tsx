@@ -37,29 +37,35 @@ const STATUS_LABEL = {
   graded: "Dinilai",
 } as const;
 
-export function WorkbookCard({ workbook }: { workbook: DemoWorkbook }) {
+export function WorkbookCard({ workbook, variant = "default" }: { workbook: DemoWorkbook; variant?: "default" | "illustrated" }) {
   const subject = subjectById(workbook.subjectId);
+  const illustrated = variant === "illustrated";
+  const artwork: Partial<Record<SubjectId, string>> = {
+    science: "/assets/thiings/workbook-flask.png",
+    math: "/assets/thiings/workbook-calculator.png",
+    language: "/assets/thiings/workbook-pencil.png",
+  };
   return (
     <Link
       href={`/workbooks/${workbook.id}`}
       className="group flex flex-col overflow-hidden rounded-[24px] border border-border bg-card shadow-soft transition-transform hover:-translate-y-1 hover:shadow-soft-lg"
     >
-      <div className={cn("relative flex h-24 items-center justify-center", SUBJECT_TINT[workbook.subjectId])}>
+      <div className={cn("relative flex items-center justify-center", illustrated ? "h-40 overflow-hidden" : "h-24", SUBJECT_TINT[workbook.subjectId])}>
         <Image
-          src={subject.asset}
+          src={illustrated ? artwork[workbook.subjectId] ?? subject.asset : subject.asset}
           alt=""
-          width={64}
-          height={64}
-          className="drop-shadow-[0_10px_12px_rgba(16,17,47,0.16)] transition-transform group-hover:scale-105"
+          width={illustrated ? 160 : 64}
+          height={illustrated ? 160 : 64}
+          className={cn("drop-shadow-[0_10px_12px_rgba(16,17,47,0.16)] transition-transform group-hover:scale-105", illustrated && "mt-4")}
         />
-        <Chip tone="neutral" className="absolute right-3 top-3 bg-card/90">
+        <Chip tone="neutral" className={cn("absolute top-3 bg-card/90", illustrated ? "left-4 text-xs" : "right-3")}>
           {subject.name}
         </Chip>
       </div>
-      <div className="flex flex-1 flex-col gap-3 p-4">
+      <div className={cn("flex flex-1 flex-col gap-3", illustrated ? "p-5" : "p-4")}>
         <div>
-          <h3 className="truncate text-[15px] font-extrabold">{workbook.title}</h3>
-          <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{workbook.topic}</p>
+          <h3 className={cn("font-extrabold", illustrated ? "text-lg leading-snug tracking-tight" : "truncate text-[15px]")}>{workbook.title}</h3>
+          <p className={cn("mt-0.5 text-xs text-muted-foreground", illustrated ? "line-clamp-2 leading-relaxed" : "line-clamp-1")}>{workbook.topic}</p>
         </div>
         <div className="mt-auto flex flex-col gap-2">
           <div className="flex items-center justify-between text-xs text-muted-foreground">

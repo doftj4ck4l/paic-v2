@@ -5,6 +5,7 @@ import { ArrowRight, ChartNoAxesColumnIncreasing, Check, ListChecks, Play, Searc
 import { getDemoStudent } from "@/lib/demo-profile";
 import { ACHIEVEMENTS, QUIZZES, SUBJECTS, WORKBOOKS, subjectById } from "@/lib/demo-data";
 import styles from "./home.module.css";
+import content from "@/components/studio/content-width.module.css";
 
 export const metadata: Metadata = { title: "Utama" };
 
@@ -25,7 +26,7 @@ export default async function HomePage() {
 
   return (
     <div className={styles.page}>
-      <main id="main" className={styles.main}>
+      <main id="main" className={`${content.container} ${styles.main}`}>
         <section className={styles.hero} aria-labelledby="welcome-title">
           <div className={styles.heroCopy}>
             <span className={styles.classBadge}>{student.yearLabel} · {student.className}</span>
