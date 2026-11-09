@@ -116,3 +116,18 @@ prompts/            master prompt, student app spec, design directions, communit
 
 Learning content (workbooks, community, artifacts) is still seeded demonstration data
 (`src/lib/demo-data.ts`) — clearly fictional, to be replaced by real queries per module.
+
+## AI generation (workbook slides)
+
+The Slaid tab generates real slide decks from workbook sources via the
+**Pixelspace Router** (OpenAI-compatible):
+
+- `ROUTER_BASE_URL` (e.g. `https://router.pixel-space.co/v1`), `ROUTER_API_KEY`
+- `MODEL_TEXT` (default `gemini-2.5-flash`), `MODEL_IMAGE` (default `gemini-3.1-flash-image`)
+- `GENERATION_MOCK=1` fakes generation locally without calling the router
+- Generated illustrations live in `ASSETS_DIR` (Docker: `./assets:/app/assets`);
+  on servers the host directory must be writable by the container user
+  (`chown -R 100:101 /opt/paicv3/assets` for the paic deployment).
+
+Decks are structured text (house style, BM, speaker notes) with AI flat-vector
+illustrations on the cover and requested slides — not text-baked images.
