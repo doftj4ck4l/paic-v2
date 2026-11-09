@@ -1,11 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-import { CalendarClock, FileText, ListChecks, Users } from "lucide-react";
+import { FileText, ListChecks, Users } from "lucide-react";
 import { Chip, ProgressBar } from "@/components/studio/ui";
 import {
   CREATION_KIND_LABEL,
   subjectById,
-  type DemoQuizItem,
   type DemoSubjectClass,
   type DemoCreation,
   type DemoSubject,
@@ -134,32 +133,6 @@ export function ArtifactCard({ creation }: { creation: DemoCreation }) {
   );
 }
 
-export function QuizRow({ quiz }: { quiz: DemoQuizItem }) {
-  const subject = subjectById(quiz.subjectId);
-  const tone = quiz.status === "new" ? "amber" : quiz.status === "in-progress" ? "purple" : "teal";
-  const label = quiz.status === "new" ? "Baharu" : quiz.status === "in-progress" ? "Dalam proses" : "Selesai";
-  return (
-    <Link
-      href={quiz.status === "done" ? `/quizzes/${quiz.id}/hasil` : `/quizzes/${quiz.id}`}
-      className="flex items-center gap-4 rounded-[20px] border border-border bg-card p-4 shadow-soft transition-transform hover:-translate-y-0.5 hover:shadow-soft-lg"
-    >
-      <span className={cn("grid size-11 shrink-0 place-items-center rounded-2xl", SUBJECT_TINT[quiz.subjectId])}>
-        <Image src={subject.asset} alt="" width={32} height={32} className="drop-shadow-[0_5px_6px_rgba(16,17,47,0.16)]" />
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-bold">{quiz.title}</span>
-        <span className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
-          <CalendarClock className="size-3.5" aria-hidden="true" />
-          {quiz.due} · {quiz.teacherName}
-        </span>
-      </span>
-      <span className="flex shrink-0 flex-col items-end gap-1">
-        <Chip tone={tone}>{label}</Chip>
-        {quiz.score && <span className="text-xs font-bold text-[#00786a]">{quiz.score}</span>}
-      </span>
-    </Link>
-  );
-}
 
 export function SubjectClassCard({ klass, workbooks, quizzes }: { klass: DemoSubjectClass; workbooks: number; quizzes: number }) {
   const subject = subjectById(klass.subjectId);

@@ -1,54 +1,50 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { BookOpen, BookSearch, Calculator, Crown, Ellipsis, FlaskConical, Globe, LayoutGrid, List, MessageCircle, Search, Settings, X } from "lucide-react";
+import { BookOpen, BookSearch, Ellipsis, LayoutGrid, List, Search, Settings, X } from "lucide-react";
+import { ContentTile, SUBJECT_ICONS } from "@/components/studio/content-tile";
 import { SUBJECTS, subjectById, type DemoWorkbook, type SubjectId } from "@/lib/demo-data";
 import styles from "./workbooks.module.css";
 
-const SUBJECT_ICONS = { math: Calculator, science: FlaskConical, language: BookOpen, english: MessageCircle, history: Crown, geography: Globe };
 const COVER_ART: Partial<Record<SubjectId, string>> = {
   science: "/assets/thiings/workbook-flask.png",
   math: "/assets/thiings/workbook-calculator.png",
   language: "/assets/thiings/workbook-pencil.png",
 };
 
-function WorkbookTile({ workbook }: { workbook: DemoWorkbook }) {
+export function WorkbookTile({ workbook }: { workbook: DemoWorkbook }) {
   const subject = subjectById(workbook.subjectId);
   const Icon = SUBJECT_ICONS[subject.id];
   return (
-    <article className={styles.card} data-subject={subject.id}>
-      <Link href={`/workbooks/${workbook.id}`} className={styles.cardLink}>
-        <div className={styles.cover}>
-          <svg className={styles.coverWave} viewBox="0 0 460 105" preserveAspectRatio="none" aria-hidden="true"><path d="M0 30C75-10 106 115 206 63S333-18 381 51s64 59 79 50v25H0Z" fill="currentColor" /></svg>
-          <span className={styles.subjectBadge}><Icon size={19} aria-hidden="true" />{subject.name}</span>
-          <Image src={COVER_ART[subject.id] ?? subject.asset} alt="" width={1024} height={1024} sizes="(max-width: 600px) 210px, 220px" className={styles.coverArt} />
-          <span className={styles.coverRays} aria-hidden="true"><i /><i /></span>
-        </div>
-        <div className={styles.cardBody}>
-          <h2>{workbook.title}</h2>
-          <p className={styles.topic}>{workbook.topic}</p>
-          <div className={styles.progressDetails}><strong>{workbook.progress}% siap</strong><span>{workbook.teacherName}</span></div>
-          <div className={styles.progressTrack} role="progressbar" aria-label={`Kemajuan ${workbook.title}`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={workbook.progress}><span style={{ width: `${workbook.progress}%` }} /></div>
-        </div>
-      </Link>
-      <details className={styles.cardMenu} onKeyDown={(event) => {
-        if (event.key === "Escape") {
-          event.preventDefault();
-          event.currentTarget.open = false;
-          event.currentTarget.querySelector("summary")?.focus();
-        }
-      }} onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) event.currentTarget.open = false;
-      }}>
-        <summary aria-label={`Pilihan ${workbook.title}`}><Ellipsis size={21} aria-hidden="true" /></summary>
-        <div className={styles.menuContent}>
-          <Link href={`/workbooks/${workbook.id}`}><BookOpen size={16} aria-hidden="true" />Buka buku kerja</Link>
-          <Link href={`/workbooks/${workbook.id}/settings`}><Settings size={16} aria-hidden="true" />Tetapan buku kerja</Link>
-        </div>
-      </details>
-    </article>
+    <ContentTile
+      href={`/workbooks/${workbook.id}`}
+      tint={subject.id}
+      art={COVER_ART[subject.id] ?? subject.asset}
+      badge={<><Icon size={14} aria-hidden="true" />{subject.name}</>}
+      title={workbook.title}
+      description={workbook.topic}
+      footer={<strong>{workbook.progress}% siap</strong>}
+      footerEnd={<span>{workbook.teacherName}</span>}
+      progress={{ value: workbook.progress, label: `Kemajuan ${workbook.title}` }}
+      menu={
+        <details className={styles.cardMenu} onKeyDown={(event) => {
+          if (event.key === "Escape") {
+            event.preventDefault();
+            event.currentTarget.open = false;
+            event.currentTarget.querySelector("summary")?.focus();
+          }
+        }} onBlur={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget)) event.currentTarget.open = false;
+        }}>
+          <summary aria-label={`Pilihan ${workbook.title}`}><Ellipsis size={17} aria-hidden="true" /></summary>
+          <div className={styles.menuContent}>
+            <Link href={`/workbooks/${workbook.id}`}><BookOpen size={15} aria-hidden="true" />Buka buku kerja</Link>
+            <Link href={`/workbooks/${workbook.id}/settings`}><Settings size={15} aria-hidden="true" />Tetapan buku kerja</Link>
+          </div>
+        </details>
+      }
+    />
   );
 }
 
@@ -72,7 +68,7 @@ export function WorkbookList({ workbooks }: { workbooks: DemoWorkbook[] }) {
     <section className={styles.library} aria-label="Koleksi buku kerja">
       <div className={styles.toolbar}>
         <div className={styles.search}>
-          <Search size={21} aria-hidden="true" />
+          <Search size={18} aria-hidden="true" />
           <label htmlFor="workbook-search" className={styles.srOnly}>Cari buku kerja</label>
           <input id="workbook-search" type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Cari buku kerja…" autoComplete="off" />
           {query && <button type="button" aria-label="Kosongkan carian" onClick={() => setQuery("")}><X size={16} /></button>}
@@ -81,7 +77,7 @@ export function WorkbookList({ workbooks }: { workbooks: DemoWorkbook[] }) {
           <button type="button" onClick={() => setSubject("all")} aria-pressed={subject === "all"} className={styles.filter}>Semua</button>
           {SUBJECTS.map((item) => {
             const Icon = SUBJECT_ICONS[item.id];
-            return <button key={item.id} type="button" onClick={() => setSubject(item.id)} aria-pressed={subject === item.id} className={styles.filter}><Icon size={19} aria-hidden="true" />{item.name}</button>;
+            return <button key={item.id} type="button" onClick={() => setSubject(item.id)} aria-pressed={subject === item.id} className={styles.filter}><Icon size={15} aria-hidden="true" />{item.name}</button>;
           })}
         </div>
       </div>

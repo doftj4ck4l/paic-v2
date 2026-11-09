@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Info, KeyRound, Loader2 } from "lucide-react";
+import { Check, Info, KeyRound, Loader2 } from "lucide-react";
 import { SUBJECT_CLASSES, subjectById } from "@/lib/demo-data";
-import { cn } from "@/lib/utils";
+import styles from "./subjects.module.css";
 
 export function JoinSubjectForm() {
   const [code, setCode] = useState("");
@@ -41,70 +41,63 @@ export function JoinSubjectForm() {
   );
 
   return (
-    <div className="flex flex-col gap-4">
-      <form onSubmit={onSubmit} className="flex flex-col gap-3 rounded-[22px] border border-border bg-card p-5 shadow-soft">
-        <h2 className="text-sm font-bold">Sertai subjek baharu</h2>
-        <p className="text-xs leading-relaxed text-muted-foreground">
-          Masukkan kod subjek daripada guru anda untuk mengakses buku kerja dan kuiz mereka. Kod
-          contoh demo: <strong>EN-4B-2026</strong> (English · Teacher Sarah)
+    <div>
+      <div className={styles.joinCard}>
+        <p>
+          Kod contoh demo: <strong>EN-4B-2026</strong> (English · Teacher Sarah). Selepas menyertai,
+          subjek tersebut muncul dalam senarai anda bersama semua bahan gurunya.
         </p>
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <div className="relative flex-1">
-            <KeyRound
-              className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-              aria-hidden="true"
-            />
-            <input
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              placeholder="cth. EN-4B-2026"
-              aria-label="Kod subjek"
-              aria-invalid={!!error}
-              className="focus-ring h-11 w-full rounded-xl border border-input bg-card pl-10 pr-4 text-sm uppercase shadow-soft outline-none transition-shadow focus:border-primary"
-            />
+        <form onSubmit={onSubmit} className={styles.joinForm} noValidate>
+          <div className={styles.joinRow}>
+            <div className={styles.joinInput}>
+              <KeyRound size={17} aria-hidden="true" />
+              <label htmlFor="join-code" className={styles.srOnly}>Kod subjek</label>
+              <input
+                id="join-code"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                placeholder="cth. EN-4B-2026"
+                autoComplete="off"
+                aria-invalid={!!error}
+              />
+            </div>
+            <button
+              type="submit"
+              className={styles.primaryButton}
+              disabled={submitting}
+            >
+              {submitting ? (
+                <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+              ) : (
+                <Check size={16} aria-hidden="true" />
+              )}
+              Sertai subjek
+            </button>
           </div>
-          <button
-            type="submit"
-            disabled={submitting}
-            className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#007a66] to-[#00856f] px-5 text-sm font-semibold text-white shadow-soft disabled:opacity-60"
-          >
-            {submitting ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
-            Sertai subjek
-          </button>
-        </div>
-        {error && (
-          <p className="text-xs font-medium text-destructive" role="alert">
-            {error}
-          </p>
-        )}
-        {message && (
-          <p
-            className="flex items-start gap-1.5 rounded-xl bg-[#E7F6F4] px-3.5 py-2.5 text-xs leading-relaxed text-[#046b69]"
-            role="status"
-          >
-            <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
-            {message}
-          </p>
-        )}
-      </form>
+          {error && (
+            <p className={styles.joinError} role="alert">
+              {error}
+            </p>
+          )}
+          {message && (
+            <p className={styles.joinStatus} role="status">
+              <Info size={15} aria-hidden="true" />
+              {message}
+            </p>
+          )}
+        </form>
+      </div>
 
       {notJoined.length > 0 && (
-        <div className="rounded-[22px] border border-dashed border-border bg-card/60 p-5">
-          <h2 className="text-sm font-bold">Belum disertai</h2>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Subjek berikut belum dipautkan. Minta kod daripada guru anda untuk menyertai.
-          </p>
-          <ul className="mt-3 flex flex-wrap gap-2">
+        <div className={styles.pendingCard}>
+          <h3>Belum disertai</h3>
+          <p>Subjek berikut belum dipautkan. Minta kod daripada guru anda untuk menyertai.</p>
+          <ul className={styles.pendingChips}>
             {notJoined.map((c) => {
               const subject = subjectById(c.subjectId);
               return (
-                <li
-                  key={c.subjectId}
-                  className={cn(
-                    "inline-flex items-center gap-2 rounded-full border border-border bg-card px-3.5 py-2 text-xs font-semibold text-muted-foreground",
-                  )}
-                >
-                  <span className="size-2 rounded-full bg-[#d5d9ea]" aria-hidden="true" />
+                <li key={c.subjectId} className={styles.pendingChip}>
+                  <i aria-hidden="true" />
                   {subject.name} · {c.teacherName}
                 </li>
               );

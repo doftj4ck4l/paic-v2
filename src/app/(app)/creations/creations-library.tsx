@@ -1,12 +1,50 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArtifactCard } from "@/components/studio/cards";
-import { EmptyState } from "@/components/studio/ui";
+import { ArrowRight, ClipboardList, Headphones, Layers, ListChecks, Network, NotebookPen, Palette, Presentation } from "lucide-react";
+import { ContentTile } from "@/components/studio/content-tile";
 import { CREATIONS, CREATION_KIND_LABEL, type DemoCreation } from "@/lib/demo-data";
-import { cn } from "@/lib/utils";
+import styles from "./creations.module.css";
 
 const KINDS = Object.keys(CREATION_KIND_LABEL) as DemoCreation["kind"][];
+
+const KIND_ICONS = {
+  notes: NotebookPen,
+  quizzes: ListChecks,
+  flashcards: Layers,
+  slides: Presentation,
+  mindmaps: Network,
+  audio: Headphones,
+  "study-guides": ClipboardList,
+} satisfies Record<DemoCreation["kind"], typeof NotebookPen>;
+
+const STATUS_LABEL = {
+  ready: "Sedia",
+  processing: "Sedang dijana",
+  failed: "Gagal",
+} as const;
+
+function CreationTile({ creation }: { creation: DemoCreation }) {
+  const ready = creation.status === "ready";
+  const Icon = KIND_ICONS[creation.kind];
+  return (
+    <ContentTile
+      href={ready ? `/creations/${creation.kind}/${creation.id}` : undefined}
+      tint={creation.kind}
+      art={creation.asset}
+      badge={<><Icon size={14} aria-hidden="true" />{CREATION_KIND_LABEL[creation.kind]}</>}
+      title={creation.title}
+      description={`${creation.meta} · ${creation.time}`}
+      footer={
+        <>
+          <span className={styles.statusChip} data-status={creation.status}>{STATUS_LABEL[creation.status]}</span>
+          <span className={styles.tileMeta}>{ready ? "Ketik untuk buka" : "Akan muncul apabila siap"}</span>
+        </>
+      }
+      footerEnd={ready ? <ArrowRight size={16} className={styles.tileArrow} aria-hidden="true" /> : undefined}
+    />
+  );
+}
 
 export function CreationsLibrary() {
   const [kind, setKind] = useState<DemoCreation["kind"] | "all">("all");
@@ -17,53 +55,37 @@ export function CreationsLibrary() {
   );
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap gap-1.5" role="group" aria-label="Tapis mengikut jenis">
-        <button
-          type="button"
-          onClick={() => setKind("all")}
-          className={cn(
-            "rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors",
-            kind === "all"
-              ? "border-transparent bg-foreground text-background"
-              : "border-border bg-card text-muted-foreground hover:text-foreground",
-          )}
-        >
-          Semua
-        </button>
-        {KINDS.map((k) => (
-          <button
-            key={k}
-            type="button"
-            onClick={() => setKind(k)}
-            className={cn(
-              "rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors",
-              kind === k
-                ? "border-transparent bg-foreground text-background"
-                : "border-border bg-card text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {CREATION_KIND_LABEL[k]}
+    <section className={styles.library} aria-label="Koleksi hasil karya">
+      <div className={styles.filterRow}>
+        <div className={styles.filters} role="group" aria-label="Tapis mengikut jenis">
+          <button type="button" className={styles.filter} aria-pressed={kind === "all"} onClick={() => setKind("all")}>
+            Semua
           </button>
-        ))}
+          {KINDS.map((k) => (
+            <button key={k} type="button" className={styles.filter} aria-pressed={kind === k} onClick={() => setKind(k)}>
+              {CREATION_KIND_LABEL[k]}
+            </button>
+          ))}
+        </div>
+        <span className={styles.countPill} role="status" aria-live="polite">
+          {filtered.length} daripada {CREATIONS.length} bahan
+        </span>
       </div>
 
       {filtered.length === 0 ? (
-        <EmptyState
-          title="Tiada hasil untuk jenis ini"
-          description="Jana bahan baharu daripada Studio dalam mana-mana buku kerja."
-        />
+        <div className={styles.empty}>
+          <Palette size={32} aria-hidden="true" />
+          <h3>Tiada hasil untuk jenis ini</h3>
+          <p>Jana bahan baharu daripada Studio dalam mana-mana buku kerja.</p>
+          <button type="button" onClick={() => setKind("all")}>Tunjukkan semua bahan</button>
+        </div>
       ) : (
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className={styles.grid}>
           {filtered.map((c) => (
-            <ArtifactCard key={c.id} creation={c} />
+            <CreationTile key={c.id} creation={c} />
           ))}
         </div>
       )}
-
-      <p className="text-xs text-muted-foreground">
-        {filtered.length} daripada {CREATIONS.length} hasil contoh · penjanaan AI baharu dalam Fasa 4.
-      </p>
-    </div>
+    </section>
   );
 }

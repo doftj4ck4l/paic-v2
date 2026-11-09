@@ -4,7 +4,8 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, BookOpen, Compass, ListChecks, Search, X } from "lucide-react";
-import { WorkbookCard } from "@/components/studio/cards";
+import { ContentTile, SUBJECT_ICONS } from "@/components/studio/content-tile";
+import { WorkbookTile } from "@/app/(app)/workbooks/workbook-list";
 import { SUBJECTS, TOPICS, WORKBOOKS, subjectById, type SubjectId } from "@/lib/demo-data";
 import styles from "./explore.module.css";
 
@@ -53,13 +54,19 @@ export function Explorer() {
           <div className={styles.topicGrid}>
             {topics.map((topic) => {
               const item = subjectById(topic.subjectId);
+              const Icon = SUBJECT_ICONS[item.id];
               return (
-                <Link key={topic.id} href={`/explore/topics/${topic.id}`} className={styles.topicCard} data-subject={item.id}>
-                  <span className={styles.topicSubject}>{item.name}</span>
-                  <Image src={item.asset} alt="" width={74} height={74} className={styles.topicArt} />
-                  <h3>{topic.name}</h3><p>{topic.blurb}</p>
-                  <span className={styles.topicFooter}><span><BookOpen size={13} />{topic.workbookCount} buku kerja</span>{topic.quizCount > 0 && <span><ListChecks size={13} />{topic.quizCount} kuiz</span>}<ArrowRight size={17} className={styles.topicArrow} aria-hidden="true" /></span>
-                </Link>
+                <ContentTile
+                  key={topic.id}
+                  href={`/explore/topics/${topic.id}`}
+                  tint={item.id}
+                  art={item.asset}
+                  badge={<><Icon size={14} aria-hidden="true" />{item.name}</>}
+                  title={topic.name}
+                  description={topic.blurb}
+                  footer={<><span><BookOpen size={13} aria-hidden="true" />{topic.workbookCount} buku kerja</span>{topic.quizCount > 0 && <span><ListChecks size={13} aria-hidden="true" />{topic.quizCount} kuiz</span>}</>}
+                  footerEnd={<ArrowRight size={16} className={styles.topicArrow} aria-hidden="true" />}
+                />
               );
             })}
           </div>
@@ -69,7 +76,7 @@ export function Explorer() {
       <section className={styles.workbooksSection} aria-labelledby="community-title">
         <div className={styles.sectionHeading}><div><h2 id="community-title">Belajar bersama komuniti</h2><p>Buku kerja yang dikongsi untuk membantu anda melangkah lebih jauh.</p></div><Link href="/workbooks" className={styles.textLink}>Buku kerja saya <ArrowRight size={17} /></Link></div>
         {workbooks.length === 0 ? <div className={styles.empty}><BookOpen size={30} aria-hidden="true" /><h3>Tiada buku kerja sepadan</h3><p>Cuba kata kunci atau subjek lain.</p><button type="button" onClick={reset}>Tetapkan semula carian</button></div> : (
-          <div className={styles.communityGrid}>{workbooks.map((workbook) => <WorkbookCard key={workbook.id} workbook={workbook} variant="illustrated" />)}</div>
+          <div className={styles.communityGrid}>{workbooks.map((workbook) => <WorkbookTile key={workbook.id} workbook={workbook} />)}</div>
         )}
       </section>
     </div>

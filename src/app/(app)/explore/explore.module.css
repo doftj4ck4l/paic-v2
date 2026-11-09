@@ -61,22 +61,7 @@
 .topicsSection, .workbooksSection { margin-top: 34px; }
 .countPill { flex-shrink: 0; padding: 5px 10px; border-radius: 15px; background: #eee9f8; color: #7e6b9a; font-size: 11px; font-weight: 600; }
 .topicGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 17px; }
-.topicCard { position: relative; display: flex; flex-direction: column; min-width: 0; overflow: hidden; min-height: 193px; padding: 18px; border: 1px solid #e2e7f2; border-radius: 22px; background: #fff; box-shadow: 0 4px 10px #3f406008; transition: transform 150ms, box-shadow 150ms; }
-.topicCard::before { content: ""; position: absolute; width: 110px; height: 90px; right: -13px; top: -20px; border-radius: 45%; background: #eaf7f1; rotate: -15deg; }
-.topicCard[data-subject="math"]::before { background: #fff5df; }
-.topicCard[data-subject="language"]::before { background: #fff0e7; }
-.topicCard[data-subject="english"]::before { background: #e9f3ff; }
-.topicCard[data-subject="history"]::before { background: #f2ecff; }
-.topicCard[data-subject="geography"]::before { background: #f0f8df; }
-.topicSubject { width: fit-content; max-width: calc(100% - 65px); font-size: 10px; font-weight: 650; color: #748582; }
-.topicArt { position: absolute; right: 12px; top: 7px; width: 66px; height: 66px; object-fit: contain; }
-.topicCard h3 { position: relative; margin-top: 24px; padding-right: 30px; font-size: 16px; font-weight: 750; line-height: 1.4; letter-spacing: -.5px; }
-.topicCard > p { margin-top: 6px; padding-right: 7px; color: #727896; font-size: 12px; line-height: 1.7; }
-.topicFooter { display: flex; align-items: center; gap: 10px; margin-top: auto; padding-top: 15px; color: #707c8b; }
-.topicFooter > span { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; }
-.topicFooter svg { flex-shrink: 0; }
-.topicArrow { margin-left: auto; color: #008a78; }
-.topicCard:hover { transform: translateY(-3px); box-shadow: 0 7px 18px #3f406012; border-color: #b9d7ce; }
+.topicArrow { color: #008a78; }
 .communityGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
 .textLink { display: inline-flex; align-items: center; gap: 7px; flex-shrink: 0; color: #007c69; font-size: 12px; font-weight: 650; }
 .textLink:hover { text-decoration: underline; text-underline-offset: 4px; }
@@ -104,8 +89,6 @@
   .topicNote { right: 0; top: 112px; font-size: 8px; }
   .subjectNote { left: 0; bottom: 28px; padding: 9px 11px; }
   .topicGrid { gap: 13px; }
-  .topicCard { padding: 16px; }
-  .topicFooter { gap: 8px; }
   .subjectCard strong { font-size: 12px; }
 }
 @media (max-width: 900px) {
@@ -154,12 +137,6 @@
   .subjectCard > span { font-size: 10px; }
   .topicsSection, .workbooksSection { margin-top: 28px; }
   .topicGrid, .communityGrid { grid-template-columns: 1fr; gap: 14px; }
-  .topicCard { min-height: 180px; padding: 20px; }
-  .topicArt { width: 76px; height: 76px; right: 18px; }
-  .topicCard h3 { font-size: 18px; }
-  .topicCard > p { font-size: 13px; }
-  .topicFooter > span { font-size: 11px; }
-  .topicSubject { font-size: 11px; }
   .textLink { font-size: 10px; gap: 4px; }
   .textLink svg { width: 14px; }
 }

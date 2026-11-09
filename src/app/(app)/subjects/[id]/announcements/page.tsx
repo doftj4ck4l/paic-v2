@@ -1,29 +1,36 @@
-import type { Metadata } from "next";
 import { Megaphone } from "lucide-react";
 import { announcementsForSubject, subjectClassById } from "@/lib/demo-data";
-
-export const metadata: Metadata = { title: "Pengumuman Subjek" };
+import styles from "../../subjects.module.css";
 
 export default async function SubjectAnnouncementsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const klass = subjectClassById(id);
   const announcements = announcementsForSubject(klass.subjectId);
 
+  if (announcements.length === 0) {
+    return (
+      <div className={styles.empty}>
+        <Megaphone size={32} aria-hidden="true" />
+        <h3>Tiada pengumuman</h3>
+        <p>Pengumuman daripada {klass.teacherName} akan muncul di sini.</p>
+      </div>
+    );
+  }
+
   return (
-    <ul className="flex flex-col gap-3">
-      {announcements.map((n) => (
-        <li key={n.id} className="rounded-[22px] border border-border bg-card p-5 shadow-soft">
-          <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-            <Megaphone className="size-3.5 text-[#00786a]" aria-hidden="true" />
-            {n.author} · {n.time}
-          </div>
-          <h2 className="mt-2 text-sm font-extrabold">{n.title}</h2>
-          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{n.body}</p>
-        </li>
-      ))}
-      {announcements.length === 0 && (
-        <p className="text-sm text-muted-foreground">Tiada pengumuman buat masa ini.</p>
-      )}
-    </ul>
+    <section aria-label="Pengumuman subjek">
+      <div className={styles.announceList}>
+        {announcements.map((n) => (
+          <article key={n.id} className={styles.announceCard}>
+            <p className={styles.announceMeta}>
+              <Megaphone size={14} aria-hidden="true" />
+              {n.author} · {n.time}
+            </p>
+            <h3>{n.title}</h3>
+            <p>{n.body}</p>
+          </article>
+        ))}
+      </div>
+    </section>
   );
 }
