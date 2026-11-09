@@ -88,7 +88,7 @@ export default async function HomePage() {
 
         <section className={styles.summaryRow} aria-label="Kuiz dan kemajuan">
           <section className={styles.summaryCard} aria-labelledby="assignments-title">
-            <div className={styles.cardHeading}><h2 id="assignments-title"><ListChecks />Kuiz</h2><Link href="/subjects" className={styles.textLink}>Lihat semua</Link></div>
+            <div className={styles.cardHeading}><h2 id="assignments-title"><ListChecks />Kuiz</h2></div>
             <div className={styles.assignments}>
               {QUIZZES.map((quiz) => (
                 <Link key={quiz.id} href={quiz.status === "done" ? `/quizzes/${quiz.id}/hasil` : `/quizzes/${quiz.id}`} className={styles.assignment}>

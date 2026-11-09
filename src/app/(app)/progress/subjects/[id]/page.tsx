@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowRight, TrendingDown, TrendingUp, Minus } from "lucide-react";
 import { PageHeader, PageShell, Section } from "@/components/studio/shell";
 import { Chip, ProgressBar } from "@/components/studio/ui";
-import { SUBJECTS, SUBJECT_MASTERY } from "@/lib/demo-data";
+import { QUIZZES, SUBJECTS, SUBJECT_MASTERY } from "@/lib/demo-data";
 import { cn } from "@/lib/utils";
 
 export function generateStaticParams() {
@@ -18,6 +18,7 @@ export default async function SubjectProgressPage({ params }: { params: Promise<
   const subject = SUBJECTS.find((s) => s.id === id);
   if (!subject) notFound();
   const mastery = SUBJECT_MASTERY.find((m) => m.subjectId === subject.id);
+  const quiz = QUIZZES.find((q) => q.subjectId === subject.id);
   const Trend = mastery ? TREND_ICON[mastery.trend] : Minus;
 
   return (
@@ -61,7 +62,7 @@ export default async function SubjectProgressPage({ params }: { params: Promise<
             Latih topik di bawah 60% untuk meningkatkan penguasaan anda dengan cepat.
           </p>
           <Link
-            href={`/subjects/${subject.id}/quizzes`}
+            href={quiz ? `/quizzes/${quiz.id}` : "/explore"}
             className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-r from-[#007a66] to-[#00856f] px-4 text-xs font-semibold text-white shadow-soft"
           >
             Mula latihan <ArrowRight className="size-3.5" aria-hidden="true" />

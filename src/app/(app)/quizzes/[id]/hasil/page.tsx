@@ -30,8 +30,8 @@ export default async function QuizResultPage({ params }: { params: Promise<{ id:
       <PageHeader
         title="Keputusan kuiz"
         description={`${quiz.title} · ${quiz.teacherName}`}
-        backHref={`/subjects/${quiz.subjectId}/quizzes`}
-        backLabel="Kembali ke kuiz subjek"
+        backHref="/home"
+        backLabel="Kembali ke Utama"
         actions={<Chip tone={percent >= 75 ? "teal" : "amber"}>{score}/{QUIZ_QUESTIONS.length} betul</Chip>}
       />
 

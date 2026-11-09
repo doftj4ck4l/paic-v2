@@ -4,7 +4,6 @@ import { NextResponse, type NextRequest } from "next/server";
 const PROTECTED = [
   "/home",
   "/workbooks",
-  "/subjects",
   "/quizzes",
   "/explore",
   "/creations",
@@ -37,7 +36,6 @@ export const config = {
   matcher: [
     "/home",
     "/workbooks/:path*",
-    "/subjects/:path*",
     "/quizzes/:path*",
     "/explore/:path*",
     "/creations/:path*",

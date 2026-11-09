@@ -1,11 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
-import { FileText, ListChecks, Users } from "lucide-react";
 import { Chip, ProgressBar } from "@/components/studio/ui";
 import {
   CREATION_KIND_LABEL,
   subjectById,
-  type DemoSubjectClass,
   type DemoCreation,
   type DemoSubject,
   type DemoWorkbook,
@@ -133,40 +131,6 @@ export function ArtifactCard({ creation }: { creation: DemoCreation }) {
   );
 }
 
-
-export function SubjectClassCard({ klass, workbooks, quizzes }: { klass: DemoSubjectClass; workbooks: number; quizzes: number }) {
-  const subject = subjectById(klass.subjectId);
-  return (
-    <Link
-      href={`/subjects/${klass.subjectId}`}
-      className="flex flex-col gap-4 rounded-[24px] border border-border bg-card p-5 shadow-soft transition-transform hover:-translate-y-1 hover:shadow-soft-lg"
-    >
-      <div className="flex items-center gap-3.5">
-        <span className={cn("grid size-14 shrink-0 place-items-center rounded-2xl p-2.5", SUBJECT_TINT[klass.subjectId])}>
-          <Image src={subject.asset} alt="" width={38} height={38} className="drop-shadow-[0_5px_6px_rgba(16,17,47,0.16)]" />
-        </span>
-        <div className="min-w-0">
-          <h3 className="truncate text-[15px] font-extrabold">{subject.name}</h3>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            {klass.teacherName} · {klass.className}
-          </p>
-        </div>
-      </div>
-      <p className="text-xs text-muted-foreground">{klass.schedule}</p>
-      <div className="flex items-center gap-4 border-t border-border pt-3.5 text-xs text-muted-foreground">
-        <span className="inline-flex items-center gap-1.5">
-          <FileText className="size-3.5" aria-hidden="true" /> {workbooks} buku kerja
-        </span>
-        <span className="inline-flex items-center gap-1.5">
-          <ListChecks className="size-3.5" aria-hidden="true" /> {quizzes} kuiz
-        </span>
-        <span className="ml-auto inline-flex items-center gap-1.5">
-          <Users className="size-3.5" aria-hidden="true" /> {klass.studentCount}
-        </span>
-      </div>
-    </Link>
-  );
-}
 
 export function MiniStat({
   icon: Icon,

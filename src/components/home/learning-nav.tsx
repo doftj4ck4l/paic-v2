@@ -10,7 +10,6 @@ import {
   ChevronRight,
   Compass,
   Flame,
-  GraduationCap,
   House,
   LogOut,
   Palette,
@@ -25,7 +24,6 @@ import styles from "./learning-nav.module.css";
 const NAV_LINKS = [
   { href: "/home", label: "Utama", icon: House },
   { href: "/workbooks", label: "Buku Kerja", icon: BookOpen },
-  { href: "/subjects", label: "Subjek", icon: GraduationCap },
   { href: "/explore", label: "Jelajah", icon: Compass },
   { href: "/community", label: "Komuniti", icon: UsersRound },
   { href: "/creations", label: "Hasil Karya", icon: Palette },

@@ -91,6 +91,8 @@ export type DemoWorkbook = {
   topic: string;
   progress: number;
   teacherName: string;
+  yearLabel: string;
+  updatedDaysAgo: number;
 };
 
 export const WORKBOOKS: DemoWorkbook[] = [
@@ -101,6 +103,8 @@ export const WORKBOOKS: DemoWorkbook[] = [
     topic: "Proses sejatan, pemeluwapan dan kerpasan",
     progress: 64,
     teacherName: "Cikgu Farah",
+    yearLabel: "Tahun 4",
+    updatedDaysAgo: 0,
   },
   {
     id: "pecahan-tahun4",
@@ -109,6 +113,8 @@ export const WORKBOOKS: DemoWorkbook[] = [
     topic: "Pecahan setara dan perbandingan",
     progress: 32,
     teacherName: "Cikgu Rosli",
+    yearLabel: "Tahun 4",
+    updatedDaysAgo: 2,
   },
   {
     id: "cerita-raya",
@@ -117,6 +123,28 @@ export const WORKBOOKS: DemoWorkbook[] = [
     topic: "Struktur cerita dan watak",
     progress: 78,
     teacherName: "Cikgu Aminah",
+    yearLabel: "Tahun 4",
+    updatedDaysAgo: 5,
+  },
+  {
+    id: "sistem-suria",
+    title: "Sistem Suria",
+    subjectId: "science",
+    topic: "Planet, orbit dan gerhana",
+    progress: 12,
+    teacherName: "Cikgu Farah",
+    yearLabel: "Tahun 5",
+    updatedDaysAgo: 1,
+  },
+  {
+    id: "fungsi-kuadratik",
+    title: "Fungsi Kuadratik",
+    subjectId: "math",
+    topic: "Graf, punca dan bentuk parabola",
+    progress: 45,
+    teacherName: "Cikgu Rosli",
+    yearLabel: "Tingkatan 4",
+    updatedDaysAgo: 7,
   },
 ];
 
@@ -199,73 +227,6 @@ export const ANNOUNCEMENTS: DemoAnnouncement[] = [
 ];
 
 
-/* ================= Subject classes ================= */
-
-export type DemoSubjectClass = {
-  subjectId: SubjectId;
-  teacherName: string;
-  className: string;
-  schedule: string;
-  room: string;
-  joinCode: string;
-  joined: boolean;
-  studentCount: number;
-};
-
-export const SUBJECT_CLASSES: DemoSubjectClass[] = [
-  { subjectId: "science", teacherName: "Cikgu Farah", className: "4 Bestari", schedule: "Isnin & Rabu · 8:00 pagi", room: "Bilik Sains 2", joinCode: "SC-4B-2026", joined: true, studentCount: 32 },
-  { subjectId: "math", teacherName: "Cikgu Rosli", className: "4 Dinamik", schedule: "Selasa & Khamis · 9:30 pagi", room: "Kelas 4D", joinCode: "MT-4B-2026", joined: true, studentCount: 30 },
-  { subjectId: "language", teacherName: "Cikgu Aminah", className: "4 Amanah", schedule: "Jumaat · 10:00 pagi", room: "Kelas 4A", joinCode: "BM-4B-2026", joined: true, studentCount: 31 },
-  { subjectId: "english", teacherName: "Teacher Sarah", className: "4 Bestari", schedule: "Isnin · 11:30 pagi", room: "Kelas 4B", joinCode: "EN-4B-2026", joined: false, studentCount: 32 },
-  { subjectId: "history", teacherName: "Cikgu Zainal", className: "4 Bestari", schedule: "Rabu · 10:00 pagi", room: "Kelas 4B", joinCode: "SJ-4B-2026", joined: false, studentCount: 32 },
-  { subjectId: "geography", teacherName: "Cikgu Mei Ling", className: "4 Dinamik", schedule: "Khamis · 11:30 pagi", room: "Kelas 4D", joinCode: "GE-4B-2026", joined: false, studentCount: 30 },
-];
-
-export function subjectClassById(subjectId: string): DemoSubjectClass {
-  return SUBJECT_CLASSES.find((c) => c.subjectId === subjectId) ?? SUBJECT_CLASSES[0];
-}
-
-export function joinedSubjectClasses(): DemoSubjectClass[] {
-  return SUBJECT_CLASSES.filter((c) => c.joined);
-}
-
-export type DemoSubjectMaterial = {
-  id: string;
-  subjectId: SubjectId;
-  title: string;
-  kind: "workbook" | "notes" | "video" | "slides";
-  addedAt: string;
-  workbookId?: string;
-};
-
-export const SUBJECT_MATERIALS: DemoSubjectMaterial[] = [
-  { id: "sm1", subjectId: "science", title: "Buku Kerja: Kitaran Air", kind: "workbook", addedAt: "2 hari lalu", workbookId: "kitaran-air" },
-  { id: "sm2", subjectId: "science", title: "Nota Bab 8 — Sejatan & Pemeluwapan", kind: "notes", addedAt: "4 hari lalu" },
-  { id: "sm3", subjectId: "science", title: "Video: Air di Bumi (ringkasan)", kind: "video", addedAt: "1 minggu lalu" },
-  { id: "sm4", subjectId: "science", title: "Slaid: Rantai Makanan", kind: "slides", addedAt: "2 minggu lalu" },
-  { id: "sm5", subjectId: "math", title: "Buku Kerja: Pecahan yang Menyeronokkan", kind: "workbook", addedAt: "3 hari lalu", workbookId: "pecahan-tahun4" },
-  { id: "sm6", subjectId: "math", title: "Latihan Tambahan: Ruang & Bentuk", kind: "notes", addedAt: "1 minggu lalu" },
-  { id: "sm7", subjectId: "language", title: "Buku Kerja: Cerita Rakyat Nusantara", kind: "workbook", addedAt: "5 hari lalu", workbookId: "cerita-raya" },
-  { id: "sm8", subjectId: "language", title: "Senarai Peribahasa Penting", kind: "notes", addedAt: "1 minggu lalu" },
-];
-
-export type DemoSubjectAnnouncement = {
-  id: string;
-  subjectId: SubjectId;
-  title: string;
-  body: string;
-  time: string;
-  author: string;
-};
-
-export const SUBJECT_ANNOUNCEMENTS: DemoSubjectAnnouncement[] = [
-  { id: "sa1", subjectId: "science", title: "Kuiz Sains Mingguan", body: "Kuiz Kitaran Air dibuka sehingga Khamis. Sila siapkan sebelum 5 petang.", time: "2 jam lalu", author: "Cikgu Farah" },
-  { id: "sa2", subjectId: "science", title: "Bawa buku latihan", body: "Jangan lupa bawa buku latihan Sains untuk kelas esok.", time: "Semalam", author: "Cikgu Farah" },
-  { id: "sa3", subjectId: "science", title: "Ujian bulanan", body: "Ujian bulanan akan dijalankan pada minggu hadapan. Ulang kaji bab 1–8.", time: "3 hari lalu", author: "Cikgu Farah" },
-  { id: "sa4", subjectId: "math", title: "Latihan pecahan", body: "Siapkan latihan pecahan setara muka surat 42 sebelum Khamis.", time: "Semalam", author: "Cikgu Rosli" },
-  { id: "sa5", subjectId: "language", title: "Pertandingan bercerita", body: "Pendaftaran pertandingan bercerita dibuka sehingga Jumaat ini.", time: "2 hari lalu", author: "Cikgu Aminah" },
-];
-
 /* ================= Quizzes (teacher-created with AI from workbook sources) ================= */
 
 export type DemoQuizStatus = "new" | "in-progress" | "done";
@@ -324,18 +285,6 @@ export function quizById(id: string): DemoQuizItem {
   return QUIZZES.find((q) => q.id === id) ?? QUIZZES[0];
 }
 
-export function quizzesForSubject(subjectId: SubjectId): DemoQuizItem[] {
-  return QUIZZES.filter((q) => q.subjectId === subjectId);
-}
-
-export function materialsForSubject(subjectId: SubjectId): DemoSubjectMaterial[] {
-  return SUBJECT_MATERIALS.filter((m) => m.subjectId === subjectId);
-}
-
-export function announcementsForSubject(subjectId: SubjectId): DemoSubjectAnnouncement[] {
-  return SUBJECT_ANNOUNCEMENTS.filter((a) => a.subjectId === subjectId);
-}
-
 /* ================= Explore ================= */
 
 export type DemoTopic = {
@@ -345,21 +294,22 @@ export type DemoTopic = {
   blurb: string;
   workbookCount: number;
   quizCount: number;
+  yearLabel: string;
 };
 
 export const TOPICS: DemoTopic[] = [
-  { id: "kitaran-air", subjectId: "science", name: "Kitaran Air", blurb: "Sejatan, pemeluwapan dan kerpasan", workbookCount: 3, quizCount: 2 },
-  { id: "rantai-makanan", subjectId: "science", name: "Rantai Makanan", blurb: "Pengeluar, pengguna dan pengurai", workbookCount: 2, quizCount: 1 },
-  { id: "pecahan", subjectId: "math", name: "Pecahan", blurb: "Pecahan setara, tambah dan tolak", workbookCount: 4, quizCount: 3 },
-  { id: "ruang", subjectId: "math", name: "Ruang & Bentuk", blurb: "Perimeter, luas dan isipadu", workbookCount: 2, quizCount: 1 },
-  { id: "cerita-rakyat", subjectId: "language", name: "Cerita Rakyat", blurb: "Struktur cerita dan watak", workbookCount: 2, quizCount: 1 },
-  { id: "tatabahasa", subjectId: "language", name: "Tatabahasa", blurb: "Kata nama, kata kerja dan ayat", workbookCount: 3, quizCount: 2 },
-  { id: "reading", subjectId: "english", name: "Reading Comprehension", blurb: "Main idea, inference and vocabulary", workbookCount: 2, quizCount: 1 },
-  { id: "writing", subjectId: "english", name: "Writing Skills", blurb: "Sentences, paragraphs and stories", workbookCount: 1, quizCount: 1 },
-  { id: "kesultanan-melayu", subjectId: "history", name: "Kesultanan Melayu Melaka", blurb: "Pengasasan, kegemilangan dan kejatuhan", workbookCount: 2, quizCount: 1 },
-  { id: "kemerdekaan", subjectId: "history", name: "Kemerdekaan Tanah Air", blurb: "Perjuangan menuju merdeka", workbookCount: 1, quizCount: 1 },
-  { id: "peta-malaysia", subjectId: "geography", name: "Peta Malaysia", blurb: "Negeri, ibu negeri dan sempadan", workbookCount: 1, quizCount: 1 },
-  { id: "cuaca-iklim", subjectId: "geography", name: "Cuaca & Iklim", blurb: "Musim, hujan dan iklim tropika", workbookCount: 1, quizCount: 0 },
+  { id: "kitaran-air", subjectId: "science", name: "Kitaran Air", blurb: "Sejatan, pemeluwapan dan kerpasan", workbookCount: 3, quizCount: 2, yearLabel: "Tahun 4" },
+  { id: "rantai-makanan", subjectId: "science", name: "Rantai Makanan", blurb: "Pengeluar, pengguna dan pengurai", workbookCount: 2, quizCount: 1, yearLabel: "Tahun 4" },
+  { id: "pecahan", subjectId: "math", name: "Pecahan", blurb: "Pecahan setara, tambah dan tolak", workbookCount: 4, quizCount: 3, yearLabel: "Tahun 4" },
+  { id: "ruang", subjectId: "math", name: "Ruang & Bentuk", blurb: "Perimeter, luas dan isipadu", workbookCount: 2, quizCount: 1, yearLabel: "Tahun 4" },
+  { id: "cerita-rakyat", subjectId: "language", name: "Cerita Rakyat", blurb: "Struktur cerita dan watak", workbookCount: 2, quizCount: 1, yearLabel: "Tahun 4" },
+  { id: "tatabahasa", subjectId: "language", name: "Tatabahasa", blurb: "Kata nama, kata kerja dan ayat", workbookCount: 3, quizCount: 2, yearLabel: "Tahun 4" },
+  { id: "reading", subjectId: "english", name: "Reading Comprehension", blurb: "Main idea, inference and vocabulary", workbookCount: 2, quizCount: 1, yearLabel: "Tahun 4" },
+  { id: "writing", subjectId: "english", name: "Writing Skills", blurb: "Sentences, paragraphs and stories", workbookCount: 1, quizCount: 1, yearLabel: "Tahun 4" },
+  { id: "kesultanan-melayu", subjectId: "history", name: "Kesultanan Melayu Melaka", blurb: "Pengasasan, kegemilangan dan kejatuhan", workbookCount: 2, quizCount: 1, yearLabel: "Tahun 5" },
+  { id: "kemerdekaan", subjectId: "history", name: "Kemerdekaan Tanah Air", blurb: "Perjuangan menuju merdeka", workbookCount: 1, quizCount: 1, yearLabel: "Tahun 5" },
+  { id: "peta-malaysia", subjectId: "geography", name: "Peta Malaysia", blurb: "Negeri, ibu negeri dan sempadan", workbookCount: 1, quizCount: 1, yearLabel: "Tahun 5" },
+  { id: "cuaca-iklim", subjectId: "geography", name: "Cuaca & Iklim", blurb: "Musim, hujan dan iklim tropika", workbookCount: 1, quizCount: 0, yearLabel: "Tahun 5" },
 ];
 
 export function topicById(id: string): DemoTopic {

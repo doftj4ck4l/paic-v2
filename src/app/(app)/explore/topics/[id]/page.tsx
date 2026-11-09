@@ -5,7 +5,7 @@ import { ArrowRight, BookOpen, ListChecks } from "lucide-react";
 import { PageHeader, PageShell, Section } from "@/components/studio/shell";
 import { Chip } from "@/components/studio/ui";
 import { WorkbookCard } from "@/components/studio/cards";
-import { TOPICS, WORKBOOKS, subjectById } from "@/lib/demo-data";
+import { QUIZZES, TOPICS, WORKBOOKS, subjectById } from "@/lib/demo-data";
 
 export function generateStaticParams() {
   return TOPICS.map((t) => ({ id: t.id }));
@@ -17,6 +17,7 @@ export default async function TopicDetailPage({ params }: { params: Promise<{ id
   if (!topic) notFound();
   const subject = subjectById(topic.subjectId);
   const related = WORKBOOKS.filter((w) => w.subjectId === topic.subjectId);
+  const quiz = QUIZZES.find((q) => q.subjectId === topic.subjectId);
 
   return (
     <PageShell>
@@ -38,7 +39,7 @@ export default async function TopicDetailPage({ params }: { params: Promise<{ id
         </div>
         <div className="flex gap-2">
           <Link
-            href={`/subjects/${subject.id}/quizzes`}
+            href={quiz ? `/quizzes/${quiz.id}` : "/explore"}
             className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-border bg-card px-4 text-xs font-semibold shadow-soft hover:bg-secondary"
           >
             <ListChecks className="size-3.5" aria-hidden="true" /> Latihan

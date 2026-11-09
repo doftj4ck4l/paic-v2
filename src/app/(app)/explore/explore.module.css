@@ -28,6 +28,15 @@
 .subjectNote > span { font-size: 9px; color: #7b7590; }
 .topicNote { position: absolute; display: flex; align-items: center; gap: 7px; top: 106px; right: 4px; padding: 9px 12px; border-radius: 12px; border: 1px solid #fff; background: #ffffffed; color: #706181; font-size: 9px; rotate: 5deg; }
 .topicNote strong { color: #7957a2; font-size: 12px; }
+.filterBar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 18px; }
+.filterField { position: relative; display: inline-flex; }
+.filterSelect { appearance: none; height: 42px; padding: 0 36px 0 15px; border: 1px solid #dfe4f3; border-radius: 16px; background: #fff; color: #3c4160; font-size: 12.5px; font-weight: 650; letter-spacing: -.2px; cursor: pointer; box-shadow: 0 3px 7px #4f3a7307; outline: none; transition: border-color 140ms; }
+.filterSelect:hover { border-color: #b9ddd1; }
+.filterSelect:focus-visible { border-color: #00a58d; box-shadow: 0 0 0 3px #00a58d18; }
+.filterChevron { position: absolute; right: 13px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: #6d7292; pointer-events: none; }
+.resetButton { display: inline-flex; align-items: center; gap: 6px; height: 42px; padding-inline: 14px; border: 1px dashed #d4dcec; border-radius: 16px; background: #ffffffb8; color: #6d7292; font-size: 12px; font-weight: 650; cursor: pointer; transition: border-color 140ms, color 140ms; }
+.resetButton:hover { border-color: #b9ddd1; color: #007c69; }
+
 .library { margin-top: 28px; scroll-margin-top: 95px; }
 .searchRow { display: flex; align-items: center; justify-content: space-between; gap: 22px; }
 .search { display: flex; align-items: center; gap: 11px; height: 49px; width: 100%; max-width: 490px; padding-inline: 17px; border: 1px solid #dfe4f3; border-radius: 27px; background: #fff; color: #737792; box-shadow: 0 3px 7px #4f3a7307; }
@@ -40,25 +49,11 @@
 .resultCount { flex-shrink: 0; font-size: 12px; color: #7c809a; }
 .resultCount strong { font-weight: 650; color: #686882; }
 .resultCount > span { margin-inline: 6px; color: #b0b2c7; }
-.subjectSection { margin-top: 29px; }
+.topicsSection { margin-top: 28px; }
+.workbooksSection { margin-top: 34px; }
 .sectionHeading { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 17px; }
 .sectionHeading h2 { font-size: 23px; font-weight: 750; letter-spacing: -.8px; }
 .sectionHeading p { margin-top: 3px; font-size: 12px; line-height: 1.6; color: #6d7292; }
-.allSubjects { flex-shrink: 0; min-height: 34px; padding-inline: 13px; border: 1px solid #dfe5ee; border-radius: 20px; font-size: 11px; font-weight: 650; background: white; color: #6c7590; cursor: pointer; }
-.allSubjects[aria-pressed="true"] { background: #e4f5ef; border-color: #b9ddd1; color: #007c69; }
-.subjectGrid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
-.subjectCard { display: flex; flex-direction: column; align-items: center; position: relative; padding: 6px 6px 15px; min-width: 0; border: 1px solid #dfd3f4; border-radius: 24px; background: linear-gradient(145deg, #fbf8ff, #f1eaff); box-shadow: inset 0 0 0 2px #ffffffa0; cursor: pointer; transition: transform 150ms, box-shadow 150ms; }
-.subjectCard img { width: 82px; height: 82px; object-fit: contain; }
-.subjectCard > strong { font-size: 13px; font-weight: 750; letter-spacing: -.5px; }
-.subjectCard > span { margin-top: 4px; font-size: 11px; color: #777791; }
-.subjectCard[data-subject="science"] { border-color: #c1e4dc; background: linear-gradient(145deg, #f2fbf8, #e1f5ee); }
-.subjectCard[data-subject="language"] { border-color: #efd8be; background: linear-gradient(145deg, #fffdf8, #fdf0df); }
-.subjectCard[data-subject="english"] { border-color: #cde2f7; background: linear-gradient(145deg, #f8fcff, #e9f3fc); }
-.subjectCard[data-subject="history"] { border-color: #f3d8cf; background: linear-gradient(145deg, #fffaf8, #ffede6); }
-.subjectCard[data-subject="geography"] { border-color: #dce8c4; background: linear-gradient(145deg, #fcfff6, #f1f9df); }
-.subjectCard[aria-pressed="true"] { border-color: #008b79; box-shadow: 0 0 0 1px #008b79, 0 5px 12px #008b7912, inset 0 0 0 2px #ffffffa0; }
-.subjectCard:hover { transform: translateY(-3px); }
-.topicsSection, .workbooksSection { margin-top: 34px; }
 .countPill { flex-shrink: 0; padding: 5px 10px; border-radius: 15px; background: #eee9f8; color: #7e6b9a; font-size: 11px; font-weight: 600; }
 .topicGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 17px; }
 .topicArrow { color: #008a78; }
@@ -89,7 +84,6 @@
   .topicNote { right: 0; top: 112px; font-size: 8px; }
   .subjectNote { left: 0; bottom: 28px; padding: 9px 11px; }
   .topicGrid { gap: 13px; }
-  .subjectCard strong { font-size: 12px; }
 }
 @media (max-width: 900px) {
   .hero { grid-template-columns: 1fr 1fr; }
@@ -97,9 +91,6 @@
   .hero h1 { font-size: 32px; }
   .heroActions { gap: 8px; }
   .primaryButton, .secondaryButton { padding-inline: 13px; font-size: 11px; }
-  .subjectGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .subjectCard img { width: 88px; height: 88px; }
-  .subjectCard strong { font-size: 14px; }
   .topicGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .communityGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
@@ -125,16 +116,11 @@
   .search { max-width: 100%; }
   .search input { font-size: 16px; }
   .resultCount { font-size: 11px; }
-  .subjectSection { margin-top: 24px; }
   .sectionHeading { gap: 13px; }
   .sectionHeading h2 { font-size: 21px; }
   .sectionHeading p { font-size: 11px; }
-  .allSubjects { padding-inline: 10px; font-size: 10px; }
-  .subjectGrid { gap: 10px; }
-  .subjectCard { border-radius: 21px; padding-bottom: 12px; }
-  .subjectCard img { width: 75px; height: 75px; }
-  .subjectCard strong { font-size: 11px; }
-  .subjectCard > span { font-size: 10px; }
+  .filterField { flex: 1 1 44%; }
+  .filterSelect { width: 100%; }
   .topicsSection, .workbooksSection { margin-top: 28px; }
   .topicGrid, .communityGrid { grid-template-columns: 1fr; gap: 14px; }
   .textLink { font-size: 10px; gap: 4px; }
@@ -144,8 +130,6 @@
   .heroCopy { padding-inline: 20px; }
   .hero h1 { font-size: 32px; }
   .primaryButton, .secondaryButton { padding-inline: 11px; font-size: 10px; gap: 6px; }
-  .subjectCard img { width: 65px; height: 65px; }
-  .subjectCard strong { font-size: 10px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .page a, .page button { transition: none; }
