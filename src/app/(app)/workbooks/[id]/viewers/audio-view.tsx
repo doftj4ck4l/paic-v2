@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { AudioLines, Download, Info, LoaderCircle, Pause, Play, Square, Volume2 } from "lucide-react";
+import { AudioLines, Download, Info, Pause, Play, Square, Volume2 } from "lucide-react";
 import type { AudioData } from "@/lib/generation/schemas";
 import styles from "../workbook.module.css";
 
@@ -16,13 +16,13 @@ export function AudioView({ artifactId, data }: { artifactId: string; data: Audi
   const utterance = useRef<SpeechSynthesisUtterance | null>(null);
   useEffect(() => {
     if (!("speechSynthesis" in window)) return;
-    setSupported(true);
     function load() {
       const list = window.speechSynthesis.getVoices(); setVoices(list);
       setVoice(current => current || list.find(item => /^ms[-_]/i.test(item.lang))?.voiceURI || list.find(item => /^id[-_]/i.test(item.lang))?.voiceURI || list.find(item => /^en[-_]/i.test(item.lang))?.voiceURI || "");
     }
-    load(); window.speechSynthesis.addEventListener("voiceschanged", load);
-    return () => { active.current = false; window.speechSynthesis.cancel(); window.speechSynthesis.removeEventListener("voiceschanged", load); };
+    const frame = requestAnimationFrame(() => { setSupported(true); load(); });
+    window.speechSynthesis.addEventListener("voiceschanged", load);
+    return () => { cancelAnimationFrame(frame); active.current = false; window.speechSynthesis.cancel(); window.speechSynthesis.removeEventListener("voiceschanged", load); };
   }, []);
   function stop() { active.current = false; window.speechSynthesis.cancel(); setPlaying(false); setPaused(false); }
   function speak() {

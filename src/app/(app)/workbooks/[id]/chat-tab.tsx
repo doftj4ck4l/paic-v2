@@ -27,7 +27,7 @@ export function ChatTab({ workbookId, onManageSources }: { workbookId: string; o
     } catch (err) { setError((err as Error).message); }
     finally { setLoading(false); }
   }, [workbookId]);
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => { const kick = setTimeout(() => void load(), 0); return () => clearTimeout(kick); }, [load]);
   useEffect(() => { if (pending || turns.length) end.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }); }, [turns.length, pending]);
   async function send(value = input) {
     const question = value.trim();

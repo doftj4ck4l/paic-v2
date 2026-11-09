@@ -26,11 +26,12 @@ function useSourceController(workbookId: string) {
     finally { if (alive.current) setLoading(false); }
   }, [workbookId]);
   useEffect(() => {
-    alive.current = true; void refresh();
+    alive.current = true;
+    const kick = setTimeout(() => void refresh(), 0);
     const timer = setInterval(() => void refresh(), 2500);
     const selectionChanged = () => setSelectedIds(readSourceSelection(workbookId) ?? []);
     window.addEventListener("paicv3:source-selection", selectionChanged); window.addEventListener("storage", selectionChanged);
-    return () => { alive.current = false; clearInterval(timer); window.removeEventListener("paicv3:source-selection", selectionChanged); window.removeEventListener("storage", selectionChanged); };
+    return () => { alive.current = false; clearTimeout(kick); clearInterval(timer); window.removeEventListener("paicv3:source-selection", selectionChanged); window.removeEventListener("storage", selectionChanged); };
   }, [workbookId, refresh]);
   function select(ids: string[]) { const next = ids.filter(id => sources.some(row => row.id === id && row.status === "ready")); writeSourceSelection(workbookId, next); setSelectedIds(next); }
   const ready = sources.filter(row => row.status === "ready");

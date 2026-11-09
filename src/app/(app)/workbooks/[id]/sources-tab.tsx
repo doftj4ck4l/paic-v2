@@ -21,7 +21,8 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
 }
 function Modal({ title, children, onClose, wide = false }: { title: string; children: ReactNode; onClose: () => void; wide?: boolean }) {
   const ref = useRef<HTMLDialogElement>(null);
-  const closeRef = useRef(onClose); closeRef.current = onClose;
+  const closeRef = useRef(onClose);
+  useEffect(() => { closeRef.current = onClose; }, [onClose]);
   useEffect(() => {
     const dialog = ref.current; const previous = document.activeElement as HTMLElement | null;
     const overflow = document.body.style.overflow;
@@ -103,7 +104,7 @@ function AddSourceDialog({ workbookId, available, onClose, onEmbedded }: { workb
   const refreshDrafts = useCallback(async () => {
     try { const payload = await api<{ sources: Source[] }>(`/api/workbooks/${workbookId}/sources?drafts=1`); if (alive.current) { setDrafts(payload.sources); if (!loadedDrafts.current) { setReviewOnly(payload.sources.length > 0); loadedDrafts.current = true; } } } catch (err) { if (alive.current) setError((err as Error).message); }
   }, [workbookId]);
-  useEffect(() => { void refreshDrafts(); const timer = setInterval(() => void refreshDrafts(), 3500); return () => clearInterval(timer); }, [refreshDrafts]);
+  useEffect(() => { const kick = setTimeout(() => void refreshDrafts(), 0); const timer = setInterval(() => void refreshDrafts(), 3500); return () => { clearTimeout(kick); clearInterval(timer); }; }, [refreshDrafts]);
   useEffect(() => {
     if (mode !== "textbook") return;
     const controller = new AbortController();
