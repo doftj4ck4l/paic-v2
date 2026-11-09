@@ -25,7 +25,8 @@ import {
 } from "lucide-react";
 import { ChatTab } from "./chat-tab";
 import { WorkbookSourcesProvider, useWorkbookSources } from "@/lib/workbook/use-sources";
-import { ArtifactTab } from "./artifact-tab";
+import { QuizzesTab } from "./quizzes-tab";
+import { ModulesTab } from "./modules-tab";
 import { SUBJECT_ICONS } from "@/components/studio/content-tile";
 import content from "@/components/studio/content-width.module.css";
 import { shareWorkbook, useSocial } from "@/lib/demo-social";
@@ -168,7 +169,7 @@ function WorkbookWorkspaceInner({ workbook, viewerId, initialTab = "sumber" }: W
           </div>
         </div>
 
-        <section className={styles.detailHero} data-subject={subject.id} aria-labelledby="workbook-title">
+        <section className={styles.detailHero} data-reference={tab === "sumber"} data-subject={subject.id} aria-labelledby="workbook-title">
           <span className={styles.detailArt}>
             <Image src={COVER_ART[subject.id] ?? subject.asset} alt="" width={1024} height={1024} />
           </span>
@@ -181,7 +182,7 @@ function WorkbookWorkspaceInner({ workbook, viewerId, initialTab = "sumber" }: W
               </span>
               <span className={styles.detailChip}>
                 <Users size={13} aria-hidden="true" />
-                {workbook.teacherName}
+                {tab === "sumber" ? workbook.yearLabel : workbook.teacherName}
               </span>
               <span className={styles.detailChip}>
                 <TrendingUp size={13} aria-hidden="true" />
@@ -190,6 +191,7 @@ function WorkbookWorkspaceInner({ workbook, viewerId, initialTab = "sumber" }: W
             </div>
             <p>{workbook.topic}</p>
           </div>
+          {tab === "sumber" && <span className={styles.heroIllustration} aria-hidden="true"><Image src={workbook.subjectId === "geography" ? "/assets/thiings/workbook-globe.png" : COVER_ART[subject.id] ?? subject.asset} alt="" width={260} height={260} /><Sparkles size={25} /><Sparkles size={17} /></span>}
           <div className={styles.detailStats}>
             <span className={styles.detailStat}>
               <Layers size={15} aria-hidden="true" />
@@ -217,14 +219,14 @@ function WorkbookWorkspaceInner({ workbook, viewerId, initialTab = "sumber" }: W
         </div>
 
         <div className={styles.content}>
-          {tab === "sumber" && <SourcesTab workbookId={workbook.id} />}
+          {tab === "sumber" && <SourcesTab workbookId={workbook.id} workbook={{ ...workbook, visibility }} />}
 
           {visited.includes("sembang") && <div hidden={tab !== "sembang"}><ChatTab workbookId={workbook.id} onManageSources={() => setTab("sumber")} /></div>}
 
           {modules.map((m) =>
             visited.includes(m.kind) ? (
               <div key={m.kind} hidden={tab !== m.kind} className={styles.module}>
-                <ArtifactTab workbookId={workbook.id} kind={m.kind} onManageSources={() => setTab("sumber")} />
+                {m.kind === "quizzes" ? <QuizzesTab workbook={workbook} onManageSources={() => setTab("sumber")} /> : <ModulesTab workbook={workbook} kind={m.kind} active={tab === m.kind} onManageSources={() => setTab("sumber")} />}
               </div>
             ) : null,
           )}

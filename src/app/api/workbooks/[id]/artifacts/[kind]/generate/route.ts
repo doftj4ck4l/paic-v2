@@ -12,6 +12,8 @@ import { countFor, isArtifactKind, isGenerationAvailable } from "@/lib/generatio
 const bodySchema = z.object({
   count: z.enum(["fewer", "standard", "more"]).default("standard"),
   theme: z.enum(["clean", "bold", "warm"]).default("clean"),
+  focus: z.string().trim().max(200).optional(),
+  difficulty: z.enum(["easy", "medium", "hard"]).optional(),
   sourceIds: z.array(z.string()).optional(),
 });
 

@@ -98,6 +98,7 @@ export function buildQuizPrompt({ count, sourceText }: { count: number; sourceTe
 Balas HANYA JSON:
 {
   "title": "tajuk kuiz",
+  "description": "penerangan ringkas tentang pengetahuan yang diuji",
   "questions": [
     {
       "question": "soalan",

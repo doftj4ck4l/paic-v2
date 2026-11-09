@@ -14,11 +14,11 @@ const TYPE_LABEL: Record<string, string> = {
   summary: "Ringkasan",
 };
 
-function SlideArt({ artifactId, index, status, title }: { artifactId: string; index: number; status: DeckSlide["image_status"]; title: string }) {
+function SlideArt({ artifactId, index, status, title, imageKey }: { artifactId: string; index: number; status: DeckSlide["image_status"]; title: string; imageKey?: string }) {
   if (status === "ready") {
     return (
       // eslint-disable-next-line @next/next/no-img-element -- private auth-gated asset route
-      <img src={`/api/artifacts/${artifactId}/assets/slide-${index}.png`} alt={`Ilustrasi: ${title}`} className={styles.slideArtImage} />
+      <img src={`/api/artifacts/${artifactId}/assets/${imageKey || `slide-${index}.png`}`} alt={`Ilustrasi: ${title}`} className={styles.slideArtImage} />
     );
   }
   if (status === "pending") {
@@ -54,7 +54,7 @@ function SlideCanvas({ artifactId, slide, index, total }: { artifactId: string; 
         </div>
         {hasArt && (
           <span className={styles.slideCoverArt}>
-            <SlideArt artifactId={artifactId} index={index} status={slide.image_status} title={slide.title} />
+            <SlideArt artifactId={artifactId} index={index} status={slide.image_status} title={slide.title} imageKey={slide.image_key} />
           </span>
         )}
       </div>
@@ -78,7 +78,7 @@ function SlideCanvas({ artifactId, slide, index, total }: { artifactId: string; 
         </div>
         {split && (
           <span className={styles.slideArtBox}>
-            <SlideArt artifactId={artifactId} index={index} status={slide.image_status} title={slide.title} />
+            <SlideArt artifactId={artifactId} index={index} status={slide.image_status} title={slide.title} imageKey={slide.image_key} />
           </span>
         )}
       </div>

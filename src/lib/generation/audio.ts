@@ -51,7 +51,7 @@ export async function runAudioGeneration(artifactId: string) {
   const [artifact] = await db.select().from(artifacts).where(eq(artifacts.id, artifactId));
   if (!artifact) return;
 
-  const params = (artifact.params ?? {}) as { sourceIds?: string[] };
+  const params = (artifact.params ?? {}) as { sourceIds?: string[]; focus?: string };
 
   try {
     if (isGenerationMock()) {
@@ -65,7 +65,7 @@ export async function runAudioGeneration(artifactId: string) {
     // 1) Script
     const messages = [
       { role: "system" as const, content: "Anda ialah guru pakar sekolah Malaysia. Balas HANYA JSON yang sah." },
-      { role: "user" as const, content: buildAudioPrompt({ sourceText: corpus }) },
+      { role: "user" as const, content: buildAudioPrompt({ sourceText: corpus }) + (params.focus ? `\nFokus: ${JSON.stringify(params.focus)}. Semua fakta mesti berdasarkan sumber.` : "") },
     ];
     let script = null;
     let lastError: unknown = null;

@@ -23,12 +23,14 @@ export function QuizPlayer({
   aiExplain = false,
   sourceWorkbookId,
   generated = false,
+  onExit,
 }: {
   questions?: QuizQuestion[];
   onFinishHref?: string;
   aiExplain?: boolean;
   sourceWorkbookId?: string;
   generated?: boolean;
+  onExit?: () => void;
 }) {
   const [index, setIndex] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
@@ -81,7 +83,7 @@ export function QuizPlayer({
         </h2>
         <p className="max-w-sm text-sm text-muted-foreground">
           {percent >= 75
-            ? "Pemahaman anda tentang kitaran air sangat baik."
+            ? "Pemahaman anda tentang topik ini sangat baik."
             : "Ulang kaji nota dan cuba lagi — anda boleh buat!"}
         </p>
         <div className="mt-2 flex flex-wrap justify-center gap-2.5">
@@ -92,12 +94,12 @@ export function QuizPlayer({
           >
             <RotateCcw className="size-4" aria-hidden="true" /> Cuba lagi
           </button>
-          <Link
+          {onExit ? <button type="button" onClick={onExit} className="focus-ring inline-flex h-11 items-center justify-center rounded-xl border border-border bg-card px-5 text-sm font-semibold">Kembali ke senarai kuiz</button> : (<Link
             href={onFinishHref}
             className="focus-ring inline-flex h-11 items-center rounded-xl bg-gradient-to-r from-[#007a66] to-[#00856f] px-5 text-sm font-semibold text-white shadow-soft"
           >
             Lihat keputusan penuh
-          </Link>
+          </Link>)}
         </div>
         <div className="mt-4 w-full max-w-md text-left">
           <h3 className="text-sm font-bold">Semak jawapan</h3>

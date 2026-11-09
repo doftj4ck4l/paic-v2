@@ -30,6 +30,34 @@
       "original": "https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-6TJq3TblGrgJLKvMLFj3N2YcDEXG2A.png",
       "sha256": "eb1f4632e07298e654e2c3857562e029800ed5cf8da6a9bafb807f5f0d8688a8",
       "modified": false
+    },
+    {
+      "file": "workbook-globe.png",
+      "page": "https://www.thiings.co/things/globe",
+      "original": "https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-KBUXl6AhDj2IsoZnozHL39yX1acqa5.png",
+      "sha256": "ed33bfdb594fbacfb7335b9b3a61f1540808fa14a8f2b0444014018628fa963a",
+      "modified": false
+    },
+    {
+      "file": "workbook-map.png",
+      "page": "https://www.thiings.co/things/map",
+      "original": "https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-SsfjxCJh43Hr1dqzkbFWUGH3ICZQbH.png",
+      "sha256": "5c022a10c49b0faf14236bae4b721837db3a2d0302245b0bc05c5cf6ed7dd926",
+      "modified": false
+    },
+    {
+      "file": "workbook-mountain.png",
+      "page": "https://www.thiings.co/things/mountain",
+      "original": "https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-QMg5bgl8655VjZk04AufIpOoMcf8HS.png",
+      "sha256": "5722afa5e9ec76488ff2c4167348899de9fdac398cda7180885a43ac75c303b1",
+      "modified": false
+    },
+    {
+      "file": "workbook-open-book.png",
+      "page": "https://www.thiings.co/things/open-book",
+      "original": "https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-wlth4GLe1Ud0AZvRjsPb0DfbfaQOEq.png",
+      "sha256": "3022cef94ec34d46b6fa9b24559fd6483cb5c40a4b6ab40038c8d811ecf6b262",
+      "modified": false
     }
   ]
 }

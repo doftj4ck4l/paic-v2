@@ -29,7 +29,7 @@ export const deckSchema = z.object({
 export type GeneratedSlide = z.infer<typeof slideSchema>;
 export type GeneratedDeck = z.infer<typeof deckSchema>;
 
-export type DeckSlide = GeneratedSlide & { image_status: "none" | "pending" | "ready" | "failed" };
+export type DeckSlide = GeneratedSlide & { image_key?: string; image_status: "none" | "pending" | "ready" | "failed" };
 export type DeckData = { title: string; slides: DeckSlide[] };
 
 /** Slides that receive an AI illustration: the cover + slides that asked for one, capped. */
@@ -64,6 +64,7 @@ export type GeneratedNotes = z.infer<typeof notesSchema>;
 
 export const quizSchema = z.object({
   title: z.string().transform((v) => clamp(v, 160)).refine((v) => v.length > 0, "Tajuk kuiz diperlukan."),
+  description: z.string().optional().default("").transform((value) => clamp(value, 400)),
   questions: z
     .array(
       z.object({

@@ -308,3 +308,12 @@
 .audioTranscript li[data-speaking=true] { background: #edf9f2; border-radius: 10px; }
 
 .slidesViewer { display: grid; gap: 14px; min-width: 0; }
+.detailHero[data-reference=true] { min-height: 190px; background: linear-gradient(115deg, #eaf2ff 15%, #e8f7fc 65%, #e1f9f5); border-color: #e1ebfd; border-radius: 33px; padding-block: 29px; }
+.detailHero[data-reference=true] .detailCopy { position: relative; z-index: 2; padding-right: 220px; }
+.heroIllustration { position: absolute; right: 170px; bottom: -35px; display: grid; place-items: center; width: 250px; height: 240px; pointer-events: none; }
+.heroIllustration::before { content: ""; position: absolute; z-index: -1; inset: 20px -20px -20px -40px; border-radius: 55% 40% 0 0; background: #c9f1e14d; transform: rotate(-15deg); }
+.heroIllustration > img { width: 220px; height: 220px; object-fit: contain; transform: rotate(-7deg); filter: drop-shadow(0 9px 4px #7182a40c); }
+.heroIllustration > svg { position: absolute; color: #ffd05b; fill: #ffdf84; top: 30px; right: 15px; }
+.heroIllustration > svg:last-child { top: 105px; left: 13px; }
+@media (max-width: 1050px) { .detailHero[data-reference=true] .detailCopy { padding-right: 140px; } .heroIllustration { right: 125px; width: 205px; } .heroIllustration > img { width: 180px; } }
+@media (max-width: 760px) { .heroIllustration { display: none; } .detailHero[data-reference=true] .detailCopy { padding-right: 0; } .detailHero[data-reference=true] { min-height: 160px; } }

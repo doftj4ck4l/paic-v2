@@ -69,7 +69,7 @@ function toMindmapNodes(node: MindmapNode, prefix = "n"): ViewerMindmapNode {
   };
 }
 
-const KIND_UI: Record<ArtifactKind, KindUi> = {
+export const KIND_UI: Record<ArtifactKind, KindUi> = {
   slides: {
     noun: "slaid",
     description: "Dek slaid kelas dengan ilustrasi dijana AI untuk slaid terpilih.",

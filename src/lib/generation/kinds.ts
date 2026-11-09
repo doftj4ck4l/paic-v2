@@ -78,7 +78,7 @@ export async function runSimpleKindGeneration(artifactId: string, kind: string) 
   const [artifact] = await db.select().from(artifacts).where(eq(artifacts.id, artifactId));
   if (!artifact) return;
 
-  const params = (artifact.params ?? {}) as { count?: string; sourceIds?: string[]; slideCount?: number };
+  const params = (artifact.params ?? {}) as { count?: string; sourceIds?: string[]; slideCount?: number; focus?: string; difficulty?: string };
   const count = params.slideCount ?? simpleCountFor(kind, params.count ?? "standard");
 
   try {
@@ -90,7 +90,7 @@ export async function runSimpleKindGeneration(artifactId: string, kind: string) 
       if (!corpus.trim()) {
         throw new Error("Tiada kandungan sumber untuk dijana. Tambah sumber dahulu.");
       }
-      const prompt = config.buildPrompt({ count, sourceText: corpus });
+      const prompt = config.buildPrompt({ count, sourceText: corpus }) + (params.focus ? `\nFokus pembelajaran yang diminta: ${JSON.stringify(params.focus)}. Gunakan hanya fakta dalam sumber.` : "") + (kind === "quizzes" ? `\nFokus yang diminta pengguna: ${JSON.stringify(params.focus || "Liputi konsep utama sumber")}\nTahap kesukaran: ${{ easy: "Mudah: mengingat dan memahami", medium: "Sederhana: memahami dan mengaplikasi", hard: "Mencabar: mengaplikasi dan menganalisis" }[params.difficulty || "medium"] || "Sederhana"}. Kekalkan semua fakta berdasarkan sumber.` : "");
       const messages = [
         { role: "system" as const, content: "Anda ialah guru pakar sekolah Malaysia. Balas HANYA JSON yang sah mengikut skema yang diminta." },
         { role: "user" as const, content: prompt },

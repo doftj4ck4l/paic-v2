@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/auth-session";
 import { accessibleWorkbook } from "@/lib/ingestion/access";
 import { kickArtifactWorker } from "@/lib/generation/worker";
 import { isGenerationAvailable, sweepStaleGenerations } from "@/lib/generation/shared";
+import { moduleSummary } from "@/lib/workbook/modules";
 import { ARTIFACT_KINDS } from "@/lib/generation/registry";
 import type { DeckData } from "@/lib/generation/schemas";
 
@@ -43,6 +44,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       const imagesReady = Array.isArray(data?.slides) ? data.slides.filter((s) => s.image_status === "ready").length : 0;
       const imagesPending = Array.isArray(data?.slides) ? data.slides.filter((s) => s.image_status === "pending").length : 0;
       return {
+        ...moduleSummary(row.kind, row.data),
         id: row.id,
         workbookId: row.workbookId,
         kind: row.kind,
@@ -50,6 +52,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         status: row.status,
         error: row.error,
         createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+        description: moduleSummary(row.kind, row.data).description,
+        questionCount: Array.isArray((row.data as { questions?: unknown[] } | null)?.questions) ? (row.data as { questions: unknown[] }).questions.length : 0,
+        difficulty: (row.params as { difficulty?: string } | null)?.difficulty || "medium",
+        cover: (row.params as { cover?: string } | null)?.cover || null,
+        canEdit: row.userId === user.id,
         slideCount,
         imagesReady,
         imagesPending,

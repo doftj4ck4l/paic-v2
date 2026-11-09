@@ -50,7 +50,7 @@ export async function runSlidesGeneration(artifactId: string) {
   const [artifact] = await db.select().from(artifacts).where(eq(artifacts.id, artifactId));
   if (!artifact) return;
 
-  const params = (artifact.params ?? {}) as { count?: string; theme?: string; sourceIds?: string[] };
+  const params = (artifact.params ?? {}) as { count?: string; theme?: string; focus?: string; sourceIds?: string[] };
   const count = slideCountFor(params.count ?? "standard");
   const themeStyle = SLIDE_THEME_STYLE[params.theme ?? "clean"] ?? SLIDE_THEME_STYLE.clean;
 
@@ -63,7 +63,7 @@ export async function runSlidesGeneration(artifactId: string) {
       if (!corpus.trim()) {
         throw new Error("Tiada kandungan sumber untuk dijana. Tambah sumber dahulu.");
       }
-      deck = await generateDeckWithRetry(buildSlidesPrompt({ count, sourceText: corpus }));
+      deck = await generateDeckWithRetry(buildSlidesPrompt({ count, sourceText: corpus }) + (params.focus ? `\nFokus: ${JSON.stringify(params.focus)}. Semua fakta mesti berdasarkan sumber.` : ""));
     }
 
     const visualIndexes = slidesNeedingIllustration(deck);

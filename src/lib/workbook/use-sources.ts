@@ -4,7 +4,7 @@ import { readSourceSelection, syncSourceSelection, writeSourceSelection } from "
 export type WorkbookSource = {
   id: string; title: string; kind: string; status: string; chars: number; preview: string; excerpt: string;
   sizeLabel?: string | null; error?: string | null; fullText?: string; canDelete: boolean;
-  meta: { url?: string; stage?: string; progress?: number; completedChunks?: number; totalChunks?: number; review?: string; embeddingModel?: string; relevanceReason?: string; relevanceScore?: number };
+  meta: { videoId?: string; url?: string; stage?: string; progress?: number; completedChunks?: number; totalChunks?: number; review?: string; embeddingModel?: string; relevanceReason?: string; relevanceScore?: number };
 };
 function useSourceController(workbookId: string) {
   const [sources, setSources] = useState<WorkbookSource[]>([]);
