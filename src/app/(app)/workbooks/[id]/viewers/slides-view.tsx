@@ -97,7 +97,7 @@ export function SlidesView({ artifactId, deck }: { artifactId: string; deck: Dec
   if (!slide) return null;
 
   return (
-    <div className={styles.deckWrap}>
+    <div className={styles.slidesViewer}>
       <div className={styles.deckViewerTools}>
         <button type="button" onClick={() => setShowNotes((v) => !v)} aria-pressed={showNotes} className={styles.deckNotesButton}>
           <NotebookPen size={14} aria-hidden="true" /> Nota penyampai

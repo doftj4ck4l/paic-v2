@@ -91,7 +91,7 @@ export function StudyGuideView({ guide = STUDY_GUIDE }: { guide?: typeof STUDY_G
           })}
         </ul>
         <p className="mt-3 text-xs text-muted-foreground">
-          {checked.size}/{guide.checklist.length} selesai · senarai semak disimpan dalam demo ini sahaja.
+          {checked.size}/{guide.checklist.length} item senarai semak selesai.
         </p>
       </section>
     </div>

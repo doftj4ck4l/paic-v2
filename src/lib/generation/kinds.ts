@@ -86,7 +86,7 @@ export async function runSimpleKindGeneration(artifactId: string, kind: string) 
     if (isGenerationMock()) {
       throw new Error("Mod demo tidak menyokong penjanaan jenis ini.");
     } else {
-      const corpus = corpusForWorkbook(artifact.workbookId, params.sourceIds);
+      const corpus = await corpusForWorkbook(artifact.workbookId, params.sourceIds, artifact.userId ?? undefined);
       if (!corpus.trim()) {
         throw new Error("Tiada kandungan sumber untuk dijana. Tambah sumber dahulu.");
       }

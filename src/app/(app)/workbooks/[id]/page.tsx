@@ -1,13 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { WORKBOOKS } from "@/lib/demo-data";
+import { getAppWorkbook } from "@/lib/workbooks";
+import { getCurrentUser } from "@/lib/auth-session";
 import { WorkbookWorkspace } from "./workspace";
 
 export const metadata: Metadata = { title: "Ruang Kerja Buku Kerja" };
-
-export function generateStaticParams() {
-  return WORKBOOKS.map((w) => ({ id: w.id }));
-}
 
 export default async function WorkbookWorkspacePage({
   params,
@@ -15,9 +12,10 @@ export default async function WorkbookWorkspacePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const workbook = WORKBOOKS.find((w) => w.id === id);
+  const workbook = await getAppWorkbook(id);
   if (!workbook) notFound();
+  const user = await getCurrentUser();
   return (
-    <WorkbookWorkspace workbook={workbook} />
+    <WorkbookWorkspace workbook={workbook} viewerId={user?.id ?? null} />
   );
 }

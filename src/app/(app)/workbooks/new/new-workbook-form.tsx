@@ -24,10 +24,29 @@ export function NewWorkbookForm() {
     }
     setError(null);
     setSubmitting(true);
-    // Demo build: no backend yet (Phase 3). We simulate creation and open the
-    // seeded demo workbook so the flow is honest end-to-end.
-    await new Promise((r) => setTimeout(r, 700));
-    router.push("/workbooks/kitaran-air");
+    try {
+      const res = await fetch("/api/workbooks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: title.trim(),
+          subjectId,
+          topic: topic.trim() || description.trim(),
+        }),
+      });
+      if (!res.ok) {
+        const payload = (await res.json().catch(() => ({}))) as { error?: string };
+        setError(payload.error ?? "Buku kerja gagal dicipta. Sila cuba lagi.");
+        return;
+      }
+      const { id } = (await res.json()) as { id: string };
+      router.push(`/workbooks/${id}`);
+      router.refresh();
+    } catch {
+      setError("Rangkaian bermasalah. Sila cuba lagi.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -35,8 +54,8 @@ export function NewWorkbookForm() {
       <div className="flex items-start gap-3 rounded-2xl bg-[#E7F6F4] px-4 py-3.5">
         <Info className="mt-0.5 size-4 shrink-0 text-[#00786a]" aria-hidden="true" />
         <p className="text-xs leading-relaxed text-[#3d5a63]">
-          Mod demo — penciptaan sebenar disambung dalam Fasa 3. Menghantar borang ini akan membuka
-          buku kerja contoh supaya anda boleh mencuba ruang kerja penuh.
+          Selepas dicipta, tambah sumber (fail, web, buku teks atau YouTube) di tab{" "}
+          <strong>Sumber</strong> — kemudian jana nota, kuiz, slaid dan banyak lagi dengan AI.
         </p>
       </div>
 

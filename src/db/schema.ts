@@ -124,7 +124,70 @@ export const schoolRequests = pgTable("school_requests", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+/* ================= Workbooks + sources ================= */
+
+/**
+ * User-created workbooks (teachers and students). The seeded demo workbooks
+ * live in code; DB rows are merged with them across the app.
+ */
+export const workbooks = pgTable(
+  "workbooks",
+  {
+    id: text("id").primaryKey(),
+    title: text("title").notNull(),
+    subjectId: text("subject_id").notNull(),
+    topic: text("topic").notNull().default(""),
+    yearLabel: text("year_label").notNull().default(""),
+    ownerId: text("owner_id").notNull(),
+    ownerName: text("owner_name").notNull().default(""),
+    ownerRole: text("owner_role").notNull().default("student"),
+    visibility: text("visibility").notNull().default("private"),
+    publishedAt: timestamp("published_at"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => [index("workbooks_owner_idx").on(t.ownerId), index("workbooks_visibility_idx").on(t.visibility)],
+);
+
+/**
+ * Workbook sources: uploaded files, pasted text, web pages (TinyFish picks),
+ * YouTube transcripts and textbook sections. `fullText` feeds AI generation.
+ */
+export const sources = pgTable(
+  "sources",
+  {
+    id: text("id").primaryKey(),
+    workbookId: text("workbook_id").notNull(),
+    ownerId: text("owner_id"),
+    title: text("title").notNull(),
+    kind: text("kind").notNull(),
+    status: text("status").notNull().default("processing"),
+    fullText: text("full_text"),
+    fileKey: text("file_key"),
+    sizeLabel: text("size_label"),
+    error: text("error"),
+    meta: jsonb("meta"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => [index("sources_workbook_idx").on(t.workbookId)],
+);
+
 /* ================= AI artifacts (workbook studio) ================= */
+
+/** Real, resumable per-source embeddings; JSON vectors work in Postgres and PGlite. */
+export const sourceChunks = pgTable("source_chunks", {
+  id: text("id").primaryKey(),
+  sourceId: text("source_id").notNull().references(() => sources.id, { onDelete: "cascade" }),
+  workbookId: text("workbook_id").notNull(),
+  ownerId: text("owner_id"),
+  chunkIndex: integer("chunk_index").notNull(),
+  content: text("content").notNull(),
+  contentHash: text("content_hash").notNull(),
+  embedding: jsonb("embedding").$type<number[]>().notNull(),
+  embeddingModel: text("embedding_model").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [index("source_chunks_source_idx").on(table.sourceId), index("source_chunks_workbook_idx").on(table.workbookId)]);
 
 /**
  * Generated study artifacts for a workbook (slides first; quiz/cards/mindmap/
@@ -150,3 +213,15 @@ export const artifacts = pgTable(
   },
   (t) => [index("artifacts_workbook_kind_idx").on(t.workbookId, t.kind)],
 );
+
+/** Saved chat turns, isolated by workbook and learner. A turn is written atomically. */
+export const workbookChatTurns = pgTable("workbook_chat_turns", {
+  id: text("id").primaryKey(),
+  workbookId: text("workbook_id").notNull(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  question: text("question").notNull(),
+  answer: text("answer").notNull(),
+  sourceIds: jsonb("source_ids").$type<string[]>().notNull(),
+  citations: jsonb("citations").$type<{ index: number; sourceId: string; title: string; excerpt: string; url?: string }[]>().notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, table => [index("workbook_chat_turns_scope_idx").on(table.workbookId, table.userId)]);

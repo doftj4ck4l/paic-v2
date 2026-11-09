@@ -126,7 +126,7 @@ export function FlashcardPlayer({ cards: sourceCards = FLASHCARDS }: { cards?: t
       </div>
 
       <p className="text-center text-xs text-muted-foreground">
-        Kemajuan kad disimpan dalam demo ini sahaja. Ulang kaji berjadual (spaced repetition) dalam Fasa 4.
+        Tandakan kad yang anda sudah faham dan gunakan anak panah untuk terus mengulang kaji.
       </p>
     </div>
   );

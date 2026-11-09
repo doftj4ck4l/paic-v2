@@ -25,6 +25,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
+# yt-dlp powers the YouTube STT fallback (transcript-less videos → whisper)
+RUN apk add --no-cache yt-dlp
 RUN addgroup -S nodejs && adduser -S nextjs -G nodejs
 COPY --from=build /app/package.json /app/package-lock.json /app/tsconfig.json /app/next.config.ts /app/drizzle.config.ts ./
 COPY --from=build /app/node_modules ./node_modules

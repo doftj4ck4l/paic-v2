@@ -74,6 +74,7 @@ PGlite database persisted in `./.pglite`. Set `DATABASE_URL` to use a real Postg
 |---|---|---|---|
 | Aiman (Rendah) | `aiman@demo.pixelspace.my` or `aiman` | `DemoPelajar123` | SK Bukit Ramun |
 | Nurul (Menengah) | `nurul@demo.pixelspace.my` or `nurul` | `DemoPelajar123` | SMS Johor |
+| Cikgu Farah (Guru) | `farah@demo.pixelspace.my` or `farah` | `DemoPelajar123` | SK Bukit Ramun |
 
 ### Seeded schools
 
@@ -131,3 +132,21 @@ The Slaid tab generates real slide decks from workbook sources via the
 
 Decks are structured text (house style, BM, speaker notes) with AI flat-vector
 illustrations on the cover and requested slides — not text-baked images.
+
+
+### Workbook source ingestion
+
+Run `npm run db:migrate` before starting the updated app. Source extraction now creates persisted drafts, without embedding them. In **Tambah sumber**, extract a search result, URL, file, textbook or transcript, review the actual text, then tick individual drafts and choose **Embed sumber dipilih**. Only an accepted embedding request closes the dialog. Unchecked drafts remain available through **Semak draf**.
+
+Web discovery uses TinyFish Search with the workbook topic, year and language. Results exclude common gated/social hosts and prioritise education/reference domains. Extraction uses TinyFish Fetch, a Readability fallback for HTML, and a PDF text reader. Empty/challenge/error pages are rejected; scanned PDFs require a text version. Optional router assessment explains topical relevance without selecting sources automatically. Provider JSON tolerates an extra gzip layer observed in live responses.
+
+Embeddings use `MODEL_EMBEDDING` (default `embeddinggemma-2`) at the router's `/embeddings` endpoint. `EMBEDDING_BASE_URL` and `EMBEDDING_API_KEY` optionally override router credentials. Real chunk vectors and their model are stored in `source_chunks`; `sources.meta` stores job stage, chunk counts, progress and a renewable database lease. The Node worker starts with the app, resumes expired jobs and reuses already completed chunks on retry. Run this app as a persistent Node server; request-only serverless deployments need a separate worker service.
+
+Generation accepts only ready sources visible to the current user and honours an explicitly empty selection. `retrieveSourceChunks` provides owner-scoped cosine retrieval with citation metadata for workbook chat; artifact generation uses the selected source text. Vectors use portable JSON storage for small workbook libraries; larger deployments can migrate to a vector index.
+
+Validation: `npx tsx --test tests/source-ingestion.test.ts`, `npx tsc --noEmit`, `npm run build`.
+
+
+Workbook chat now answers from selected ready sources, with validated reference numbers and saved turns in `workbook_chat_turns`. All tabs share one source controller: completing embedding updates chat and generation without returning to Sumber. Explicitly unchecked sources remain excluded. **Pilih sumber** is available inside chat and each module.
+
+Artifact generation uses persisted jobs, renewable leases and up to three concurrent workers, so a long slide/audio job does not block every other module. In-flight jobs resume after an expired lease on restart. When server TTS is unavailable, the Audio viewer offers device speech playback, voice selection, pause/stop and a downloadable transcript; it clearly distinguishes device playback from a generated audio file.

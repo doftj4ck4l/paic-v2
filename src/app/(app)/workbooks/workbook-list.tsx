@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Bookmark, BookOpen, BookSearch, Ellipsis, LayoutGrid, List, RotateCcw, Search, Settings, X } from "lucide-react";
+import { ArrowRight, Bookmark, BookOpen, BookSearch, ChevronDown, Ellipsis, LayoutGrid, List, RotateCcw, Search, Settings, X } from "lucide-react";
 import { ContentTile, SUBJECT_ICONS } from "@/components/studio/content-tile";
 import { SharedWorkbookTile } from "@/components/studio/shared-workbook-tile";
 import {
@@ -75,11 +75,14 @@ function RemixTile({ workbook }: { workbook: DemoSharedWorkbook }) {
   );
 }
 
+type SortId = "recent" | "complete" | "az";
+
 export function WorkbookList({ workbooks }: { workbooks: DemoWorkbook[] }) {
   const { saved, remixed } = useSocial();
   const [scope, setScope] = useState<"mine" | "saved">("mine");
   const [query, setQuery] = useState("");
   const [subject, setSubject] = useState<SubjectId | "all">("all");
+  const [sort, setSort] = useState<SortId>("recent");
   const [view, setView] = useState<"grid" | "list">("grid");
 
   const savedWorkbooks = useMemo(
@@ -112,6 +115,18 @@ export function WorkbookList({ workbooks }: { workbooks: DemoWorkbook[] }) {
 
   function resetFilters() { setQuery(""); setSubject("all"); }
 
+  function sortWorkbooks<T extends DemoWorkbook>(list: T[]): T[] {
+    if (sort === "az") return [...list].sort((a, b) => a.title.localeCompare(b.title, "ms"));
+    if (sort === "complete") return [...list].sort((a, b) => b.progress - a.progress);
+    return [...list].sort((a, b) => a.updatedDaysAgo - b.updatedDaysAgo);
+  }
+
+  function sortShared(list: typeof SHARED_WORKBOOKS): typeof SHARED_WORKBOOKS {
+    if (sort === "az") return [...list].sort((a, b) => a.title.localeCompare(b.title, "ms"));
+    if (sort === "complete") return [...list].sort((a, b) => b.saves - a.saves);
+    return list;
+  }
+
   const showingMine = scope === "mine";
   const showRemixes = showingMine && query.trim() === "" && subject === "all" && remixSources.length > 0;
 
@@ -142,6 +157,15 @@ export function WorkbookList({ workbooks }: { workbooks: DemoWorkbook[] }) {
             return <button key={item.id} type="button" onClick={() => setSubject(item.id)} aria-pressed={subject === item.id} className={styles.filter}><Icon size={15} aria-hidden="true" />{item.name}</button>;
           })}
         </div>
+        <span className={styles.sortField}>
+          <label htmlFor="workbook-sort" className={styles.srOnly}>Susun buku kerja</label>
+          <select id="workbook-sort" value={sort} onChange={(event) => setSort(event.target.value as SortId)} className={styles.sortSelect}>
+            <option value="recent">Susun: Terbaharu</option>
+            <option value="complete">Susun: Paling lengkap</option>
+            <option value="az">Susun: A–Z</option>
+          </select>
+          <ChevronDown size={14} className={styles.sortChevron} aria-hidden="true" />
+        </span>
       </div>
 
       {showingMine ? (
@@ -155,7 +179,7 @@ export function WorkbookList({ workbooks }: { workbooks: DemoWorkbook[] }) {
         ) : (
           <div className={styles.workbookGrid} data-view={view}>
             {showRemixes && remixSources.map((workbook) => <RemixTile key={`remix-${workbook.id}`} workbook={workbook} />)}
-            {filtered.map((workbook) => <WorkbookTile key={workbook.id} workbook={workbook} />)}
+            {sortWorkbooks(filtered).map((workbook) => <WorkbookTile key={workbook.id} workbook={workbook} />)}
           </div>
         )
       ) : savedWorkbooks.length === 0 ? (
@@ -174,7 +198,7 @@ export function WorkbookList({ workbooks }: { workbooks: DemoWorkbook[] }) {
         </div>
       ) : (
         <div className={styles.workbookGrid} data-view={view}>
-          {filteredSaved.map((workbook) => <SharedWorkbookTile key={workbook.id} workbook={workbook} />)}
+          {sortShared(filteredSaved).map((workbook) => <SharedWorkbookTile key={workbook.id} workbook={workbook} />)}
         </div>
       )}
 

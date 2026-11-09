@@ -155,3 +155,10 @@
 @media (prefers-reduced-motion: reduce) {
   .page a, .filter { transition: none; }
 }
+
+/* Sort select in the toolbar */
+.sortField { position: relative; display: inline-flex; flex-shrink: 0; }
+.sortSelect { appearance: none; height: 37px; padding: 0 32px 0 13px; border: 1px solid #dce2f5; border-radius: 20px; background: #ffffffba; color: #435579; font-size: 12px; font-weight: 650; letter-spacing: -.2px; cursor: pointer; box-shadow: 0 2px 3px #31365e0b; outline: none; }
+.sortSelect:hover { border-color: #b9ddd1; }
+.sortSelect:focus-visible { border-color: #00b59c; box-shadow: 0 0 0 3px #00b59c25; }
+.sortChevron { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #6d7292; pointer-events: none; }

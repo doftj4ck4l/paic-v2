@@ -16,6 +16,7 @@ export type SessionUser = {
   email: string;
   emailVerified: boolean;
   username: string | null;
+  role: "student" | "teacher";
   preferredName: string;
   fullName: string;
   schoolId: string;
@@ -42,6 +43,7 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
     email: user.email,
     emailVerified: user.emailVerified,
     username: user.username ?? null,
+    role: user.role === "teacher" ? "teacher" : "student",
     preferredName: user.displayName?.trim() || user.name.split(" ")[0],
     fullName: user.name,
     schoolId: user.schoolId,

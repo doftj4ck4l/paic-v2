@@ -2,14 +2,30 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowDown, ArrowRight, Compass } from "lucide-react";
-import { SUBJECTS, TOPICS } from "@/lib/demo-data";
+import { SUBJECTS, TOPICS, type DemoWorkbook } from "@/lib/demo-data";
+import { listPublishedWorkbooks } from "@/lib/workbooks";
 import content from "@/components/studio/content-width.module.css";
 import { Explorer } from "./explorer";
 import styles from "./explore.module.css";
 
 export const metadata: Metadata = { title: "Jelajah" };
 
-export default function ExplorePage() {
+export const dynamic = "force-dynamic";
+
+export default async function ExplorePage() {
+  const published = await listPublishedWorkbooks();
+  const publishedWorkbooks: (DemoWorkbook & { ownerRole: "student" | "teacher" })[] = published.map((workbook) => ({
+    id: workbook.id,
+    title: workbook.title,
+    subjectId: workbook.subjectId,
+    topic: workbook.topic,
+    progress: workbook.progress,
+    teacherName: workbook.teacherName,
+    yearLabel: workbook.yearLabel,
+    updatedDaysAgo: workbook.updatedDaysAgo,
+    ownerRole: workbook.ownerRole === "teacher" ? "teacher" : "student",
+  }));
+
   return (
     <div className={styles.page}>
       <main id="main" className={`${content.container} ${styles.main}`}>
@@ -34,7 +50,7 @@ export default function ExplorePage() {
             <span className={styles.topicNote}><strong>{TOPICS.length}</strong> topik pembelajaran <ArrowRight size={14} /></span>
           </div>
         </section>
-        <Explorer />
+        <Explorer publishedWorkbooks={publishedWorkbooks} />
         <p className={styles.attribution}>3D icons by <a href="https://www.thiings.co/things" target="_blank" rel="noreferrer">Thiings</a></p>
       </main>
     </div>

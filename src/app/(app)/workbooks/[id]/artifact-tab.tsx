@@ -21,6 +21,8 @@ import type { ArtifactKind } from "@/lib/generation/registry";
 import type { DemoStudyGuide } from "@/lib/demo-data";
 import type { AudioData } from "@/lib/generation/schemas";
 import type { DeckData, MindmapNode } from "@/lib/generation/schemas";
+import { useWorkbookSources } from "@/lib/workbook/use-sources";
+import { SourceScope } from "./source-scope";
 import { SlidesView } from "./viewers/slides-view";
 import { NotesView, type NotesData } from "./viewers/notes-view";
 import { AudioView } from "./viewers/audio-view";
@@ -114,7 +116,7 @@ const KIND_UI: Record<ArtifactKind, KindUi> = {
       const questions = ((data as { questions?: { question: string; options: string[]; answer: number; explanation: string; aiExplain?: string; citation?: string }[] }).questions ?? []).map(
         (q, i) => ({ ...q, id: `q${i}` }),
       );
-      return <QuizPlayer questions={questions} aiExplain sourceWorkbookId={workbookId} />;
+      return <QuizPlayer questions={questions} aiExplain generated sourceWorkbookId={workbookId} />;
     },
   },
   flashcards: {
@@ -168,7 +170,7 @@ const THEME_OPTIONS = [
   { value: "warm", label: "Mesra" },
 ] as const;
 
-export function ArtifactTab({ workbookId, kind }: { workbookId: string; kind: ArtifactKind }) {
+export function ArtifactTab({ workbookId, kind, onManageSources }: { workbookId: string; kind: ArtifactKind; onManageSources?: () => void }) {
   const ui = KIND_UI[kind];
   const Icon = ui.icon;
 
@@ -179,11 +181,13 @@ export function ArtifactTab({ workbookId, kind }: { workbookId: string; kind: Ar
   const [count, setCount] = useState<"fewer" | "standard" | "more">("standard");
   const [theme, setTheme] = useState<(typeof THEME_OPTIONS)[number]["value"]>("clean");
   const [submitting, setSubmitting] = useState(false);
+  const sourceState = useWorkbookSources(workbookId);
+  const sourceCount = sourceState.selectedIds.length;
   const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     const res = await fetch(`/api/workbooks/${workbookId}/artifacts?kind=${kind}`);
-    if (!res.ok) return null;
+    if (!res.ok) { const payload = await res.json().catch(() => ({})); throw new Error(payload.error || "Bahan pembelajaran gagal dimuatkan."); }
     const payload = (await res.json()) as { artifacts: ArtifactSummary[]; available: boolean };
     setAvailable(payload.available);
     const latest = payload.artifacts[0] ?? null;
@@ -193,46 +197,51 @@ export function ArtifactTab({ workbookId, kind }: { workbookId: string; kind: Ar
 
   const loadFull = useCallback(async (id: string) => {
     const res = await fetch(`/api/artifacts/${id}`);
-    if (!res.ok) return;
+    if (!res.ok) { setError("Hasil gagal dimuatkan. Sila cuba lagi."); return; }
     setFull((await res.json()) as FullArtifact);
+    setError(null);
   }, []);
 
   useEffect(() => {
     (async () => {
-      const latest = await refresh();
-      if (latest && latest.status === "ready") await loadFull(latest.id);
-      setLoading(false);
+      try {
+        const latest = await refresh();
+        if (latest && (latest.status === "ready" || kind === "audio" || kind === "slides")) await loadFull(latest.id);
+      } catch (err) { setError((err as Error).message || "Bahan gagal dimuatkan."); }
+      finally { setLoading(false); }
     })();
-  }, [refresh, loadFull]);
+  }, [refresh, loadFull, kind]);
 
   useEffect(() => {
     if (artifact?.status !== "generating") return;
     const timer = setInterval(async () => {
-      const latest = await refresh();
-      if (latest && latest.status !== "generating") {
-        if (latest.status === "ready") await loadFull(latest.id);
-      }
+      try {
+        const latest = await refresh();
+        if (latest && (latest.status === "ready" || kind === "audio" || kind === "slides")) await loadFull(latest.id);
+      } catch (err) { setError((err as Error).message); }
     }, 2500);
     return () => clearInterval(timer);
-  }, [artifact?.status, refresh, loadFull]);
+  }, [artifact?.status, refresh, loadFull, kind]);
 
   async function generate() {
     setSubmitting(true);
     setError(null);
-    setFull(null);
     try {
       const res = await fetch(`/api/workbooks/${workbookId}/artifacts/${kind}/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ count, theme }),
+        body: JSON.stringify({ count, theme, sourceIds: sourceState.selectedIds }),
       });
       if (!res.ok) {
         const payload = (await res.json().catch(() => ({}))) as { error?: string };
         setError(payload.error ?? "Penjanaan gagal dimulakan.");
         return;
       }
+      setFull(null);
       const latest = await refresh();
-      if (latest?.status === "ready") await loadFull(latest.id);
+      if (latest && (latest.status === "ready" || kind === "audio" || kind === "slides")) await loadFull(latest.id);
+    } catch {
+      setError("Tidak dapat menghubungi pelayan. Sila cuba lagi.");
     } finally {
       setSubmitting(false);
     }
@@ -240,9 +249,11 @@ export function ArtifactTab({ workbookId, kind }: { workbookId: string; kind: Ar
 
   async function remove() {
     if (!artifact) return;
-    await fetch(`/api/artifacts/${artifact.id}`, { method: "DELETE" });
-    setArtifact(null);
-    setFull(null);
+    try {
+      const response = await fetch(`/api/artifacts/${artifact.id}`, { method: "DELETE" });
+      if (!response.ok) throw new Error("Bahan tidak dapat dipadam. Sila cuba lagi.");
+      setArtifact(null); setFull(null); setError(null);
+    } catch (err) { setError((err as Error).message); }
   }
 
   const data = full?.data ?? null;
@@ -263,6 +274,7 @@ export function ArtifactTab({ workbookId, kind }: { workbookId: string; kind: Ar
         <span className={styles.generateIcon} aria-hidden="true"><Icon /></span>
         <h3>Jana {ui.noun} AI</h3>
         <p>{ui.description}</p>
+        <SourceScope state={sourceState} onManageSources={onManageSources} />
         {!available && <p className={styles.generateNotice}>Penjanaan AI belum dikonfigurasi pada pelayan ini.</p>}
         {(ui.countOptions.length > 0 || ui.showTheme) && (
           <div className={styles.generateOptions}>
@@ -300,7 +312,7 @@ export function ArtifactTab({ workbookId, kind }: { workbookId: string; kind: Ar
           </div>
         )}
         {error && <p className={styles.generateError} role="alert">{error}</p>}
-        <button type="button" onClick={generate} disabled={submitting || !available} className={styles.generateButton}>
+        <button type="button" onClick={generate} disabled={submitting || !available || !sourceCount} className={styles.generateButton}>
           <Wand2 size={16} aria-hidden="true" />
           {submitting ? "Memulakan…" : `Jana ${ui.noun}`}
         </button>
@@ -308,7 +320,7 @@ export function ArtifactTab({ workbookId, kind }: { workbookId: string; kind: Ar
     );
   }
 
-  if (artifact.status === "generating") {
+  if (artifact.status === "generating" && !(data && (kind === "audio" || kind === "slides"))) {
     return (
       <div className={styles.slidesState}>
         <span className={styles.slidesSpinner} aria-hidden="true" />
@@ -330,7 +342,7 @@ export function ArtifactTab({ workbookId, kind }: { workbookId: string; kind: Ar
         <h3>Penjanaan gagal</h3>
         <p>{artifact.error ?? "Sila cuba lagi."}</p>
         <div className={styles.slidesActions}>
-          <button type="button" onClick={generate} className={styles.generateButton}>Cuba lagi</button>
+          <button type="button" onClick={generate} disabled={submitting || !sourceCount} className={styles.generateButton}>Cuba lagi</button>
           <button type="button" onClick={remove} className={styles.slideGhostButton}>Padam</button>
         </div>
       </div>
@@ -340,21 +352,22 @@ export function ArtifactTab({ workbookId, kind }: { workbookId: string; kind: Ar
   if (!data) {
     return (
       <div className={styles.slidesState}>
-        <span className={styles.slidesSpinner} aria-hidden="true" />
-        <p>Memuatkan…</p>
+        {error ? <><p role="alert">{error}</p><button className={styles.generateButton} onClick={() => void loadFull(artifact.id)}>Muat semula hasil</button></> : <><span className={styles.slidesSpinner} aria-hidden="true" /><p>Memuatkan…</p></>}
       </div>
     );
   }
 
   return (
     <div className={styles.deckWrap}>
+      <SourceScope state={sourceState} onManageSources={onManageSources} />
+      {error && <p className={styles.generateError} role="alert">{error}</p>}
       <div className={styles.deckToolbar}>
         <div className={styles.deckMeta}>
           <strong>{artifact.title}</strong>
           <span>{meta}</span>
         </div>
         <div className={styles.deckActions}>
-          <button type="button" onClick={generate} disabled={submitting} className={styles.deckNotesButton}>
+          <button type="button" onClick={generate} disabled={submitting || !sourceCount || artifact.status === "generating"} className={styles.deckNotesButton}>
             <Wand2 size={14} aria-hidden="true" /> Jana semula
           </button>
           <button type="button" onClick={remove} aria-label={`Padam ${ui.noun}`} className={styles.deckDeleteButton}>
@@ -362,6 +375,7 @@ export function ArtifactTab({ workbookId, kind }: { workbookId: string; kind: Ar
           </button>
         </div>
       </div>
+      {artifact.status === "generating" && <p className={styles.panelInfo}><Sparkles size={13} />{kind === "audio" ? "Skrip sudah sedia. Fail audio sedang disediakan; anda boleh membaca atau menggunakan suara peranti dahulu." : "Kandungan slaid sudah sedia. Ilustrasi sedang dilengkapkan."}</p>}
       {ui.render({ artifactId: artifact.id, workbookId, data })}
       <p className={styles.artifactNote}>
         <Sparkles size={12} aria-hidden="true" />

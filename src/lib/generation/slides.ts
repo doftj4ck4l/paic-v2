@@ -59,7 +59,7 @@ export async function runSlidesGeneration(artifactId: string) {
     if (isGenerationMock()) {
       deck = mockDeck(count);
     } else {
-      const corpus = corpusForWorkbook(artifact.workbookId, params.sourceIds);
+      const corpus = await corpusForWorkbook(artifact.workbookId, params.sourceIds, artifact.userId ?? undefined);
       if (!corpus.trim()) {
         throw new Error("Tiada kandungan sumber untuk dijana. Tambah sumber dahulu.");
       }

@@ -36,6 +36,7 @@ export async function sweepStaleGenerations(workbookId: string, kind: string) {
   const rows = await db.select().from(artifacts).where(eq(artifacts.workbookId, workbookId));
   const staleBefore = Date.now() - 10 * 60 * 1000;
   for (const row of rows) {
+    if ((row.params as { job?: string } | null)?.job === "generate") continue;
     if (row.kind === kind && row.status === "generating" && row.updatedAt.getTime() < staleBefore) {
       await updateArtifact(row.id, { status: "failed", error: "Penjanaan terhenti. Sila cuba lagi." });
     }

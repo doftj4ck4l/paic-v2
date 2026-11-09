@@ -22,11 +22,13 @@ export function QuizPlayer({
   onFinishHref = "/creations",
   aiExplain = false,
   sourceWorkbookId,
+  generated = false,
 }: {
   questions?: QuizQuestion[];
   onFinishHref?: string;
   aiExplain?: boolean;
   sourceWorkbookId?: string;
+  generated?: boolean;
 }) {
   const [index, setIndex] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
@@ -249,7 +251,7 @@ export function QuizPlayer({
                 )}
               </div>
               <p className="rounded-xl bg-[#E7F6F4] px-3.5 py-2.5 text-xs leading-relaxed text-[#3d5a63]">
-                Mod demo — penjelasan AI sebenar (bersitasi daripada sumber) disambung dalam Fasa 3.
+                {generated ? "Penjelasan ini dijana bersama kuiz berdasarkan sumber yang dipilih. Semak rujukan untuk kepastian." : "Mod demo — penjelasan AI sebenar (bersitasi daripada sumber) disambung dalam Fasa 3."}
               </p>
             </div>
           </div>

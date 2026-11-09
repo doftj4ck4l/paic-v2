@@ -673,6 +673,7 @@ export type DemoSharedWorkbook = {
   subjectId: SubjectId;
   topic: string;
   authorId: string;
+  yearLabel: string;
   sharedAt: string;
   subscribers: number;
   saves: number;
@@ -684,11 +685,11 @@ export type DemoSharedWorkbook = {
 };
 
 export const SHARED_WORKBOOKS: DemoSharedWorkbook[] = [
-  { id: "peta-kitaran-air", title: "Peta Kitaran Air", subjectId: "science", topic: "Nota ringkas, kad imbas dan kuiz kitaran air", authorId: "mei-lin", sharedAt: "2 jam lalu", subscribers: 18, saves: 124, featured: true, modules: ["notes", "flashcards", "quizzes"], asset: "/assets/thiings/workbook-flask.png", defaultSaved: true, yourStreak: 3 },
-  { id: "tatabahasa-mudah", title: "Tatabahasa Mudah", subjectId: "language", topic: "Kata nama, kata kerja dan ayat mudah", authorId: "danial", sharedAt: "Semalam", subscribers: 11, saves: 57, modules: ["notes", "slides", "study-guides"], asset: "/assets/thiings/workbook-pencil.png" },
-  { id: "trik-pecahan-pantas", title: "Trik Pecahan Pantas", subjectId: "math", topic: "Cara cepat banding dan tambah pecahan", authorId: "priya", sharedAt: "2 hari lalu", subscribers: 24, saves: 86, featured: true, modules: ["notes", "slides", "quizzes", "mindmaps"], asset: "/assets/thiings/workbook-calculator.png" },
-  { id: "cerita-pendek-kreatif", title: "Cerita Pendek Kreatif", subjectId: "language", topic: "Contoh cerita dan struktur watak untuk projek kelas", authorId: "sofia", sharedAt: "3 hari lalu", subscribers: 14, saves: 41, featured: true, modules: ["notes", "study-guides"], asset: "/assets/thiings/subject-language.png" },
-  { id: "eksperimen-rumah", title: "Eksperimen Sains Rumah", subjectId: "science", topic: "5 eksperimen mudah dengan bahan dapur", authorId: "hafiz", sharedAt: "4 hari lalu", subscribers: 9, saves: 23, modules: ["notes", "flashcards"], asset: "/assets/thiings/subject-science.png" },
+  { id: "peta-kitaran-air", title: "Peta Kitaran Air", subjectId: "science", topic: "Nota ringkas, kad imbas dan kuiz kitaran air", authorId: "mei-lin", yearLabel: "Tahun 4", sharedAt: "2 jam lalu", subscribers: 18, saves: 124, featured: true, modules: ["notes", "flashcards", "quizzes"], asset: "/assets/thiings/workbook-flask.png", defaultSaved: true, yourStreak: 3 },
+  { id: "tatabahasa-mudah", title: "Tatabahasa Mudah", subjectId: "language", topic: "Kata nama, kata kerja dan ayat mudah", authorId: "danial", yearLabel: "Tahun 4", sharedAt: "Semalam", subscribers: 11, saves: 57, modules: ["notes", "slides", "study-guides"], asset: "/assets/thiings/workbook-pencil.png" },
+  { id: "trik-pecahan-pantas", title: "Trik Pecahan Pantas", subjectId: "math", topic: "Cara cepat banding dan tambah pecahan", authorId: "priya", yearLabel: "Tahun 4", sharedAt: "2 hari lalu", subscribers: 24, saves: 86, featured: true, modules: ["notes", "slides", "quizzes", "mindmaps"], asset: "/assets/thiings/workbook-calculator.png" },
+  { id: "cerita-pendek-kreatif", title: "Cerita Pendek Kreatif", subjectId: "language", topic: "Contoh cerita dan struktur watak untuk projek kelas", authorId: "sofia", yearLabel: "Tahun 4", sharedAt: "3 hari lalu", subscribers: 14, saves: 41, featured: true, modules: ["notes", "study-guides"], asset: "/assets/thiings/subject-language.png" },
+  { id: "eksperimen-rumah", title: "Eksperimen Sains Rumah", subjectId: "science", topic: "5 eksperimen mudah dengan bahan dapur", authorId: "hafiz", yearLabel: "Tahun 5", sharedAt: "4 hari lalu", subscribers: 9, saves: 23, modules: ["notes", "flashcards"], asset: "/assets/thiings/subject-science.png" },
 ];
 
 export function sharedWorkbookById(id: string): DemoSharedWorkbook {

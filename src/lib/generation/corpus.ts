@@ -1,6 +1,11 @@
+import { listSources } from "@/lib/sources";
+
 /**
- * Source text corpus used by AI generation for the seeded demo workbooks.
- * Real workbooks will use extracted text from uploaded sources instead.
+ * Source text corpus used by AI generation.
+ *
+ * Real sources (DB) take priority — uploaded files, web pages, YouTube
+ * transcripts, textbook sections and pasted text. The seeded demo corpus
+ * remains as a fallback for demo workbooks that predate real sources.
  */
 
 export type CorpusSource = { id: string; title: string; text: string };
@@ -83,10 +88,11 @@ Nilai murni dalam cerita rakyat: kasih sayang, kejujuran, kerajinan, keberanian 
   ],
 };
 
-export function corpusForWorkbook(workbookId: string, sourceIds?: string[]): string {
-  const sources = WORKBOOK_CORPUS[workbookId] ?? [];
-  const selected = sourceIds && sourceIds.length > 0 ? sources.filter((s) => sourceIds.includes(s.id)) : sources;
-  return selected
-    .map((s) => `### Sumber: ${s.title}\n${s.text}`)
-    .join("\n\n");
+/** Only reviewed, ready sources visible to this user may enter generation. */
+export async function corpusForWorkbook(workbookId: string, sourceIds?: string[], viewerId?: string): Promise<string> {
+  const rows = await listSources(workbookId, viewerId);
+  const ready = rows.filter(row => row.status === "ready" && row.fullText?.trim());
+  const selected = sourceIds === undefined ? ready : ready.filter(row => sourceIds.includes(row.id));
+  if (!selected.length) throw new Error("Pilih sekurang-kurangnya satu sumber yang siap diembed dalam tab Sumber.");
+  return selected.map(row => `### Sumber: ${row.title} [${row.id}]\n${row.fullText}`).join("\n\n").slice(0, 80_000);
 }
