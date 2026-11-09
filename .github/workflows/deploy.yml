@@ -36,11 +36,11 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  # Runs on the paic server's self-hosted runner. Enable by setting the
-  # repository variable PAIC_DEPLOY=true once the runner is installed.
+  # Runs on the paic server's self-hosted runner. Disable with the repository
+  # variable PAIC_DEPLOY=false.
   deploy:
     needs: build
-    if: ${{ vars.PAIC_DEPLOY == 'true' }}
+    if: ${{ vars.PAIC_DEPLOY != 'false' }}
     runs-on: [self-hosted, paic]
     steps:
       - name: Pull image, migrate, restart
