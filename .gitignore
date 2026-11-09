@@ -45,3 +45,6 @@ next-env.d.ts
 
 # local embedded postgres (dev)
 .pglite/
+
+# keep generated assets out of git
+.assets/

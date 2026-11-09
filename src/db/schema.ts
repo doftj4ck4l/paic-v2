@@ -123,3 +123,30 @@ export const schoolRequests = pgTable("school_requests", {
   requestedBy: text("requested_by"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
+
+/* ================= AI artifacts (workbook studio) ================= */
+
+/**
+ * Generated study artifacts for a workbook (slides first; quiz/cards/mindmap/
+ * guide/notes reuse the same table). `data` holds the validated artifact JSON
+ * (for slides: { title, slides: [{ ..., image_status }] }); illustration
+ * images live on the asset store, keyed by artifact id.
+ */
+export const artifacts = pgTable(
+  "artifacts",
+  {
+    id: text("id").primaryKey(),
+    workbookId: text("workbook_id").notNull(),
+    userId: text("user_id"),
+    kind: text("kind").notNull(),
+    title: text("title").notNull().default("Menjana…"),
+    status: text("status").notNull().default("generating"),
+    error: text("error"),
+    params: jsonb("params"),
+    data: jsonb("data"),
+    model: text("model"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => [index("artifacts_workbook_kind_idx").on(t.workbookId, t.kind)],
+);

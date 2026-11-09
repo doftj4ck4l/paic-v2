@@ -28,9 +28,9 @@ import {
 import { Chip } from "@/components/studio/ui";
 import { QuizPlayer } from "@/components/studio/quiz-player";
 import { FlashcardPlayer } from "@/components/studio/flashcard-player";
-import { SlideViewer } from "@/components/studio/slide-viewer";
 import { MindMapViewer } from "@/components/studio/mindmap-viewer";
 import { StudyGuideView } from "@/components/studio/study-guide-view";
+import { SlidesTab } from "./slides-tab";
 import { SUBJECT_ICONS } from "@/components/studio/content-tile";
 import content from "@/components/studio/content-width.module.css";
 import { shareWorkbook, useSocial } from "@/lib/demo-social";
@@ -168,7 +168,7 @@ export function WorkbookWorkspace({
       case "flashcards":
         return <FlashcardPlayer />;
       case "slides":
-        return <SlideViewer />;
+        return <SlidesTab workbookId={workbook.id} />;
       case "mindmaps":
         return <MindMapViewer />;
       case "audio":
