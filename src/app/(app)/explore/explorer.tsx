@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, BookOpen, ChevronDown, Compass, GraduationCap, ListChecks, RotateCcw, Search, UsersRound, X } from "lucide-react";
+import { ArrowRight, BookOpen, ChevronDown, Compass, GraduationCap, ListChecks, RotateCcw, Search, SlidersHorizontal, UsersRound, X } from "lucide-react";
 import { ContentTile, SUBJECT_ICONS } from "@/components/studio/content-tile";
 import { WorkbookTile } from "@/app/(app)/workbooks/workbook-list";
 import { SharedWorkbookTile } from "@/components/studio/shared-workbook-tile";
@@ -29,8 +29,8 @@ const SORT_OPTIONS: { value: SortId; label: string }[] = [
 ];
 
 const SCOPES: { id: ScopeId; label: string; icon: typeof GraduationCap }[] = [
-  { id: "guru", label: "Daripada Guru", icon: GraduationCap },
-  { id: "pelajar", label: "Daripada Pelajar", icon: UsersRound },
+  { id: "guru", label: "Guru", icon: GraduationCap },
+  { id: "pelajar", label: "Pelajar", icon: UsersRound },
   { id: "topik", label: "Topik", icon: Compass },
 ];
 
@@ -47,6 +47,24 @@ export function Explorer({ publishedWorkbooks = [] }: { publishedWorkbooks?: Pub
   const [year, setYear] = useState<string>("all");
   const [author, setAuthor] = useState<string>("all");
   const [sort, setSort] = useState<SortId>("recent");
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const filterRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!filtersOpen) return;
+    function onPointerDown(event: PointerEvent) {
+      if (!filterRef.current?.contains(event.target as Node)) setFiltersOpen(false);
+    }
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setFiltersOpen(false);
+    }
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [filtersOpen]);
 
   const teacherWorkbooks = useMemo(
     () => [...WORKBOOKS, ...publishedWorkbooks.filter((w) => w.ownerRole === "teacher")],
@@ -135,6 +153,7 @@ export function Explorer({ publishedWorkbooks = [] }: { publishedWorkbooks?: Pub
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [studentPublished, subject, year, author, query, sort]);
 
+  const activeFilterCount = (subject !== "all" ? 1 : 0) + (year !== "all" ? 1 : 0) + (author !== "all" ? 1 : 0);
   const filtersActive = subject !== "all" || year !== "all" || author !== "all" || sort !== "recent";
 
   function reset() {
@@ -154,68 +173,90 @@ export function Explorer({ publishedWorkbooks = [] }: { publishedWorkbooks?: Pub
     <div className={styles.library} id="explore-library">
       <div className={styles.searchRow}>
         <div className={styles.search}>
-          <Search size={21} aria-hidden="true" />
+          <Search size={18} aria-hidden="true" />
           <label htmlFor="explore-search" className={styles.srOnly}>Cari bahan pembelajaran</label>
           <input id="explore-search" type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Cari topik atau buku kerja…" autoComplete="off" />
           {query && <button type="button" onClick={() => setQuery("")} aria-label="Kosongkan carian"><X size={17} /></button>}
         </div>
-        <p className={styles.resultCount} role="status" aria-live="polite" aria-atomic="true">{resultLabel}</p>
-      </div>
-
-      <div className={styles.scopeTabs} role="group" aria-label="Sumber bahan">
-        {SCOPES.map((item) => (
+        <div className={styles.scopeTabs} role="group" aria-label="Sumber bahan">
+          {SCOPES.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={styles.scopeTab}
+              aria-pressed={scope === item.id}
+              onClick={() => {
+                setScope(item.id);
+                setAuthor("all");
+              }}
+            >
+              <item.icon size={14} aria-hidden="true" />
+              {item.label}
+            </button>
+          ))}
+        </div>
+        <div className={styles.filterMenu} ref={filterRef}>
           <button
-            key={item.id}
             type="button"
-            className={styles.scopeTab}
-            aria-pressed={scope === item.id}
-            onClick={() => {
-              setScope(item.id);
-              setAuthor("all");
-            }}
+            className={styles.filterTrigger}
+            aria-expanded={filtersOpen}
+            aria-haspopup="true"
+            onClick={() => setFiltersOpen((open) => !open)}
           >
-            <item.icon size={14} aria-hidden="true" />
-            {item.label}
+            <SlidersHorizontal size={15} aria-hidden="true" />
+            Tapis
+            {activeFilterCount > 0 && <span className={styles.filterCount}>{activeFilterCount}</span>}
+            <ChevronDown size={14} className={styles.filterTriggerChevron} aria-hidden="true" />
           </button>
-        ))}
-      </div>
+          {filtersOpen && (
+            <div className={styles.filterPanel}>
+              <label className={styles.filterGroup}>
+                <span>Subjek</span>
+                <span className={styles.filterSelectWrap}>
+                  <select value={subject} onChange={(event) => setSubject(event.target.value as SubjectId | "all")} className={styles.filterSelect}>
+                    <option value="all">Semua subjek</option>
+                    {SUBJECTS.map((item) => (
+                      <option key={item.id} value={item.id}>{item.name}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className={styles.filterChevron} aria-hidden="true" />
+                </span>
+              </label>
 
-      <div className={styles.filterBar} role="group" aria-label="Tapis bahan pembelajaran">
-        <span className={styles.filterField}>
-          <label htmlFor="filter-subject" className={styles.srOnly}>Tapis mengikut subjek</label>
-          <select id="filter-subject" value={subject} onChange={(event) => setSubject(event.target.value as SubjectId | "all")} className={styles.filterSelect}>
-            <option value="all">Semua subjek</option>
-            {SUBJECTS.map((item) => (
-              <option key={item.id} value={item.id}>{item.name}</option>
-            ))}
-          </select>
-          <ChevronDown className={styles.filterChevron} aria-hidden="true" />
-        </span>
+              <label className={styles.filterGroup}>
+                <span>Tingkatan</span>
+                <span className={styles.filterSelectWrap}>
+                  <select value={year} onChange={(event) => setYear(event.target.value)} className={styles.filterSelect}>
+                    <option value="all">Semua tingkatan</option>
+                    {yearOptions.map((item) => (
+                      <option key={item} value={item}>{item}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className={styles.filterChevron} aria-hidden="true" />
+                </span>
+              </label>
 
-        <span className={styles.filterField}>
-          <label htmlFor="filter-year" className={styles.srOnly}>Tapis mengikut tingkatan</label>
-          <select id="filter-year" value={year} onChange={(event) => setYear(event.target.value)} className={styles.filterSelect}>
-            <option value="all">Semua tingkatan</option>
-            {yearOptions.map((item) => (
-              <option key={item} value={item}>{item}</option>
-            ))}
-          </select>
-          <ChevronDown className={styles.filterChevron} aria-hidden="true" />
-        </span>
+              {scope !== "topik" && (
+                <label className={styles.filterGroup}>
+                  <span>Pengarang</span>
+                  <span className={styles.filterSelectWrap}>
+                    <select value={author} onChange={(event) => setAuthor(event.target.value)} className={styles.filterSelect}>
+                      <option value="all">{scope === "pelajar" ? "Semua pelajar" : "Semua guru"}</option>
+                      {authorOptions.map((item) => (
+                        <option key={item} value={item}>{item}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className={styles.filterChevron} aria-hidden="true" />
+                  </span>
+                </label>
+              )}
 
-        {scope !== "topik" && (
-          <span className={styles.filterField}>
-            <label htmlFor="filter-author" className={styles.srOnly}>Tapis mengikut pengarang</label>
-            <select id="filter-author" value={author} onChange={(event) => setAuthor(event.target.value)} className={styles.filterSelect}>
-              <option value="all">{scope === "pelajar" ? "Semua pelajar" : "Semua guru"}</option>
-              {authorOptions.map((item) => (
-                <option key={item} value={item}>{item}</option>
-              ))}
-            </select>
-            <ChevronDown className={styles.filterChevron} aria-hidden="true" />
-          </span>
-        )}
-
+              <button type="button" className={styles.filterReset} onClick={reset} disabled={!filtersActive}>
+                <RotateCcw size={13} aria-hidden="true" /> Set semula tapisan
+              </button>
+            </div>
+          )}
+        </div>
         <span className={styles.filterField}>
           <label htmlFor="filter-sort" className={styles.srOnly}>Susun mengikut</label>
           <select id="filter-sort" value={sort} onChange={(event) => setSort(event.target.value as SortId)} className={styles.filterSelect}>
@@ -225,12 +266,7 @@ export function Explorer({ publishedWorkbooks = [] }: { publishedWorkbooks?: Pub
           </select>
           <ChevronDown className={styles.filterChevron} aria-hidden="true" />
         </span>
-
-        {filtersActive && (
-          <button type="button" onClick={reset} className={styles.resetButton}>
-            <RotateCcw size={13} aria-hidden="true" /> Set semula
-          </button>
-        )}
+        <p className={styles.resultCount} role="status" aria-live="polite" aria-atomic="true">{resultLabel}</p>
       </div>
 
       {scope === "guru" && (
@@ -257,8 +293,7 @@ export function Explorer({ publishedWorkbooks = [] }: { publishedWorkbooks?: Pub
       )}
 
       {scope === "topik" && (
-        <section className={styles.topicsSection} aria-labelledby="topics-title">
-          <div className={styles.sectionHeading}><div><h2 id="topics-title">Topik untuk diteroka</h2><p>{subject === "all" ? "Satu idea kecil boleh membuka dunia yang besar." : `Terokai topik ${subjectById(subject).name} mengikut minat anda.`}</p></div><span className={styles.countPill}>{topics.length} topik</span></div>
+        <section className={styles.topicsSection} aria-label="Topik untuk diteroka">
           {topics.length === 0 ? (
             <div className={styles.empty}><Compass size={32} aria-hidden="true" /><h3>Tiada topik sepadan</h3><p>Cuba kata kunci atau tapisan lain.</p><button type="button" onClick={reset}>Tetapkan semula tapisan</button></div>
           ) : (

@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Bookmark, BookOpen, BookSearch, ChevronDown, Ellipsis, LayoutGrid, List, RotateCcw, Search, Settings, X } from "lucide-react";
+import { ArrowRight, Bookmark, BookOpen, BookSearch, ChevronDown, Ellipsis, LayoutGrid, List, RotateCcw, Search, SlidersHorizontal, Settings, X } from "lucide-react";
 import { ContentTile, SUBJECT_ICONS } from "@/components/studio/content-tile";
 import { SharedWorkbookTile } from "@/components/studio/shared-workbook-tile";
 import {
@@ -84,6 +84,24 @@ export function WorkbookList({ workbooks }: { workbooks: DemoWorkbook[] }) {
   const [subject, setSubject] = useState<SubjectId | "all">("all");
   const [sort, setSort] = useState<SortId>("recent");
   const [view, setView] = useState<"grid" | "list">("grid");
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const filterRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!filtersOpen) return;
+    function onPointerDown(event: PointerEvent) {
+      if (!filterRef.current?.contains(event.target as Node)) setFiltersOpen(false);
+    }
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setFiltersOpen(false);
+    }
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [filtersOpen]);
 
   const savedWorkbooks = useMemo(
     () => SHARED_WORKBOOKS.filter((w) => saved.includes(w.id)),
@@ -132,7 +150,13 @@ export function WorkbookList({ workbooks }: { workbooks: DemoWorkbook[] }) {
 
   return (
     <section className={styles.library} aria-label="Koleksi buku kerja">
-      <div className={styles.scopeRow}>
+      <div className={styles.toolbar}>
+        <div className={styles.search}>
+          <Search size={18} aria-hidden="true" />
+          <label htmlFor="workbook-search" className={styles.srOnly}>Cari buku kerja</label>
+          <input id="workbook-search" type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={showingMine ? "Cari buku kerja…" : "Cari buku kerja disimpan…"} autoComplete="off" />
+          {query && <button type="button" aria-label="Kosongkan carian" onClick={() => setQuery("")}><X size={16} /></button>}
+        </div>
         <div className={styles.scopeTabs} role="group" aria-label="Skop buku kerja">
           <button type="button" className={styles.scopeTab} aria-pressed={showingMine} onClick={() => setScope("mine")}>
             Buku kerja saya
@@ -141,21 +165,38 @@ export function WorkbookList({ workbooks }: { workbooks: DemoWorkbook[] }) {
             Disimpan{savedWorkbooks.length > 0 ? ` (${savedWorkbooks.length})` : ""}
           </button>
         </div>
-      </div>
-
-      <div className={styles.toolbar}>
-        <div className={styles.search}>
-          <Search size={18} aria-hidden="true" />
-          <label htmlFor="workbook-search" className={styles.srOnly}>Cari buku kerja</label>
-          <input id="workbook-search" type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={showingMine ? "Cari buku kerja…" : "Cari buku kerja disimpan…"} autoComplete="off" />
-          {query && <button type="button" aria-label="Kosongkan carian" onClick={() => setQuery("")}><X size={16} /></button>}
-        </div>
-        <div className={styles.filters} role="group" aria-label="Tapis mengikut subjek">
-          <button type="button" onClick={() => setSubject("all")} aria-pressed={subject === "all"} className={styles.filter}>Semua</button>
-          {SUBJECTS.map((item) => {
-            const Icon = SUBJECT_ICONS[item.id];
-            return <button key={item.id} type="button" onClick={() => setSubject(item.id)} aria-pressed={subject === item.id} className={styles.filter}><Icon size={15} aria-hidden="true" />{item.name}</button>;
-          })}
+        <div className={styles.filterMenu} ref={filterRef}>
+          <button
+            type="button"
+            className={styles.filterTrigger}
+            aria-expanded={filtersOpen}
+            aria-haspopup="true"
+            onClick={() => setFiltersOpen((open) => !open)}
+          >
+            <SlidersHorizontal size={15} aria-hidden="true" />
+            Tapis
+            {subject !== "all" && <span className={styles.filterCount}>1</span>}
+            <ChevronDown size={14} className={styles.filterTriggerChevron} aria-hidden="true" />
+          </button>
+          {filtersOpen && (
+            <div className={styles.filterPanel}>
+              <label className={styles.filterGroup}>
+                <span>Subjek</span>
+                <span className={styles.filterSelectWrap}>
+                  <select value={subject} onChange={(event) => setSubject(event.target.value as SubjectId | "all")} className={styles.filterSelect}>
+                    <option value="all">Semua subjek</option>
+                    {SUBJECTS.map((item) => (
+                      <option key={item.id} value={item.id}>{item.name}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className={styles.filterChevron} aria-hidden="true" />
+                </span>
+              </label>
+              <button type="button" className={styles.filterReset} onClick={resetFilters} disabled={subject === "all" && !query.trim()}>
+                <RotateCcw size={13} aria-hidden="true" /> Set semula tapisan
+              </button>
+            </div>
+          )}
         </div>
         <span className={styles.sortField}>
           <label htmlFor="workbook-sort" className={styles.srOnly}>Susun buku kerja</label>

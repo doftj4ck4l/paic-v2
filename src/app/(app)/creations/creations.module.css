@@ -6,7 +6,7 @@
 .main { padding-block: 12px 36px; }
 
 /* ---------------- Hero ---------------- */
-.hero { display: grid; grid-template-columns: 1.1fr 1fr; align-items: center; min-height: 300px; position: relative; isolation: isolate; overflow: hidden; border: 1px solid #f6dbe7; border-radius: 42px 42px 60px 42px; background: linear-gradient(115deg, #fff1f4, #fdeef7 55%, #eef7ff); }
+.hero { display: grid; grid-template-columns: 1.1fr 1fr; align-items: center; min-height: 330px; position: relative; isolation: isolate; overflow: hidden; border: 1px solid #f6dbe7; border-radius: 42px 42px 60px 42px; background: linear-gradient(115deg, #fff1f4, #fdeef7 55%, #eef7ff); }
 .heroCopy { position: relative; z-index: 2; padding: 33px 0 35px 38px; }
 .eyebrow { display: inline-flex; align-items: center; gap: 7px; padding: 6px 11px; border: 1px solid #f3d9e4; border-radius: 20px; background: #ffffff99; color: #99607d; font-size: 9px; font-weight: 700; letter-spacing: .7px; }
 .hero h1 { margin-top: 13px; font-size: clamp(34px, 3.4vw, 43px); font-weight: 800; line-height: 1.12; letter-spacing: -1.8px; }
@@ -38,9 +38,9 @@
 
 /* ---------------- Filter + grid ---------------- */
 .library { margin-top: 28px; }
-.filterRow { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 18px; }
-.filters { display: flex; flex-wrap: wrap; gap: 7px; padding: 6px; width: fit-content; max-width: 100%; border: 1px solid #e2e7f2; border-radius: 24px; background: #fff; box-shadow: 0 3px 8px #3f406008; }
-.filter { display: inline-flex; align-items: center; justify-content: center; min-height: 38px; padding-inline: 16px; border: none; border-radius: 18px; font-size: 12px; font-weight: 650; background: transparent; color: #6c7590; cursor: pointer; transition: background 150ms, color 150ms; }
+.filterRow { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 28px; }
+.filters { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px; width: fit-content; max-width: 100%; border: 1px solid #e2e7f2; border-radius: 19px; background: #fff; box-shadow: 0 3px 8px #3f406008; }
+.filter { display: inline-flex; align-items: center; justify-content: center; min-height: 27px; padding-inline: 13px; border: none; border-radius: 14px; font-size: 12px; font-weight: 650; background: transparent; color: #6c7590; cursor: pointer; transition: background 150ms, color 150ms; }
 .filter:hover { background: #f2f8f7; color: #10112f; }
 .filter[aria-pressed="true"] { background: linear-gradient(110deg, #007a66, #00856f); color: #fff; box-shadow: 0 3px 7px #30776814; }
 .countPill { flex-shrink: 0; padding: 5px 10px; border-radius: 15px; background: #eee9f8; color: #7e6b9a; font-size: 11px; font-weight: 600; }
@@ -104,7 +104,7 @@
   .aiNote { top: 90px; right: 0; }
   .library { margin-top: 23px; }
   .filterRow { align-items: flex-start; flex-direction: column; gap: 12px; }
-  .filters { width: 100%; padding: 5px; gap: 5px; border-radius: 21px; }
+  .filters { width: 100%; padding: 4px; gap: 5px; border-radius: 19px; }
   .filter { min-height: 33px; padding-inline: 12px; font-size: 10.5px; }
   .grid { grid-template-columns: 1fr; gap: 14px; }
 }
