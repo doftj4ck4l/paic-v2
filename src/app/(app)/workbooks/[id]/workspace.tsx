@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   ArrowLeft,
+  Bookmark,
   BookOpen,
   NotebookPen,
   ListChecks,
@@ -13,11 +14,10 @@ import {
   Headphones,
   BookOpenCheck,
   Check,
-  Info,
+  Eye,
   Layers,
   MessageSquareText,
   Settings2,
-  Share2,
   Sparkles,
   TrendingUp,
   Users,
@@ -28,8 +28,8 @@ import { WorkbookSourcesProvider, useWorkbookSources } from "@/lib/workbook/use-
 import { QuizzesTab } from "./quizzes-tab";
 import { ModulesTab } from "./modules-tab";
 import { SUBJECT_ICONS } from "@/components/studio/content-tile";
+import { toggleSavedWorkbook, useSavedWorkbooks } from "@/lib/saved-workbooks";
 import content from "@/components/studio/content-width.module.css";
-import { shareWorkbook, useSocial } from "@/lib/demo-social";
 import {
   subjectById,
   type DemoCreation,
@@ -68,6 +68,8 @@ function WorkbookWorkspaceInner({ workbook, viewerId, initialTab = "sumber" }: W
   const sourceState = useWorkbookSources(workbook.id);
   const [visited, setVisited] = useState<TabId[]>([initialTab]);
   const isOwner = workbook.isDb && workbook.ownerId === viewerId;
+  // Non-owners (including everyone on demo workbooks) get the read-only experience.
+  const readOnly = !isOwner;
   const [visibility, setVisibility] = useState(workbook.visibility);
   const [publishing, setPublishing] = useState(false);
   const isPublished = visibility === "published";
@@ -92,6 +94,9 @@ function WorkbookWorkspaceInner({ workbook, viewerId, initialTab = "sumber" }: W
   const SubjectIcon = SUBJECT_ICONS[subject.id];
   const modules = MODULE_TABS;
   const [readyModules, setReadyModules] = useState<number | null>(null);
+  // Live progress: share of the 7 module kinds that are ready (falls back to the
+  // server-computed value until the artifact counts load).
+  const liveProgress = readyModules === null ? workbook.progress : Math.round((readyModules / modules.length) * 100);
 
   useEffect(() => {
     let cancelled = false;
@@ -114,24 +119,8 @@ function WorkbookWorkspaceInner({ workbook, viewerId, initialTab = "sumber" }: W
   });
   const sourceCount = sourceState.loading ? null : sourceState.ready.length;
   function setTab(next: TabId) { updateTab(next); setVisited(current => current.includes(next) ? current : [...current, next]); }
-  const { shared } = useSocial();
-  const isShared = shared.includes(workbook.id);
-  const [shareOpen, setShareOpen] = useState(false);
-  const [shareVisibility, setShareVisibility] = useState<"class" | "community">("class");
-
-  useEffect(() => {
-    if (!shareOpen) return;
-    function onKey(event: KeyboardEvent) {
-      if (event.key === "Escape") setShareOpen(false);
-    }
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [shareOpen]);
-
-  function confirmShare() {
-    shareWorkbook(workbook.id);
-    setShareOpen(false);
-  }
+  const savedWorkbooks = useSavedWorkbooks();
+  const isSaved = savedWorkbooks.includes(workbook.id);
 
   return (
     <div className={styles.page}>
@@ -153,20 +142,22 @@ function WorkbookWorkspaceInner({ workbook, viewerId, initialTab = "sumber" }: W
                 {publishing ? "Mengemas kini…" : isPublished ? "Diterbitkan" : "Terbitkan"}
               </button>
             )}
-            {!workbook.isDb && (
+            {readOnly && workbook.isDb && (
               <button
                 type="button"
-                onClick={() => setShareOpen(true)}
-                data-shared={isShared}
+                onClick={() => toggleSavedWorkbook(workbook.id)}
+                data-shared={isSaved}
                 className={styles.shareButton}
               >
-                {isShared ? <Check size={14} aria-hidden="true" /> : <Share2 size={14} aria-hidden="true" />}
-                {isShared ? "Dikongsi" : "Kongsi"}
+                <Bookmark size={14} aria-hidden="true" fill={isSaved ? "currentColor" : "none"} />
+                {isSaved ? "Disimpan" : "Simpan"}
               </button>
             )}
-            <Link href={`/workbooks/${workbook.id}/settings`} className={styles.settingsButton}>
-              <Settings2 size={14} aria-hidden="true" /> Tetapan
-            </Link>
+            {!readOnly && (
+              <Link href={`/workbooks/${workbook.id}/settings`} className={styles.settingsButton}>
+                <Settings2 size={14} aria-hidden="true" /> Tetapan
+              </Link>
+            )}
           </div>
         </div>
 
@@ -187,8 +178,14 @@ function WorkbookWorkspaceInner({ workbook, viewerId, initialTab = "sumber" }: W
               </span>
               <span className={styles.detailChip}>
                 <TrendingUp size={13} aria-hidden="true" />
-                {workbook.progress}% siap
+                {liveProgress}% siap
               </span>
+              {readOnly && (
+                <span className={styles.detailChip}>
+                  <Eye size={13} aria-hidden="true" />
+                  Baca sahaja
+                </span>
+              )}
             </div>
             <p>{workbook.topic}</p>
           </div>
@@ -220,14 +217,14 @@ function WorkbookWorkspaceInner({ workbook, viewerId, initialTab = "sumber" }: W
         </div>
 
         <div className={styles.content}>
-          {tab === "sumber" && <SourcesTab workbookId={workbook.id} workbook={{ ...workbook, visibility }} />}
+          {tab === "sumber" && <SourcesTab workbookId={workbook.id} workbook={{ ...workbook, visibility }} readOnly={readOnly} />}
 
           {visited.includes("sembang") && <div hidden={tab !== "sembang"}><ChatTab workbookId={workbook.id} /></div>}
 
           {modules.map((m) =>
             visited.includes(m.kind) ? (
               <div key={m.kind} hidden={tab !== m.kind} className={styles.module}>
-                {m.kind === "quizzes" ? <QuizzesTab workbook={workbook} /> : <ModulesTab workbook={workbook} kind={m.kind} active={tab === m.kind} />}
+                {m.kind === "quizzes" ? <QuizzesTab workbook={workbook} readOnly={readOnly} /> : <ModulesTab workbook={workbook} kind={m.kind} active={tab === m.kind} readOnly={readOnly} />}
               </div>
             ) : null,
           )}
@@ -241,56 +238,6 @@ function WorkbookWorkspaceInner({ workbook, viewerId, initialTab = "sumber" }: W
         </p>
       </main>
 
-      {/* Share dialog */}
-      {shareOpen && (
-        <div className={styles.dialogBackdrop} role="dialog" aria-modal="true" aria-labelledby="share-title">
-          <button type="button" aria-label="Tutup" className={styles.dialogDismiss} onClick={() => setShareOpen(false)} />
-          <div className={styles.dialog}>
-            <div className={styles.dialogHead}>
-              <div>
-                <h2 id="share-title">Kongsi buku kerja</h2>
-                <p className={styles.dialogDesc}>
-                  Kongsi &quot;{workbook.title}&quot; dengan rakan sekelas atau seluruh komuniti Pixelspace.
-                </p>
-              </div>
-              <button type="button" aria-label="Tutup dialog" className={styles.dialogClose} onClick={() => setShareOpen(false)}>
-                <X size={16} aria-hidden="true" />
-              </button>
-            </div>
-            <fieldset className={styles.radioGroup}>
-              <legend>Pilih siapa boleh melihat</legend>
-              <label className={styles.radioRow} data-checked={shareVisibility === "class"}>
-                <input type="radio" name="share-visibility" checked={shareVisibility === "class"} onChange={() => setShareVisibility("class")} />
-                <span>
-                  <strong>Sekolah sahaja</strong>
-                  <span>Hanya pelajar di sekolah anda (demo)</span>
-                </span>
-              </label>
-              <label className={styles.radioRow} data-checked={shareVisibility === "community"}>
-                <input type="radio" name="share-visibility" checked={shareVisibility === "community"} onChange={() => setShareVisibility("community")} />
-                <span>
-                  <strong>Komuniti Pixelspace</strong>
-                  <span>Semua pelajar demo di halaman Komuniti</span>
-                </span>
-              </label>
-            </fieldset>
-            <div className={styles.dialogField}>
-              <label htmlFor="share-note">Penerangan (pilihan)</label>
-              <textarea id="share-note" rows={3} placeholder="cth. Nota ringkas untuk ulang kaji bab 8…" />
-            </div>
-            <p className={styles.dialogNote}>
-              <Info size={12} aria-hidden="true" />
-              Mod demo — perkongsian disimpan dalam sesi ini sahaja (Fasa 5).
-            </p>
-            <div className={styles.dialogActions}>
-              <button type="button" className={styles.ghostButton} onClick={() => setShareOpen(false)}>Batal</button>
-              <button type="button" className={styles.confirmButton} onClick={confirmShare}>
-                <Share2 size={15} aria-hidden="true" /> Kongsi sekarang
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
     </div>
   );

@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth-session";
-import { accessibleWorkbook, sourcePayload, sourceView } from "@/lib/ingestion/access";
+import { editableWorkbook, sourcePayload, sourcePayloadReadOnly, sourceView, viewableWorkbook } from "@/lib/ingestion/access";
 import { kickSourceWorker } from "@/lib/ingestion/worker";
 import {
   createFileSource,
@@ -25,11 +25,17 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Tidak dibenarkan." }, { status: 401 });
   const { id } = await params;
-  if (!await accessibleWorkbook(id, user.id)) return NextResponse.json({ error: "Buku kerja tidak dijumpai." }, { status: 404 });
-  const payload = await sourcePayload(id, user.id);
-  const drafts = request.nextUrl.searchParams.get("drafts") === "1";
-  void kickSourceWorker();
-  return NextResponse.json({ sources: drafts ? payload.drafts : payload.sources, draftCount: payload.draftCount, embeddingAvailable: payload.embeddingAvailable });
+  const owned = await editableWorkbook(id, user.id);
+  if (owned) {
+    const payload = await sourcePayload(id, user.id);
+    const drafts = request.nextUrl.searchParams.get("drafts") === "1";
+    void kickSourceWorker();
+    return NextResponse.json({ sources: drafts ? payload.drafts : payload.sources, draftCount: payload.draftCount, embeddingAvailable: payload.embeddingAvailable });
+  }
+  const workbook = await viewableWorkbook(id, user.id);
+  if (!workbook) return NextResponse.json({ error: "Buku kerja tidak dijumpai." }, { status: 404 });
+  const payload = await sourcePayloadReadOnly(id, workbook);
+  return NextResponse.json({ sources: payload.sources, draftCount: payload.draftCount, embeddingAvailable: payload.embeddingAvailable });
 }
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -37,7 +43,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   if (!user) return NextResponse.json({ error: "Tidak dibenarkan." }, { status: 401 });
 
   const { id } = await params;
-  const workbook = await accessibleWorkbook(id, user.id);
+  const workbook = await editableWorkbook(id, user.id);
   if (!workbook) return NextResponse.json({ error: "Buku kerja tidak dijumpai." }, { status: 404 });
 
   try {
@@ -69,7 +75,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     } else {
       const compiled = await compileTextbookContent(body.bookId);
       row = await createTextSource(id, user.id, `Buku teks: ${compiled.title}`, compiled.text);
-      row.kind = "textbook"; await updateSource(row.id, { kind: "textbook" });
+      // Textbooks are already indexed in the textbook KB and chat/generation read
+      // source text directly — mark ready immediately instead of re-embedding.
+      const meta = { ...(row.meta as Record<string, unknown> | null), method: "textbook", bookId: body.bookId, review: "accepted" };
+      if (row.status === "draft") {
+        await updateSource(row.id, { kind: "textbook", status: "ready", meta });
+        row.status = "ready";
+      } else {
+        await updateSource(row.id, { kind: "textbook", meta });
+      }
+      row.kind = "textbook"; row.meta = meta;
     }
     if (body.type === "url" && row.status === "draft") {
       const assessment = await assessSource(row, workbook);

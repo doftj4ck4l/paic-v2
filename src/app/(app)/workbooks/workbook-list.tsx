@@ -2,19 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Bookmark, BookOpen, BookSearch, ChevronDown, Ellipsis, LayoutGrid, List, RotateCcw, Search, SlidersHorizontal, Settings, X } from "lucide-react";
+import { Bookmark, BookOpen, BookSearch, ChevronDown, Ellipsis, LayoutGrid, List, RotateCcw, Search, SlidersHorizontal, Settings, X } from "lucide-react";
 import { ContentTile, SUBJECT_ICONS } from "@/components/studio/content-tile";
-import { SharedWorkbookTile } from "@/components/studio/shared-workbook-tile";
-import {
-  SHARED_WORKBOOKS,
-  SUBJECTS,
-  communityStudentById,
-  subjectById,
-  type DemoSharedWorkbook,
-  type DemoWorkbook,
-  type SubjectId,
-} from "@/lib/demo-data";
-import { useSocial } from "@/lib/demo-social";
+import { SUBJECTS, subjectById, type DemoWorkbook, type SubjectId } from "@/lib/demo-data";
+import type { AppWorkbook } from "@/lib/workbooks";
+import { toggleSavedWorkbook, useSavedWorkbooks } from "@/lib/saved-workbooks";
 import styles from "./workbooks.module.css";
 
 const COVER_ART: Partial<Record<SubjectId, string>> = {
@@ -23,9 +15,11 @@ const COVER_ART: Partial<Record<SubjectId, string>> = {
   language: "/assets/thiings/workbook-pencil.png",
 };
 
-export function WorkbookTile({ workbook }: { workbook: DemoWorkbook }) {
+export function WorkbookTile({ workbook, owned = false, canSave = false }: { workbook: DemoWorkbook; owned?: boolean; canSave?: boolean }) {
   const subject = subjectById(workbook.subjectId);
   const Icon = SUBJECT_ICONS[subject.id];
+  const saved = useSavedWorkbooks();
+  const isSaved = saved.includes(workbook.id);
   return (
     <ContentTile
       href={`/workbooks/${workbook.id}`}
@@ -38,47 +32,43 @@ export function WorkbookTile({ workbook }: { workbook: DemoWorkbook }) {
       footerEnd={<span>{workbook.teacherName}</span>}
       progress={{ value: workbook.progress, label: `Kemajuan ${workbook.title}` }}
       menu={
-        <details className={styles.cardMenu} onKeyDown={(event) => {
-          if (event.key === "Escape") {
-            event.preventDefault();
-            event.currentTarget.open = false;
-            event.currentTarget.querySelector("summary")?.focus();
-          }
-        }} onBlur={(event) => {
-          if (!event.currentTarget.contains(event.relatedTarget)) event.currentTarget.open = false;
-        }}>
-          <summary aria-label={`Pilihan ${workbook.title}`}><Ellipsis size={17} aria-hidden="true" /></summary>
-          <div className={styles.menuContent}>
-            <Link href={`/workbooks/${workbook.id}`}><BookOpen size={15} aria-hidden="true" />Buka buku kerja</Link>
-            <Link href={`/workbooks/${workbook.id}/settings`}><Settings size={15} aria-hidden="true" />Tetapan buku kerja</Link>
-          </div>
-        </details>
+        canSave ? (
+          <button
+            type="button"
+            onClick={() => toggleSavedWorkbook(workbook.id)}
+            aria-pressed={isSaved}
+            data-saved={isSaved}
+            aria-label={isSaved ? `Buang ${workbook.title} daripada simpanan` : `Simpan ${workbook.title}`}
+            className={styles.saveButton}
+          >
+            <Bookmark aria-hidden="true" fill={isSaved ? "currentColor" : "none"} />
+          </button>
+        ) : owned ? (
+          <details className={styles.cardMenu} onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              event.preventDefault();
+              event.currentTarget.open = false;
+              event.currentTarget.querySelector("summary")?.focus();
+            }
+          }} onBlur={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget)) event.currentTarget.open = false;
+          }}>
+            <summary aria-label={`Pilihan ${workbook.title}`}><Ellipsis size={17} aria-hidden="true" /></summary>
+            <div className={styles.menuContent}>
+              <Link href={`/workbooks/${workbook.id}`}><BookOpen size={15} aria-hidden="true" />Buka buku kerja</Link>
+              <Link href={`/workbooks/${workbook.id}/settings`}><Settings size={15} aria-hidden="true" />Tetapan buku kerja</Link>
+            </div>
+          </details>
+        ) : undefined
       }
-    />
-  );
-}
-
-function RemixTile({ workbook }: { workbook: DemoSharedWorkbook }) {
-  const author = communityStudentById(workbook.authorId);
-  const subject = subjectById(workbook.subjectId);
-  return (
-    <ContentTile
-      href="/workbooks/kitaran-air"
-      tint={subject.id}
-      art={workbook.asset}
-      badge={<><RotateCcw size={14} aria-hidden="true" />Versi saya</>}
-      title={workbook.title}
-      description={`Diadaptasi daripada buku kerja ${author.name}`}
-      footer={<span>Salinan peribadi</span>}
-      footerEnd={<ArrowRight size={16} className={styles.remixArrow} aria-hidden="true" />}
     />
   );
 }
 
 type SortId = "recent" | "complete" | "az";
 
-export function WorkbookList({ workbooks }: { workbooks: DemoWorkbook[] }) {
-  const { saved, remixed } = useSocial();
+export function WorkbookList({ workbooks, published }: { workbooks: AppWorkbook[]; published: AppWorkbook[] }) {
+  const savedIds = useSavedWorkbooks();
   const [scope, setScope] = useState<"mine" | "saved">("mine");
   const [query, setQuery] = useState("");
   const [subject, setSubject] = useState<SubjectId | "all">("all");
@@ -104,12 +94,8 @@ export function WorkbookList({ workbooks }: { workbooks: DemoWorkbook[] }) {
   }, [filtersOpen]);
 
   const savedWorkbooks = useMemo(
-    () => SHARED_WORKBOOKS.filter((w) => saved.includes(w.id)),
-    [saved],
-  );
-  const remixSources = useMemo(
-    () => SHARED_WORKBOOKS.filter((w) => remixed.includes(w.id)),
-    [remixed],
+    () => published.filter((w) => savedIds.includes(w.id)),
+    [published, savedIds],
   );
 
   const filtered = useMemo(() => {
@@ -125,8 +111,7 @@ export function WorkbookList({ workbooks }: { workbooks: DemoWorkbook[] }) {
     const words = query.trim().toLocaleLowerCase("ms").split(/\s+/).filter(Boolean);
     return savedWorkbooks.filter((workbook) => {
       const matchesSubject = subject === "all" || workbook.subjectId === subject;
-      const author = communityStudentById(workbook.authorId).name;
-      const searchText = `${workbook.title} ${workbook.topic} ${author} ${subjectById(workbook.subjectId).name}`.toLocaleLowerCase("ms");
+      const searchText = `${workbook.title} ${workbook.topic} ${workbook.teacherName} ${subjectById(workbook.subjectId).name}`.toLocaleLowerCase("ms");
       return matchesSubject && words.every((word) => searchText.includes(word));
     });
   }, [savedWorkbooks, query, subject]);
@@ -139,14 +124,8 @@ export function WorkbookList({ workbooks }: { workbooks: DemoWorkbook[] }) {
     return [...list].sort((a, b) => a.updatedDaysAgo - b.updatedDaysAgo);
   }
 
-  function sortShared(list: typeof SHARED_WORKBOOKS): typeof SHARED_WORKBOOKS {
-    if (sort === "az") return [...list].sort((a, b) => a.title.localeCompare(b.title, "ms"));
-    if (sort === "complete") return [...list].sort((a, b) => b.saves - a.saves);
-    return list;
-  }
 
   const showingMine = scope === "mine";
-  const showRemixes = showingMine && query.trim() === "" && subject === "all" && remixSources.length > 0;
 
   return (
     <section className={styles.library} aria-label="Koleksi buku kerja">
@@ -210,7 +189,7 @@ export function WorkbookList({ workbooks }: { workbooks: DemoWorkbook[] }) {
       </div>
 
       {showingMine ? (
-        filtered.length === 0 && !showRemixes ? (
+        filtered.length === 0 ? (
           <div className={styles.empty}>
             <span><BookSearch size={33} aria-hidden="true" /></span>
             <h2>Tiada buku kerja dijumpai</h2>
@@ -219,16 +198,15 @@ export function WorkbookList({ workbooks }: { workbooks: DemoWorkbook[] }) {
           </div>
         ) : (
           <div className={styles.workbookGrid} data-view={view}>
-            {showRemixes && remixSources.map((workbook) => <RemixTile key={`remix-${workbook.id}`} workbook={workbook} />)}
-            {sortWorkbooks(filtered).map((workbook) => <WorkbookTile key={workbook.id} workbook={workbook} />)}
+            {sortWorkbooks(filtered).map((workbook) => <WorkbookTile key={workbook.id} workbook={workbook} owned={workbook.isDb} />)}
           </div>
         )
       ) : savedWorkbooks.length === 0 ? (
         <div className={styles.empty}>
           <span><Bookmark size={31} aria-hidden="true" /></span>
           <h2>Belum ada simpanan</h2>
-          <p>Simpan buku kerja rakan anda di Komuniti — koleksi anda akan muncul di sini.</p>
-          <Link href="/community">Buka Komuniti</Link>
+          <p>Simpan buku kerja yang diterbitkan di Jelajah — koleksi anda akan muncul di sini.</p>
+          <Link href="/explore">Jelajah sekarang</Link>
         </div>
       ) : filteredSaved.length === 0 ? (
         <div className={styles.empty}>
@@ -239,7 +217,7 @@ export function WorkbookList({ workbooks }: { workbooks: DemoWorkbook[] }) {
         </div>
       ) : (
         <div className={styles.workbookGrid} data-view={view}>
-          {sortShared(filteredSaved).map((workbook) => <SharedWorkbookTile key={workbook.id} workbook={workbook} />)}
+          {sortWorkbooks(filteredSaved).map((workbook) => <WorkbookTile key={workbook.id} workbook={workbook} canSave />)}
         </div>
       )}
 

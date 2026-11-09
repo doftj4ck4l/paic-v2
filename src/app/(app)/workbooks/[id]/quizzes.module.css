@@ -22,7 +22,7 @@
 .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; padding: 13px 23px 23px; }
 .card { min-width: 0; border: 1px solid #e4e8f6; border-radius: 23px; background: #fff; box-shadow: 0 4px 10px #414a7b08; overflow: visible; display: flex; flex-direction: column; transition: transform 150ms, box-shadow 150ms; }
 .card:hover { transform: translateY(-2px); box-shadow: 0 8px 18px #414a7b0e; }
-.cardArt { position: relative; isolation: isolate; height: 137px; display: grid; place-items: center; background: linear-gradient(120deg, #e8faf2, #dff4ef); border-radius: 23px 23px 0 0; }
+.cardArt { position: relative; z-index: 2; isolation: isolate; height: 137px; display: grid; place-items: center; background: linear-gradient(120deg, #e8faf2, #dff4ef); border-radius: 23px 23px 0 0; }
 .cardArt[data-cover=globe] { background: linear-gradient(115deg, #fff8e3, #fff1d4); }
 .cardArt[data-cover=map] { background: linear-gradient(115deg, #f4edff, #ece6ff); }
 .cardArt[data-cover=quiz] { background: linear-gradient(115deg, #eaf7ff, #f1edff); }

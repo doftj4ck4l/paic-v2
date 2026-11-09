@@ -12,7 +12,6 @@ import {
   Presentation,
   ShieldCheck,
   Sparkles,
-  UsersRound,
   Wand2,
 } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth-session";
@@ -39,11 +38,6 @@ const FEATURES = [
     icon: Presentation,
     title: "Slaid dengan ilustrasi",
     text: "Dek slaid kelas yang kemas dan tersusun, lengkap dengan ilustrasi dijana AI.",
-  },
-  {
-    icon: UsersRound,
-    title: "Komuniti pelajar",
-    text: "Simpan, langgan dan buat versi anda sendiri daripada buku kerja rakan sekelas.",
   },
   {
     icon: Flame,
@@ -82,7 +76,7 @@ const FAQ = [
   },
   {
     q: "Bagaimana data murid dilindungi?",
-    a: "Akaun murid disahkan melalui sekolah. Di Komuniti, hanya nama paparan dan kelas dipaparkan — bahan peribadi dan sembang AI tidak pernah dikongsi tanpa kebenaran.",
+    a: "Akaun murid disahkan melalui sekolah. Bahan yang diterbitkan ke Jelajah hanya memaparkan nama paparan dan kelas — sumber peribadi, sembang AI dan nota tidak pernah dikongsi tanpa kebenaran.",
   },
   {
     q: "Sekolah saya tiada dalam senarai. Boleh sertai?",
@@ -197,13 +191,8 @@ export default async function LandingPage() {
           <span className={styles.previewCaption}>
             <Wand2 size={15} aria-hidden="true" /> Dek slaid dijana AI — struktur teks kemas dengan ilustrasi flat.
           </span>
-          <div className={styles.previewGrid}>
-            <div className={styles.previewCard}>
-              <Image src="/assets/landing/workbooks-preview.png" alt="Pustaka buku kerja pelajar" width={1440} height={900} className={styles.previewImg} sizes="(max-width: 1000px) 100vw, 540px" />
-            </div>
-            <div className={styles.previewCard}>
-              <Image src="/assets/landing/community-preview.png" alt="Suapan komuniti pelajar" width={1440} height={900} className={styles.previewImg} sizes="(max-width: 1000px) 100vw, 540px" />
-            </div>
+          <div className={styles.previewCard}>
+            <Image src="/assets/landing/workbooks-preview.png" alt="Pustaka buku kerja pelajar" width={1440} height={900} className={styles.previewImg} sizes="(max-width: 1000px) 100vw, 1100px" />
           </div>
         </section>
 
@@ -314,7 +303,6 @@ export default async function LandingPage() {
             <Link href="/login">Log masuk</Link>
             <Link href="/register">Daftar</Link>
             <Link href="/help">Bantuan</Link>
-            <Link href="/community/guidelines">Panduan komuniti</Link>
           </nav>
         </div>
         <p className={styles.footerMeta}>

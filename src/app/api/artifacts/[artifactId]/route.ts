@@ -5,7 +5,7 @@ import { artifacts } from "@/db/schema";
 import { validateModuleForSave } from "@/lib/workbook/modules";
 import { prepareModuleMedia } from "@/lib/workbook/module-media";
 import { validateQuizForSave } from "@/lib/workbook/quizzes";
-import { accessibleWorkbook } from "@/lib/ingestion/access";
+import { editableWorkbook, viewableWorkbook } from "@/lib/ingestion/access";
 import { getCurrentUser } from "@/lib/auth-session";
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ artifactId: string }> }) {
@@ -14,7 +14,14 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 
   const { artifactId } = await params;
   const [row] = await db.select().from(artifacts).where(eq(artifacts.id, artifactId));
-  if (!row || (row.userId && row.userId !== user.id) || !await accessibleWorkbook(row.workbookId, user.id)) return NextResponse.json({ error: "Artifak tidak dijumpai." }, { status: 404 });
+  if (!row) return NextResponse.json({ error: "Artifak tidak dijumpai." }, { status: 404 });
+  const isOwner = row.userId === user.id && Boolean(await editableWorkbook(row.workbookId, user.id));
+  if (!isOwner) {
+    // Viewers may open ready material of a published workbook they can see.
+    const workbook = await viewableWorkbook(row.workbookId, user.id);
+    const viewerOk = Boolean(workbook && row.status === "ready" && (row.userId === null || (workbook.isDb && row.userId === workbook.ownerId)));
+    if (!viewerOk) return NextResponse.json({ error: "Artifak tidak dijumpai." }, { status: 404 });
+  }
 
   return NextResponse.json({
     id: row.id,
@@ -42,7 +49,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   const user = await getCurrentUser(); if (!user) return NextResponse.json({ error: "Tidak dibenarkan." }, { status: 401 });
   const { artifactId } = await params;
   const [row] = await db.select().from(artifacts).where(and(eq(artifacts.id, artifactId), eq(artifacts.userId, user.id)));
-  if (!row || !await accessibleWorkbook(row.workbookId, user.id)) return NextResponse.json({ error: "Kuiz tidak dijumpai." }, { status: 404 });
+  if (!row || !await editableWorkbook(row.workbookId, user.id)) return NextResponse.json({ error: "Kuiz tidak dijumpai." }, { status: 404 });
   if (row.status === "generating") return NextResponse.json({ error: "Tunggu sehingga penjanaan selesai sebelum menyunting." }, { status: 409 });
   try {
     const raw = await request.json();

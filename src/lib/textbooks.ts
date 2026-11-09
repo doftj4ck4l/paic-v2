@@ -73,3 +73,53 @@ export async function compileTextbookContent(bookId: number): Promise<{ title: s
   }
   return { title: book.rows[0].title, text: parts.join("\n\n---\n\n").slice(0, 1_200_000) };
 }
+
+export type TextbookChunkHit = {
+  bookId: number;
+  content: string;
+  chapter: string | null;
+  pageStart: number | null;
+  pageEnd: number | null;
+  score: number;
+};
+
+/**
+ * Hybrid search over the textbook KB's pre-computed chunks — full-text (tsv)
+ * always, semantic (pgvector) when a query vector is provided. The KB's
+ * embeddings match our embedding model (4096-d), so no re-embedding is needed.
+ */
+export async function searchTextbookChunks(bookIds: number[], query: string, vector: number[] | null, limit = 8): Promise<TextbookChunkHit[]> {
+  const db = getPool();
+  if (!db || !bookIds.length || !query.trim()) return [];
+  const hits = new Map<string, TextbookChunkHit & { textScore: number; vectorScore: number }>();
+  try {
+    const textRows = await db.query(
+      `SELECT c.id, c.book_id, c.chapter, c.page_start, c.page_end, c.content, ts_rank(c.tsv, plainto_tsquery('simple', $1)) AS text_score
+       FROM chunks c WHERE c.book_id = ANY($2::bigint[]) AND c.tsv @@ plainto_tsquery('simple', $1)
+       ORDER BY text_score DESC LIMIT $3`,
+      [query, bookIds, limit],
+    );
+    for (const row of textRows.rows) {
+      hits.set(String(row.id), { bookId: Number(row.book_id), content: String(row.content ?? ""), chapter: row.chapter ?? null, pageStart: row.page_start ?? null, pageEnd: row.page_end ?? null, score: Math.min(1, Number(row.text_score) * 10), textScore: Number(row.text_score), vectorScore: 0 });
+    }
+  } catch { /* full-text unavailable — semantic results may still land below */ }
+  if (vector?.length) {
+    try {
+      const literal = "[" + vector.map((x) => `${x.toFixed(5)}`).join(",") + "]";
+      const vectorRows = await db.query(
+        `SELECT c.id, c.book_id, c.chapter, c.page_start, c.page_end, c.content, 1 - (c.embedding <=> $1::vector) AS vector_score
+         FROM chunks c WHERE c.book_id = ANY($2::bigint[]) AND c.embedding IS NOT NULL
+         ORDER BY c.embedding <=> $1::vector LIMIT $3`,
+        [literal, bookIds, limit],
+      );
+      for (const row of vectorRows.rows) {
+        const score = Math.max(0, Number(row.vector_score));
+        const key = String(row.id);
+        const existing = hits.get(key);
+        if (existing) { existing.vectorScore = score; existing.score = Math.max(existing.score, score); }
+        else hits.set(key, { bookId: Number(row.book_id), content: String(row.content ?? ""), chapter: row.chapter ?? null, pageStart: row.page_start ?? null, pageEnd: row.page_end ?? null, score, textScore: 0, vectorScore: score });
+      }
+    } catch { /* semantic search unavailable — text results remain */ }
+  }
+  return [...hits.values()].sort((a, b) => b.score - a.score).slice(0, limit);
+}

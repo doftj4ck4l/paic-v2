@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { artifacts } from "@/db/schema";
-import { accessibleWorkbook } from "@/lib/ingestion/access";
+import { editableWorkbook, viewableWorkbook } from "@/lib/ingestion/access";
 import { getCurrentUser } from "@/lib/auth-session";
 import { normalizeWaveHeader } from "@/lib/generation/wav";
 import { getAsset } from "@/lib/storage";
@@ -16,7 +16,13 @@ export async function GET(
 
   const { artifactId, key } = await params;
   const [artifact] = await db.select().from(artifacts).where(eq(artifacts.id, artifactId));
-  if (!artifact || (artifact.userId && artifact.userId !== user.id) || !await accessibleWorkbook(artifact.workbookId, user.id)) return NextResponse.json({ error: "Aset tidak dijumpai." }, { status: 404 });
+  if (!artifact) return NextResponse.json({ error: "Aset tidak dijumpai." }, { status: 404 });
+  const isOwner = artifact.userId === user.id && Boolean(await editableWorkbook(artifact.workbookId, user.id));
+  if (!isOwner) {
+    const workbook = await viewableWorkbook(artifact.workbookId, user.id);
+    const viewerOk = Boolean(workbook && artifact.status === "ready" && (artifact.userId === null || (workbook.isDb && artifact.userId === workbook.ownerId)));
+    if (!viewerOk) return NextResponse.json({ error: "Aset tidak dijumpai." }, { status: 404 });
+  }
   const safeKey = key.replace(/[^a-z0-9.-]/gi, "");
   const asset = await getAsset(`artifacts/${artifactId}/${safeKey}`);
   if (!asset) return NextResponse.json({ error: "Aset belum sedia." }, { status: 404 });

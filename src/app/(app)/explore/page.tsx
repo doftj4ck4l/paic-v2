@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowDown, ArrowRight, Compass } from "lucide-react";
 import { SUBJECTS, TOPICS, type DemoWorkbook } from "@/lib/demo-data";
+import { getCurrentUser } from "@/lib/auth-session";
 import { listPublishedWorkbooks } from "@/lib/workbooks";
 import content from "@/components/studio/content-width.module.css";
 import { Explorer } from "./explorer";
@@ -13,8 +14,8 @@ export const metadata: Metadata = { title: "Jelajah" };
 export const dynamic = "force-dynamic";
 
 export default async function ExplorePage() {
-  const published = await listPublishedWorkbooks();
-  const publishedWorkbooks: (DemoWorkbook & { ownerRole: "student" | "teacher" })[] = published.map((workbook) => ({
+  const [published, user] = await Promise.all([listPublishedWorkbooks(), getCurrentUser()]);
+  const publishedWorkbooks: (DemoWorkbook & { ownerRole: "student" | "teacher"; ownerId: string | null })[] = published.map((workbook) => ({
     id: workbook.id,
     title: workbook.title,
     subjectId: workbook.subjectId,
@@ -24,6 +25,7 @@ export default async function ExplorePage() {
     yearLabel: workbook.yearLabel,
     updatedDaysAgo: workbook.updatedDaysAgo,
     ownerRole: workbook.ownerRole === "teacher" ? "teacher" : "student",
+    ownerId: workbook.ownerId,
   }));
 
   return (
@@ -50,7 +52,7 @@ export default async function ExplorePage() {
             <span className={styles.topicNote}><strong>{TOPICS.length}</strong> topik pembelajaran <ArrowRight size={14} /></span>
           </div>
         </section>
-        <Explorer publishedWorkbooks={publishedWorkbooks} />
+        <Explorer publishedWorkbooks={publishedWorkbooks} viewerId={user?.id ?? null} />
         <p className={styles.attribution}>3D icons by <a href="https://www.thiings.co/things" target="_blank" rel="noreferrer">Thiings</a></p>
       </main>
     </div>

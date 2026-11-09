@@ -356,7 +356,7 @@ export function RegisterForm() {
                 <Smile aria-hidden="true" />
                 <Input
                   id="displayName"
-                  placeholder="Nama yang dilihat rakan di Komuniti"
+                  placeholder="Nama yang dilihat oleh orang lain"
                   aria-invalid={!!errors.displayName}
                   disabled={isSubmitting}
                   {...register("displayName")}

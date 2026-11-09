@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { zipSync } from "fflate";
 import { getCurrentUser } from "@/lib/auth-session";
 import { listSources } from "@/lib/sources";
-import { accessibleWorkbook, canReadSource } from "@/lib/ingestion/access";
+import { editableWorkbook, canReadSource } from "@/lib/ingestion/access";
 import { attachmentHeader, downloadName, sourceDownload } from "@/lib/workbook/downloads";
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = await getCurrentUser(); if (!user) return NextResponse.json({ error: "Tidak dibenarkan." }, { status: 401 });
-  const { id } = await params; const workbook = await accessibleWorkbook(id, user.id);
+  const { id } = await params; const workbook = await editableWorkbook(id, user.id);
   if (!workbook) return NextResponse.json({ error: "Buku kerja tidak dijumpai." }, { status: 404 });
   const rows = (await listSources(id, user.id)).filter(row => row.status === "ready" && canReadSource(row, user.id));
   if (!rows.length) return NextResponse.json({ error: "Tiada sumber siap untuk dimuat turun." }, { status: 422 });

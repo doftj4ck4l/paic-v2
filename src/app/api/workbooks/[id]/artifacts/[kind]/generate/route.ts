@@ -4,7 +4,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { artifacts } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth-session";
-import { accessibleWorkbook } from "@/lib/ingestion/access";
+import { editableWorkbook } from "@/lib/ingestion/access";
 import { listSources } from "@/lib/sources";
 import { startArtifactWorker } from "@/lib/generation/worker";
 import { countFor, isArtifactKind, isGenerationAvailable } from "@/lib/generation/registry";
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json({ error: "Jenis artifak tidak dikenali." }, { status: 404 });
   }
 
-  const workbook = await accessibleWorkbook(id, user.id);
+  const workbook = await editableWorkbook(id, user.id);
   if (!workbook) return NextResponse.json({ error: "Buku kerja tidak dijumpai." }, { status: 404 });
 
   if (!isGenerationAvailable()) {

@@ -164,3 +164,11 @@
 .sortSelect:hover { border-color: #b9ddd1; }
 .sortSelect:focus-visible { border-color: #00b59c; box-shadow: 0 0 0 3px #00b59c25; }
 .sortChevron { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #6d7292; pointer-events: none; }
+
+/* Save button on shared/published tiles */
+.saveButton { display: grid; place-items: center; width: 31px; height: 31px; border: 1px solid #fff; border-radius: 50%; background: #ffffffed; color: #273153; box-shadow: 0 3px 5px #314e6e0b; cursor: pointer; transition: background 140ms, color 140ms, transform 150ms; }
+.saveButton svg { width: 15px; height: 15px; }
+.saveButton:hover { background: #f6fbff; transform: translateY(-1px); }
+.saveButton[data-saved="true"] { background: linear-gradient(140deg, #00b6a2, #007a66); color: #fff; border-color: transparent; }
+.saveButton[data-saved="true"] svg { fill: #fff; }
+.saveButton:focus-visible { outline: 3px solid #008d79; outline-offset: 3px; }

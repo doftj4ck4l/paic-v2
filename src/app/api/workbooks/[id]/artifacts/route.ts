@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { db } from "@/db";
 import { artifacts } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth-session";
-import { accessibleWorkbook } from "@/lib/ingestion/access";
+import { editableWorkbook, viewableWorkbook } from "@/lib/ingestion/access";
 import { kickArtifactWorker } from "@/lib/generation/worker";
 import { isGenerationAvailable, sweepStaleGenerations } from "@/lib/generation/shared";
 import { moduleSummary } from "@/lib/workbook/modules";
@@ -15,18 +15,26 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   if (!user) return NextResponse.json({ error: "Tidak dibenarkan." }, { status: 401 });
 
   const { id } = await params;
-  if (!await accessibleWorkbook(id, user.id)) return NextResponse.json({ error: "Buku kerja tidak dijumpai." }, { status: 404 });
-  void kickArtifactWorker();
+  const workbook = await viewableWorkbook(id, user.id);
+  if (!workbook) return NextResponse.json({ error: "Buku kerja tidak dijumpai." }, { status: 404 });
+  const isOwner = Boolean(await editableWorkbook(id, user.id));
   const kind = request.nextUrl.searchParams.get("kind");
-  if (kind && (ARTIFACT_KINDS as readonly string[]).includes(kind)) {
-    await sweepStaleGenerations(id, kind);
+  if (isOwner) {
+    void kickArtifactWorker();
+    if (kind && (ARTIFACT_KINDS as readonly string[]).includes(kind)) {
+      await sweepStaleGenerations(id, kind);
+    }
   }
 
-  const rows = await db
-    .select()
-    .from(artifacts)
-    .where(and(eq(artifacts.workbookId, id), or(eq(artifacts.userId, user.id), isNull(artifacts.userId))))
-    .orderBy(desc(artifacts.createdAt));
+  const rows = isOwner
+    ? await db
+        .select()
+        .from(artifacts)
+        .where(and(eq(artifacts.workbookId, id), or(eq(artifacts.userId, user.id), isNull(artifacts.userId))))
+        .orderBy(desc(artifacts.createdAt))
+    : (await db.select().from(artifacts).where(and(eq(artifacts.workbookId, id), eq(artifacts.status, "ready"))).orderBy(desc(artifacts.createdAt)))
+        // Viewers only see the workbook's own ready material, never other users' drafts.
+        .filter((row) => row.userId === null || (workbook.isDb && row.userId === workbook.ownerId));
 
   if (!kind) {
     const counts: Record<string, number> = {};

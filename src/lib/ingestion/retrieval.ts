@@ -11,13 +11,13 @@ export function cosineSimilarity(a: number[], b: number[]) {
 }
 
 /** Portable exact cosine retrieval for workbook-sized libraries; returns citation metadata. */
-export async function retrieveSourceChunks(workbookId: string, ownerId: string, query: string, selectedIds: string[], limit = 6) {
+export async function retrieveSourceChunks(workbookId: string, ownerId: string, query: string, selectedIds: string[], limit = 6, vector?: number[] | null) {
   if (!query.trim() || !selectedIds.length) return [];
   const rows = await db.select({ chunk: sourceChunks, title: sources.title, meta: sources.meta }).from(sourceChunks)
     .innerJoin(sources, eq(sources.id, sourceChunks.sourceId))
     .where(and(eq(sourceChunks.workbookId, workbookId), eq(sourceChunks.ownerId, ownerId), eq(sources.ownerId, ownerId), eq(sources.status, "ready"), eq(sourceChunks.embeddingModel, embeddingModel()), inArray(sourceChunks.sourceId, selectedIds)));
   if (!rows.length) return [];
-  const [vector] = await embedTexts([query]);
-  return rows.map(({ chunk, title, meta }) => ({ sourceId: chunk.sourceId, title, url: (meta as { url?: string } | null)?.url, chunkIndex: chunk.chunkIndex, text: chunk.content, score: cosineSimilarity(vector, chunk.embedding) }))
+  const queryVector = vector ?? (await embedTexts([query]))[0];
+  return rows.map(({ chunk, title, meta }) => ({ sourceId: chunk.sourceId, title, url: (meta as { url?: string } | null)?.url, chunkIndex: chunk.chunkIndex, text: chunk.content, score: cosineSimilarity(queryVector, chunk.embedding) }))
     .filter(row => row.score > -1).sort((a, b) => b.score - a.score).slice(0, Math.max(1, Math.min(limit, 20)));
 }
