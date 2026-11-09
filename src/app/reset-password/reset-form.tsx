@@ -6,11 +6,12 @@ import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { CheckCircle2, Eye, EyeOff, Loader2, Lock, ShieldAlert } from "lucide-react";
+import { CheckCircle2, Eye, EyeOff, Loader2, LockKeyhole, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
+import styles from "@/components/auth/auth-form.module.css";
 
 const schema = z
   .object({
@@ -44,37 +45,35 @@ function ResetFormInner() {
 
   if (!token || linkError || tokenError) {
     return (
-      <div className="flex flex-col items-center text-center">
-        <span className="grid size-16 place-items-center rounded-2xl bg-[#FFE9E9] text-[#b3383e]">
-          <ShieldAlert className="size-8" aria-hidden="true" />
+      <div className={styles.successBox}>
+        <span className={styles.successIcon} style={{ background: "#ffe9e9", color: "#b3383e" }} aria-hidden="true">
+          <ShieldAlert />
         </span>
-        <h2 className="mt-4 text-lg font-extrabold tracking-tight">
-          {token || linkError || tokenError ? "Pautan tidak sah atau telah tamat" : "Pautan tidak lengkap"}
-        </h2>
-        <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
-          Pautan tetapan semula hanya sah selama 30 minit dan sekali guna. Minta pautan baharu
-          untuk meneruskan.
+        <h2>Pautan tidak sah atau telah tamat</h2>
+        <p>
+          Pautan tetapan semula hanya sah selama 30 minit dan sekali guna. Minta pautan baharu untuk
+          meneruskan.
         </p>
-        <Button asChild variant="dark" className="mt-5 w-full">
-          <Link href="/forgot-password">Minta pautan baharu</Link>
-        </Button>
+        <div className={styles.successActions}>
+          <Button asChild variant="dark" className={styles.resendButton}>
+            <Link href="/forgot-password">Minta pautan baharu</Link>
+          </Button>
+        </div>
       </div>
     );
   }
 
   if (done) {
     return (
-      <div className="flex flex-col items-center text-center">
-        <span className="grid size-16 place-items-center rounded-2xl bg-[#E7F6F4] text-teal">
-          <CheckCircle2 className="size-8" aria-hidden="true" />
-        </span>
-        <h2 className="mt-4 text-lg font-extrabold tracking-tight">Kata laluan dikemas kini</h2>
-        <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
-          Semua sesi lain telah ditamatkan. Log masuk dengan kata laluan baharu anda.
-        </p>
-        <Button asChild variant="dark" className="mt-5 w-full">
-          <Link href="/login">Log masuk</Link>
-        </Button>
+      <div className={styles.successBox}>
+        <span className={styles.successIcon} aria-hidden="true"><CheckCircle2 /></span>
+        <h2>Kata laluan dikemas kini</h2>
+        <p>Semua sesi lain telah ditamatkan. Log masuk dengan kata laluan baharu anda.</p>
+        <div className={styles.successActions}>
+          <Button asChild variant="dark" className={styles.resendButton}>
+            <Link href="/login">Log masuk</Link>
+          </Button>
+        </div>
       </div>
     );
   }
@@ -94,71 +93,63 @@ function ResetFormInner() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate aria-busy={isSubmitting}>
-      <div className="flex flex-col gap-1.5">
+    <form onSubmit={handleSubmit(onSubmit)} className={styles.form} noValidate aria-busy={isSubmitting}>
+      <div className={styles.field}>
         <Label htmlFor="password">Kata laluan baharu</Label>
-        <div className="relative">
-          <Lock
-            className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-            aria-hidden="true"
-          />
+        <div className={styles.inputWrap}>
+          <LockKeyhole aria-hidden="true" />
           <Input
             id="password"
             type={showPassword ? "text" : "password"}
             autoComplete="new-password"
             placeholder="Sekurang-kurangnya 8 aksara"
             aria-invalid={!!errors.password}
-            className="pl-10 pr-11"
+            className={styles.passwordInput}
             disabled={isSubmitting}
             {...register("password")}
           />
           <button
             type="button"
             onClick={() => setShowPassword((v) => !v)}
-            className="absolute inset-y-0 right-0 grid w-11 place-items-center text-muted-foreground hover:text-foreground"
+            className={styles.passwordToggle}
             aria-label={showPassword ? "Sembunyikan kata laluan" : "Tunjukkan kata laluan"}
           >
-            {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            {showPassword ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
           </button>
         </div>
         {errors.password && (
-          <p className="text-xs font-medium text-destructive" role="alert">
-            {errors.password.message}
-          </p>
+          <p className={styles.error} role="alert">{errors.password.message}</p>
         )}
       </div>
 
-      <div className="flex flex-col gap-1.5">
+      <div className={styles.field}>
         <Label htmlFor="confirm">Sahkan kata laluan</Label>
-        <Input
-          id="confirm"
-          type={showPassword ? "text" : "password"}
-          autoComplete="new-password"
-          placeholder="Taip semula kata laluan baharu"
-          aria-invalid={!!errors.confirm}
-          disabled={isSubmitting}
-          {...register("confirm")}
-        />
+        <div className={styles.inputWrap}>
+          <LockKeyhole aria-hidden="true" />
+          <Input
+            id="confirm"
+            type={showPassword ? "text" : "password"}
+            autoComplete="new-password"
+            placeholder="Taip semula kata laluan baharu"
+            aria-invalid={!!errors.confirm}
+            disabled={isSubmitting}
+            {...register("confirm")}
+          />
+        </div>
         {errors.confirm && (
-          <p className="text-xs font-medium text-destructive" role="alert">
-            {errors.confirm.message}
-          </p>
+          <p className={styles.error} role="alert">{errors.confirm.message}</p>
         )}
       </div>
 
       {formError && (
-        <p className="rounded-xl bg-[#fff0ef] px-4 py-3 text-xs font-semibold text-[#be3139]" role="alert">
-          {formError}
-        </p>
+        <p className={`${styles.error} ${styles.formError}`} role="alert">{formError}</p>
       )}
 
-      <Button type="submit" size="lg" disabled={isSubmitting} className="w-full">
+      <Button type="submit" size="lg" disabled={isSubmitting} className={styles.submit}>
         {isSubmitting ? (
-          <>
-            <Loader2 className="size-4 animate-spin" /> Sedang menyimpan…
-          </>
+          <><Loader2 className="size-4 animate-spin" aria-hidden="true" /> Sedang menyimpan…</>
         ) : (
-          "Simpan kata laluan baharu"
+          "Simpan kata laluan"
         )}
       </Button>
     </form>

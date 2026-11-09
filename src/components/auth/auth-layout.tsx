@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ChartNoAxesCombined, ChevronRight, Layers, Sparkles } from "lucide-react";
-import styles from "./login.module.css";
+import styles from "./auth-layout.module.css";
 
 function Brand() {
   return (
@@ -25,15 +25,27 @@ function PaperPlane() {
   );
 }
 
-export function LoginShell({ children }: { children: React.ReactNode }) {
+/**
+ * Shared auth layout — the exact login-page design used by every auth page
+ * (login, register, forgot password, reset password).
+ */
+export function AuthLayout({
+  title,
+  subtitle,
+  children,
+}: {
+  title: React.ReactNode;
+  subtitle: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className={styles.page}>
       <div className={styles.layout}>
-        <aside className={styles.story} aria-labelledby="login-story-title">
+        <aside className={styles.story} aria-labelledby="auth-story-title">
           <Brand />
           <PaperPlane />
           <div className={styles.storyContent}>
-            <h2 id="login-story-title">Belajar jadi<br />lebih <span className={styles.highlight}>seronok<i aria-hidden="true" /></span><br />bersama AI.</h2>
+            <h2 id="auth-story-title">Belajar jadi<br />lebih <span className={styles.highlight}>seronok<i aria-hidden="true" /></span><br />bersama AI.</h2>
             <p className={styles.storyDescription}>Ruang pembelajaran AI untuk murid sekolah<br className={styles.desktopBreak} /> rendah dan menengah.</p>
             <ul className={styles.features}>
               <li><span className={styles.featureIcon}><Sparkles /></span><div><h3>Buku kerja pintar</h3><p>Belajar dengan bantuan AI</p></div></li>
@@ -52,8 +64,8 @@ export function LoginShell({ children }: { children: React.ReactNode }) {
           <div className={styles.mobileBrand}><Brand /></div>
           <div className={styles.formContent}>
             <span className={styles.cardRays} aria-hidden="true"><i /><i /><i /></span>
-            <h1>Selamat kembali! <span className={styles.wave} role="img" aria-label="Hai">👋</span></h1>
-            <p className={styles.formSubtitle}>Log masuk untuk menyambung pembelajaran anda.</p>
+            <h1>{title}</h1>
+            <p className={styles.formSubtitle}>{subtitle}</p>
             {children}
           </div>
         </main>

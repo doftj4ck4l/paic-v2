@@ -5,12 +5,12 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowRight, Eye, EyeOff, Loader2, LockKeyhole, UserRound } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, Loader2, LockKeyhole, MailCheck, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
-import styles from "./login.module.css";
+import styles from "@/components/auth/auth-form.module.css";
 
 const schema = z.object({
   identifier: z.string().trim().min(3, "Masukkan emel atau ID pelajar anda."),
@@ -23,6 +23,8 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(true);
   const [formError, setFormError] = useState<string | null>(null);
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
+  const [resendState, setResendState] = useState<"idle" | "sending" | "sent">("idle");
 
   const {
     register,
@@ -35,12 +37,21 @@ export function LoginForm() {
 
   async function onSubmit(values: LoginValues) {
     setFormError(null);
+    setUnverifiedEmail(null);
+    setResendState("idle");
     const identifier = values.identifier.trim();
     const result = identifier.includes("@")
       ? await authClient.signIn.email({ email: identifier, password: values.password, rememberMe: remember })
       : await authClient.signIn.username({ username: identifier, password: values.password, rememberMe: remember });
 
     if (result.error) {
+      if (result.error.code === "EMAIL_NOT_VERIFIED") {
+        setUnverifiedEmail(identifier.includes("@") ? identifier : null);
+        setFormError(
+          "Emel anda belum disahkan. Semak peti masuk anda dan klik pautan pengesahan sebelum log masuk.",
+        );
+        return;
+      }
       setFormError("Emel/ID pelajar atau kata laluan tidak sah. Sila cuba lagi.");
       return;
     }
@@ -48,6 +59,13 @@ export function LoginForm() {
     // (cached while signed out). A full load guarantees fresh server state.
     // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- full reload required so the client router cannot replay the signed-out redirect cache
     window.location.assign("/");
+  }
+
+  async function resendVerification() {
+    if (!unverifiedEmail) return;
+    setResendState("sending");
+    await authClient.sendVerificationEmail({ email: unverifiedEmail, callbackURL: "/" });
+    setResendState("sent");
   }
 
   return (
@@ -113,7 +131,30 @@ export function LoginForm() {
         </div>
 
         {formError && (
-          <p className={`${styles.error} ${styles.formError}`} role="alert">{formError}</p>
+          <div className={`${styles.error} ${styles.formError}`} role="alert">
+            <p>{formError}</p>
+            {unverifiedEmail && (
+              <div>
+                {resendState === "sent" ? (
+                  <p className={styles.sentNote}><MailCheck aria-hidden="true" /> Pautan pengesahan baharu telah dihantar.</p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={resendVerification}
+                    disabled={resendState === "sending"}
+                    className={styles.resendButton}
+                    style={{ height: 40, marginTop: 10 }}
+                  >
+                    {resendState === "sending" ? (
+                      <><Loader2 className="size-3.5 animate-spin" aria-hidden="true" /> Sedang menghantar…</>
+                    ) : (
+                      "Hantar semula pautan pengesahan"
+                    )}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         )}
 
         <Button type="submit" size="lg" disabled={isSubmitting} className={styles.submit}>

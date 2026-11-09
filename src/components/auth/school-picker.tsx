@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Check, ChevronDown, Loader2, MapPin, School, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+import formStyles from "./auth-form.module.css";
 
 export type SchoolOption = {
   id: string;
@@ -108,7 +109,7 @@ export function SchoolPicker({
 
   if (selected) {
     return (
-      <div className="flex items-center justify-between gap-3 rounded-xl border border-[#bfe9e2] bg-[#f4fbfa] px-4 py-3">
+      <div className="flex items-center justify-between gap-3 border border-[#bfe9e2] bg-[#f4fbfa] px-4 py-3" style={{ borderRadius: 17 }}>
         <div className="flex min-w-0 items-center gap-3">
           <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#E7F6F4] text-teal">
             <School className="size-5" aria-hidden="true" />
@@ -162,7 +163,8 @@ export function SchoolPicker({
           aria-label="Cari sekolah anda"
           autoComplete="off"
           placeholder="Taip nama sekolah anda…"
-          className="h-11 w-full rounded-xl border border-input bg-card pl-10 pr-9 text-sm shadow-soft outline-none transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20"
+          className={formStyles.plainInput}
+          style={{ paddingLeft: 43 }}
         />
         {loading ? (
           <Loader2

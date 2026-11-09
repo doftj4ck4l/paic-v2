@@ -1,0 +1,105 @@
+/* Shared auth form styles (login, register, forgot, reset) */
+
+.form { display: flex; flex-direction: column; gap: 14px; margin-top: 18px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 12px; font-weight: 650; letter-spacing: -.3px; color: #191b3e; }
+.inputWrap { position: relative; }
+.inputWrap > svg { pointer-events: none; position: absolute; left: 15px; top: 50%; transform: translateY(-50%); width: 17px; height: 17px; color: #606584; }
+.inputWrap input { height: 47px; padding-left: 43px; background: #fff; border: 1.5px solid #dfdeed; border-radius: 17px; box-shadow: 0 2px 4px #27205b09; font-size: 13px; color: #26294e; }
+.inputWrap input::placeholder { color: #6b7090; }
+.inputWrap input:focus { border-color: #00b69a; --tw-ring-color: #00b69a20; }
+.inputWrap select { height: 47px; width: 100%; padding: 0 40px 0 43px; appearance: none; background: #fff; border: 1.5px solid #dfdeed; border-radius: 17px; box-shadow: 0 2px 4px #27205b09; font-size: 13px; color: #26294e; outline: none; cursor: pointer; }
+.inputWrap select:focus { border-color: #00b69a; box-shadow: 0 0 0 3px #00b69a20; }
+.inputWrap select:disabled { opacity: .6; cursor: not-allowed; }
+.inputWrap .selectChevron { pointer-events: none; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #606584; }
+.plainInput { height: 47px; width: 100%; padding-inline: 16px 40px; background: #fff; border: 1.5px solid #dfdeed; border-radius: 17px; box-shadow: 0 2px 4px #27205b09; font-size: 13px; color: #26294e; outline: none; }
+.plainInput::placeholder { color: #6b7090; }
+.plainInput:focus { border-color: #00b69a; box-shadow: 0 0 0 3px #00b69a20; }
+.passwordInput { padding-right: 47px; }
+.passwordToggle { position: absolute; inset-block: 0; right: 0; display: grid; width: 45px; place-items: center; color: #535a7a; cursor: pointer; border-radius: 12px; }
+.passwordToggle:hover { color: #00a88c; }
+.passwordToggle svg { width: 17px; height: 17px; }
+.error { font-size: 11px; color: #be3139; line-height: 1.6; }
+.formError { border-radius: 10px; padding: 12px; background: #fff0ef; }
+.hint { font-size: 11px; line-height: 1.6; color: #6b7090; }
+.formOptions { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 12px; }
+.remember { display: flex; align-items: center; gap: 8px; color: #25274d; cursor: pointer; }
+.remember input { appearance: none; display: grid; place-items: center; width: 20px; height: 20px; border: 1px solid #b9c9cb; border-radius: 50%; background: white; }
+.remember input:checked { background: #00a995; border-color: #00a995; }
+.remember input:checked::after { content: ""; width: 9px; height: 5px; border: solid white; border-width: 0 0 2px 2px; rotate: -45deg; margin-top: -2px; }
+.formOptions > a { color: #00786a; font-weight: 650; }
+.formOptions > a:hover, .register > a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.submit { position: relative; width: 100%; height: 51px; border-radius: 18px; background: linear-gradient(105deg, #007a66, #00856f); color: white; font-size: 22px; font-weight: 750; letter-spacing: -.6px; box-shadow: 0 4px 9px #039b8b12; }
+.submit:hover { background: linear-gradient(105deg, #00958f, #00ad88); }
+.submit:disabled { opacity: .65; cursor: not-allowed; }
+.submit > svg:last-child { position: absolute; right: 18px; }
+.submit > span:first-child { margin-inline: 20px; }
+.divider { display: flex; align-items: center; gap: 13px; margin-top: 16px; color: #696d88; font-size: 11px; font-weight: 650; }
+.divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: #e2e1ee; }
+.socialOptions { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+.socialButton { width: 100%; height: 46px; border: 1px solid #e4e3ee; border-radius: 17px; background: white; color: #25264b; font-size: 13px; font-weight: 600; box-shadow: 0 3px 5px #37315c0a; }
+.socialButton:disabled { opacity: .75; cursor: not-allowed; }
+.socialButton svg { width: 21px; height: 21px; }
+.socialHint { margin-top: 7px; text-align: center; color: #74788f; font-size: 9px; }
+.register { margin-top: 16px; text-align: center; font-size: 13px; color: #636787; }
+.register > a { font-weight: 750; color: #00786a; }
+
+/* ---------------- Wizard steps ---------------- */
+.steps { display: flex; align-items: center; gap: 8px; margin-top: 20px; }
+.stepDot { flex: 1; height: 6px; border-radius: 6px; background: #e7e6f2; transition: background 200ms; }
+.stepDot[data-state="done"] { background: #00c2a3; }
+.stepDot[data-state="active"] { background: linear-gradient(105deg, #00b69a, #009b86); }
+.stepMeta { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 9px; font-size: 11px; font-weight: 650; color: #696d88; }
+.stepMeta strong { color: #191b3e; font-weight: 750; }
+.backRow { display: flex; align-items: center; gap: 14px; margin-top: 2px; }
+.backButton { display: inline-flex; align-items: center; gap: 6px; padding: 0; border: none; background: transparent; font-size: 12px; font-weight: 650; color: #00786a; cursor: pointer; }
+.backButton:hover { text-decoration: underline; text-underline-offset: 4px; }
+.stepActions { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+.continueButton { position: relative; width: 100%; height: 51px; border-radius: 18px; background: linear-gradient(105deg, #007a66, #00856f); color: white; font-size: 17px; font-weight: 750; letter-spacing: -.5px; box-shadow: 0 4px 9px #039b8b12; cursor: pointer; }
+.continueButton:hover { background: linear-gradient(105deg, #00958f, #00ad88); }
+.continueButton:disabled { opacity: .65; cursor: not-allowed; }
+.continueButton > svg { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); }
+
+/* ---------------- Success / check-email ---------------- */
+.successBox { display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: 22px; }
+.successIcon { display: grid; place-items: center; width: 86px; height: 86px; border-radius: 28px; background: #e4f7f3; color: #00a88c; }
+.successIcon svg { width: 40px; height: 40px; stroke-width: 1.9; }
+.successBox h2 { margin-top: 17px; font-size: 22px; font-weight: 800; letter-spacing: -.8px; }
+.successBox > p { margin-top: 9px; max-width: 360px; font-size: 13px; line-height: 1.7; color: #555a7c; }
+.successBox > p strong { color: #191b3e; }
+.successActions { width: 100%; margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+.resendButton { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 47px; border: 1.5px solid #dfdeed; border-radius: 17px; background: #fff; font-size: 13px; font-weight: 700; color: #00786a; cursor: pointer; transition: border-color 140ms, background 140ms; }
+.resendButton:hover { border-color: #9fdcd2; background: #f4fbfa; }
+.resendButton:disabled { opacity: .6; cursor: not-allowed; }
+.sentNote { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 12px; font-weight: 650; color: #00786a; }
+.hintBox { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; margin-top: 16px; border-radius: 16px; background: #e4f7f3; font-size: 11px; line-height: 1.65; color: #4e5975; text-align: left; }
+.hintBox > svg { flex-shrink: 0; margin-top: 2px; width: 16px; height: 16px; color: #00b59c; }
+
+@media (min-width: 1500px) {
+  .form { gap: 18px; margin-top: 22px; }
+  .field label, .formOptions { font-size: 14px; }
+  .inputWrap input, .inputWrap select { height: 49px; font-size: 15px; }
+  .plainInput { height: 49px; font-size: 15px; }
+  .submit { height: 55px; font-size: 25px; }
+  .continueButton { height: 55px; font-size: 18px; }
+  .socialButton { height: 49px; font-size: 15px; }
+  .register { font-size: 15px; }
+}
+@media (max-width: 1000px) {
+  .form { gap: 20px; }
+  .field label { font-size: 13px; }
+  .inputWrap input, .inputWrap select, .plainInput { font-size: 16px; height: 50px; }
+  .formOptions { font-size: 12px; }
+  .submit { height: 53px; font-size: 22px; }
+  .continueButton { height: 53px; font-size: 17px; }
+  .register { font-size: 13px; }
+}
+@media (max-width: 420px) {
+  .formOptions { font-size: 11px; }
+  .socialOptions { gap: 10px; }
+  .socialButton { font-size: 12px; }
+  .register { font-size: 12px; }
+}
+@media (max-width: 350px) {
+  .formOptions { font-size: 10px; }
+}

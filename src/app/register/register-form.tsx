@@ -5,13 +5,29 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Eye, EyeOff, Loader2, Lock, Mail, User, UserRound } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  ChevronDown,
+  Eye,
+  EyeOff,
+  GraduationCap,
+  Loader2,
+  LockKeyhole,
+  Mail,
+  MailCheck,
+  ShieldCheck,
+  Smile,
+  User,
+  UserRound,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SchoolPicker, type SchoolOption } from "@/components/auth/school-picker";
 import { authClient } from "@/lib/auth-client";
+import styles from "@/components/auth/auth-form.module.css";
 
 const YEARS_PRIMARY = ["Tahun 1", "Tahun 2", "Tahun 3", "Tahun 4", "Tahun 5", "Tahun 6"];
 const YEARS_SECONDARY = ["Tingkatan 1", "Tingkatan 2", "Tingkatan 3", "Tingkatan 4", "Tingkatan 5"];
@@ -37,6 +53,8 @@ const schema = z
 
 type RegisterValues = z.infer<typeof schema>;
 
+const STEP_LABELS = ["Sekolah", "Maklumat anda", "Kata laluan"];
+
 function suggestUsername(fullName: string) {
   return fullName
     .toLowerCase()
@@ -51,17 +69,22 @@ function suggestUsername(fullName: string) {
 }
 
 export function RegisterForm() {
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [showPassword, setShowPassword] = useState(false);
   const [school, setSchool] = useState<SchoolOption | null>(null);
   const [schoolError, setSchoolError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [usernameTouched, setUsernameTouched] = useState(false);
+  const [sentEmail, setSentEmail] = useState<string | null>(null);
+  const [resendState, setResendState] = useState<"idle" | "sending" | "sent">("idle");
 
   const {
     register,
     handleSubmit,
     setValue,
     setError,
+    getValues,
+    trigger,
     formState: { errors, isSubmitting },
   } = useForm<RegisterValues>({
     resolver: zodResolver(schema),
@@ -76,10 +99,28 @@ export function RegisterForm() {
     setValue("yearLabel", "");
   }
 
+  function nextFromSchool() {
+    if (!school) {
+      setSchoolError("Pilih sekolah anda untuk meneruskan.");
+      return;
+    }
+    if (!getValues("yearLabel")) {
+      setError("yearLabel", { message: "Pilih tahun/tingkatan anda." });
+      return;
+    }
+    setStep(2);
+  }
+
+  async function nextFromDetails() {
+    const valid = await trigger(["fullName", "username", "displayName", "email"]);
+    if (valid) setStep(3);
+  }
+
   async function onSubmit(values: RegisterValues) {
     setFormError(null);
     if (!school) {
       setSchoolError("Pilih sekolah anda untuk meneruskan.");
+      setStep(1);
       return;
     }
     const { error } = await authClient.signUp.email({
@@ -96,248 +137,308 @@ export function RegisterForm() {
       const code = error.code ?? "";
       if (code.includes("USERNAME")) {
         setError("username", { message: "ID pelajar ini telah digunakan. Cuba yang lain." });
+        setStep(2);
       } else if (code.includes("EXISTS")) {
         setError("email", { message: "Emel ini sudah didaftarkan. Cuba log masuk." });
+        setStep(2);
       } else {
         setFormError("Pendaftaran gagal. Sila semak butiran anda dan cuba lagi.");
       }
       return;
     }
 
-    // Hard navigation: guarantees fresh server state with the new session.
-    // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- full reload required so the client router cannot replay the signed-out redirect cache
-    window.location.assign("/");
+    // Hard verification: no session yet — the account activates once the
+    // student clicks the link in the verification email.
+    setSentEmail(values.email.trim());
+    setStep(4);
+  }
+
+  async function resendVerification() {
+    if (!sentEmail) return;
+    setResendState("sending");
+    await authClient.sendVerificationEmail({ email: sentEmail, callbackURL: "/" });
+    setResendState("sent");
+  }
+
+  /* ---------- Step 4: check your email ---------- */
+  if (step === 4 && sentEmail) {
+    return (
+      <div className={styles.successBox}>
+        <span className={styles.successIcon} aria-hidden="true"><MailCheck /></span>
+        <h2>Semak emel anda</h2>
+        <p>
+          Kami menghantar pautan pengesahan ke <strong>{sentEmail}</strong>. Klik pautan itu untuk
+          mengaktifkan akaun anda, kemudian log masuk.
+        </p>
+        <div className={styles.hintBox}>
+          <ShieldCheck aria-hidden="true" />
+          <span>
+            Tidak jumpa emel? Semak folder spam atau promosi anda. Pautan pengesahan sah selama 1 jam
+            dan boleh dihantar semula.
+          </span>
+        </div>
+        <div className={styles.successActions}>
+          {resendState === "sent" ? (
+            <p className={styles.sentNote}><MailCheck aria-hidden="true" /> Pautan pengesahan baharu telah dihantar.</p>
+          ) : (
+            <button
+              type="button"
+              onClick={resendVerification}
+              disabled={resendState === "sending"}
+              className={styles.resendButton}
+            >
+              {resendState === "sending" ? (
+                <><Loader2 className="size-3.5 animate-spin" aria-hidden="true" /> Sedang menghantar…</>
+              ) : (
+                "Hantar semula pautan pengesahan"
+              )}
+            </button>
+          )}
+        </div>
+        <p className={styles.register}>
+          Sudah sahkan emel? <Link href="/login">Log masuk</Link>
+        </p>
+      </div>
+    );
   }
 
   return (
     <div>
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3.5" noValidate aria-busy={isSubmitting}>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="school-search">Sekolah</Label>
-          <SchoolPicker selected={school} onSelect={onSchoolSelect} disabled={isSubmitting} />
-          {schoolError && (
-            <p className="text-xs font-medium text-destructive" role="alert">
-              {schoolError}
-            </p>
-          )}
-          <p className="text-[11px] leading-relaxed text-muted-foreground">
-            Taip untuk mencari sekolah anda — pengalaman pembelajaran menyesuaikan sekolah anda.
-          </p>
-        </div>
+      <div className={styles.steps} aria-hidden="true">
+        {[1, 2, 3].map((n) => (
+          <span key={n} className={styles.stepDot} data-state={step === n ? "active" : step > n ? "done" : undefined} />
+        ))}
+      </div>
+      <p className={styles.stepMeta}>
+        <span>Langkah {step} daripada 3 · <strong>{STEP_LABELS[step - 1]}</strong></span>
+      </p>
 
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="fullName">Nama penuh</Label>
-          <div className="relative">
-            <User
-              className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-              aria-hidden="true"
-            />
-            <Input
-              id="fullName"
-              autoComplete="name"
-              placeholder="cth. Aiman Hakim bin Roslan"
-              aria-invalid={!!errors.fullName}
-              className="pl-10"
-              {...register("fullName", {
-                onChange: (event) => {
-                  if (!usernameTouched && event.target.value.trim().length >= 3) {
-                    setValue("username", suggestUsername(event.target.value));
-                  }
-                },
-              })}
-            />
-          </div>
-          {errors.fullName && (
-            <p className="text-xs font-medium text-destructive" role="alert">
-              {errors.fullName.message}
-            </p>
-          )}
-        </div>
+      <form onSubmit={handleSubmit(onSubmit)} className={styles.form} noValidate aria-busy={isSubmitting}>
+        {step === 1 && (
+          <>
+            <div className={styles.field}>
+              <Label htmlFor="school-search">Sekolah</Label>
+              <SchoolPicker selected={school} onSelect={onSchoolSelect} disabled={isSubmitting} />
+              {schoolError && (
+                <p className={styles.error} role="alert">{schoolError}</p>
+              )}
+              <p className={styles.hint}>Taip untuk mencari sekolah anda — pengalaman pembelajaran menyesuaikan sekolah anda.</p>
+            </div>
 
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="username">ID pelajar</Label>
-          <div className="relative">
-            <UserRound
-              className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-              aria-hidden="true"
-            />
-            <Input
-              id="username"
-              autoCapitalize="none"
-              autoComplete="username"
-              spellCheck={false}
-              placeholder="cth. aiman.hakim"
-              aria-invalid={!!errors.username}
-              className="pl-10"
-              {...register("username", {
-                onChange: () => {
-                  setUsernameTouched(true);
-                },
-              })}
-            />
-          </div>
-          {errors.username ? (
-            <p className="text-xs font-medium text-destructive" role="alert">
-              {errors.username.message}
-            </p>
-          ) : (
-            <p className="text-[11px] text-muted-foreground">Gunakan ID ini atau emel anda untuk log masuk nanti.</p>
-          )}
-        </div>
+            <div className={styles.field}>
+              <Label htmlFor="yearLabel">{school?.type === "secondary" ? "Tingkatan" : "Tahun"}</Label>
+              <div className={styles.inputWrap}>
+                <GraduationCap aria-hidden="true" />
+                <select
+                  id="yearLabel"
+                  disabled={!school || isSubmitting}
+                  aria-invalid={!!errors.yearLabel}
+                  {...register("yearLabel")}
+                >
+                  <option value="">{school ? "Pilih tahun/tingkatan" : "Pilih sekolah dahulu"}</option>
+                  {yearOptions.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className={styles.selectChevron} aria-hidden="true" />
+              </div>
+              {errors.yearLabel && (
+                <p className={styles.error} role="alert">{errors.yearLabel.message}</p>
+              )}
+            </div>
 
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="displayName">Nama paparan (pilihan)</Label>
-          <Input
-            id="displayName"
-            placeholder="Nama yang dilihat rakan di Komuniti"
-            aria-invalid={!!errors.displayName}
-            {...register("displayName")}
-          />
-          {errors.displayName && (
-            <p className="text-xs font-medium text-destructive" role="alert">
-              {errors.displayName.message}
-            </p>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="email">Emel</Label>
-          <div className="relative">
-            <Mail
-              className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-              aria-hidden="true"
-            />
-            <Input
-              id="email"
-              type="email"
-              autoComplete="email"
-              placeholder="nama@sekolah.edu.my"
-              aria-invalid={!!errors.email}
-              className="pl-10"
-              {...register("email")}
-            />
-          </div>
-          {errors.email ? (
-            <p className="text-xs font-medium text-destructive" role="alert">
-              {errors.email.message}
-            </p>
-          ) : (
-            <p className="text-[11px] text-muted-foreground">
-              Emel digunakan untuk pemulihan akaun dan pengesahan.
-            </p>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="yearLabel">{school?.type === "secondary" ? "Tingkatan" : "Tahun"}</Label>
-          <select
-            id="yearLabel"
-            disabled={!school || isSubmitting}
-            aria-invalid={!!errors.yearLabel}
-            className="h-11 w-full rounded-xl border border-input bg-card px-3.5 text-sm shadow-soft outline-none transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-60"
-            {...register("yearLabel")}
-          >
-            <option value="">{school ? "Pilih tahun/tingkatan" : "Pilih sekolah dahulu"}</option>
-            {yearOptions.map((year) => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
-          </select>
-          {errors.yearLabel && (
-            <p className="text-xs font-medium text-destructive" role="alert">
-              {errors.yearLabel.message}
-            </p>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="password">Kata laluan</Label>
-          <div className="relative">
-            <Lock
-              className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-              aria-hidden="true"
-            />
-            <Input
-              id="password"
-              type={showPassword ? "text" : "password"}
-              autoComplete="new-password"
-              placeholder="Sekurang-kurangnya 8 aksara"
-              aria-invalid={!!errors.password}
-              className="pl-10 pr-11"
-              {...register("password")}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((v) => !v)}
-              className="absolute inset-y-0 right-0 grid w-11 place-items-center text-muted-foreground hover:text-foreground"
-              aria-label={showPassword ? "Sembunyikan kata laluan" : "Tunjukkan kata laluan"}
-            >
-              {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            <button type="button" onClick={nextFromSchool} disabled={!school} className={styles.continueButton}>
+              Seterusnya <ArrowRight className="size-4" aria-hidden="true" />
             </button>
-          </div>
-          {errors.password && (
-            <p className="text-xs font-medium text-destructive" role="alert">
-              {errors.password.message}
-            </p>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="confirm">Sahkan kata laluan</Label>
-          <Input
-            id="confirm"
-            type={showPassword ? "text" : "password"}
-            autoComplete="new-password"
-            placeholder="Taip semula kata laluan"
-            aria-invalid={!!errors.confirm}
-            {...register("confirm")}
-          />
-          {errors.confirm && (
-            <p className="text-xs font-medium text-destructive" role="alert">
-              {errors.confirm.message}
-            </p>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label className="flex items-start gap-2.5 text-sm leading-snug">
-            <Checkbox className="mt-0.5" aria-invalid={!!errors.terms} {...register("terms")} />
-            <span className="text-muted-foreground">
-              Saya bersetuju dengan{" "}
-              <span className="font-semibold text-teal underline underline-offset-2">terma penggunaan</span> dan{" "}
-              <span className="font-semibold text-teal underline underline-offset-2">dasar privasi</span>.
-            </span>
-          </label>
-          {errors.terms && (
-            <p className="text-xs font-medium text-destructive" role="alert">
-              {errors.terms.message}
-            </p>
-          )}
-        </div>
-
-        {formError && (
-          <p className="rounded-xl bg-[#fff0ef] px-4 py-3 text-xs font-semibold text-[#be3139]" role="alert">
-            {formError}
-          </p>
+          </>
         )}
 
-        <Button type="submit" size="lg" disabled={isSubmitting} className="w-full">
-          {isSubmitting ? (
-            <>
-              <Loader2 className="size-4 animate-spin" /> Sedang mendaftar…
-            </>
-          ) : (
-            "Daftar sekarang"
-          )}
-        </Button>
+        {step === 2 && (
+          <>
+            <div className={styles.field}>
+              <Label htmlFor="fullName">Nama penuh</Label>
+              <div className={styles.inputWrap}>
+                <User aria-hidden="true" />
+                <Input
+                  id="fullName"
+                  autoComplete="name"
+                  placeholder="cth. Aiman Hakim bin Roslan"
+                  aria-invalid={!!errors.fullName}
+                  disabled={isSubmitting}
+                  {...register("fullName", {
+                    onChange: (event) => {
+                      if (!usernameTouched && event.target.value.trim().length >= 3) {
+                        setValue("username", suggestUsername(event.target.value));
+                      }
+                    },
+                  })}
+                />
+              </div>
+              {errors.fullName && (
+                <p className={styles.error} role="alert">{errors.fullName.message}</p>
+              )}
+            </div>
+
+            <div className={styles.field}>
+              <Label htmlFor="username">ID pelajar</Label>
+              <div className={styles.inputWrap}>
+                <UserRound aria-hidden="true" />
+                <Input
+                  id="username"
+                  autoCapitalize="none"
+                  autoComplete="username"
+                  spellCheck={false}
+                  placeholder="cth. aiman.hakim"
+                  aria-invalid={!!errors.username}
+                  disabled={isSubmitting}
+                  {...register("username", {
+                    onChange: () => {
+                      setUsernameTouched(true);
+                    },
+                  })}
+                />
+              </div>
+              {errors.username ? (
+                <p className={styles.error} role="alert">{errors.username.message}</p>
+              ) : (
+                <p className={styles.hint}>Gunakan ID ini atau emel anda untuk log masuk nanti.</p>
+              )}
+            </div>
+
+            <div className={styles.field}>
+              <Label htmlFor="displayName">Nama paparan (pilihan)</Label>
+              <div className={styles.inputWrap}>
+                <Smile aria-hidden="true" />
+                <Input
+                  id="displayName"
+                  placeholder="Nama yang dilihat rakan di Komuniti"
+                  aria-invalid={!!errors.displayName}
+                  disabled={isSubmitting}
+                  {...register("displayName")}
+                />
+              </div>
+              {errors.displayName && (
+                <p className={styles.error} role="alert">{errors.displayName.message}</p>
+              )}
+            </div>
+
+            <div className={styles.field}>
+              <Label htmlFor="email">Emel</Label>
+              <div className={styles.inputWrap}>
+                <Mail aria-hidden="true" />
+                <Input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="nama@sekolah.edu.my"
+                  aria-invalid={!!errors.email}
+                  disabled={isSubmitting}
+                  {...register("email")}
+                />
+              </div>
+              {errors.email ? (
+                <p className={styles.error} role="alert">{errors.email.message}</p>
+              ) : (
+                <p className={styles.hint}>Kami akan hantar pautan pengesahan ke emel ini.</p>
+              )}
+            </div>
+
+            <div className={styles.backRow}>
+              <button type="button" onClick={() => setStep(1)} className={styles.backButton}>
+                <ArrowLeft className="size-3.5" aria-hidden="true" /> Kembali
+              </button>
+              <button type="button" onClick={nextFromDetails} className={styles.continueButton} style={{ flex: 1 }}>
+                Seterusnya <ArrowRight className="size-4" aria-hidden="true" />
+              </button>
+            </div>
+          </>
+        )}
+
+        {step === 3 && (
+          <>
+            <div className={styles.field}>
+              <Label htmlFor="password">Kata laluan</Label>
+              <div className={styles.inputWrap}>
+                <LockKeyhole aria-hidden="true" />
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  placeholder="Sekurang-kurangnya 8 aksara"
+                  aria-invalid={!!errors.password}
+                  disabled={isSubmitting}
+                  className={styles.passwordInput}
+                  {...register("password")}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className={styles.passwordToggle}
+                  aria-label={showPassword ? "Sembunyikan kata laluan" : "Tunjukkan kata laluan"}
+                >
+                  {showPassword ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
+                </button>
+              </div>
+              {errors.password && (
+                <p className={styles.error} role="alert">{errors.password.message}</p>
+              )}
+            </div>
+
+            <div className={styles.field}>
+              <Label htmlFor="confirm">Sahkan kata laluan</Label>
+              <div className={styles.inputWrap}>
+                <LockKeyhole aria-hidden="true" />
+                <Input
+                  id="confirm"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  placeholder="Taip semula kata laluan"
+                  aria-invalid={!!errors.confirm}
+                  disabled={isSubmitting}
+                  {...register("confirm")}
+                />
+              </div>
+              {errors.confirm && (
+                <p className={styles.error} role="alert">{errors.confirm.message}</p>
+              )}
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.remember}>
+                <Checkbox aria-invalid={!!errors.terms} {...register("terms")} />
+                <span className={styles.hint}>
+                  Saya bersetuju dengan <strong>terma penggunaan</strong> dan <strong>dasar privasi</strong>.
+                </span>
+              </label>
+              {errors.terms && (
+                <p className={styles.error} role="alert">{errors.terms.message}</p>
+              )}
+            </div>
+
+            {formError && (
+              <p className={`${styles.error} ${styles.formError}`} role="alert">{formError}</p>
+            )}
+
+            <div className={styles.backRow}>
+              <button type="button" onClick={() => setStep(2)} className={styles.backButton} disabled={isSubmitting}>
+                <ArrowLeft className="size-3.5" aria-hidden="true" /> Kembali
+              </button>
+              <Button type="submit" size="lg" disabled={isSubmitting} className={styles.submit} style={{ flex: 1 }}>
+                {isSubmitting ? (
+                  <><Loader2 className="size-4 animate-spin" aria-hidden="true" /> Sedang mendaftar…</>
+                ) : (
+                  "Daftar sekarang"
+                )}
+              </Button>
+            </div>
+          </>
+        )}
       </form>
 
-      <p className="mt-6 text-center text-sm">
-        <span className="text-muted-foreground">Sudah ada akaun? </span>
-        <Link href="/login" className="font-semibold text-teal hover:underline">
-          Log masuk
-        </Link>
+      <p className={styles.register}>
+        Sudah ada akaun? <Link href="/login">Log masuk</Link>
       </p>
     </div>
   );

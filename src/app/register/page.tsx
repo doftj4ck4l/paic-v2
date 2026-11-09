@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { AuthShell } from "@/components/auth-shell";
+import { AuthLayout } from "@/components/auth/auth-layout";
 import { getCurrentUser } from "@/lib/auth-session";
 import { RegisterForm } from "./register-form";
 
@@ -13,18 +13,11 @@ export default async function RegisterPage() {
   }
 
   return (
-    <AuthShell
-      object="/assets/thiings/graduation.png"
-      headline="Sertai beribu pelajar."
-      points={[
-        "Satu akaun untuk semua subjek",
-        "Diselia oleh sekolah anda",
-        "Percuma untuk pelajar sekolah",
-      ]}
+    <AuthLayout
       title="Cipta akaun anda"
-      subtitle="Mulakan perjalanan pembelajaran anda hari ini."
+      subtitle="Mulakan perjalanan pembelajaran anda hari ini — sahkan emel selepas mendaftar."
     >
       <RegisterForm />
-    </AuthShell>
+    </AuthLayout>
   );
 }

@@ -30,8 +30,8 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
-    /** Soft verification for the pilot — accounts work immediately. */
-    requireEmailVerification: false,
+    /** Hard verification: sign-in only works after the email link is clicked. */
+    requireEmailVerification: true,
     resetPasswordTokenExpiresIn: 60 * 30,
     revokeSessionsOnPasswordReset: true,
     sendResetPassword: async ({ user, url }) => {
@@ -71,6 +71,7 @@ export const auth = betterAuth({
     max: 100,
     customRules: {
       "/request-password-reset": { window: 60, max: 3 },
+      "/send-verification-email": { window: 60, max: 3 },
       "/sign-in/email": { window: 60, max: 10 },
       "/sign-in/username": { window: 60, max: 10 },
       "/sign-up/email": { window: 60, max: 5 },
