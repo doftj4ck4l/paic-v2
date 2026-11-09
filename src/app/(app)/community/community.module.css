@@ -8,7 +8,9 @@
 /* ---------------- Hero ---------------- */
 .hero { display: grid; grid-template-columns: 1.1fr 1fr; align-items: center; min-height: 300px; position: relative; isolation: isolate; overflow: hidden; border: 1px solid #d9e7f7; border-radius: 42px 42px 60px 42px; background: linear-gradient(115deg, #eaf4ff, #e9f1ff 55%, #e7f8f4); }
 .heroCopy { position: relative; z-index: 2; padding: 33px 0 35px 38px; }
+.eyebrowRow { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 .eyebrow { display: inline-flex; align-items: center; gap: 7px; padding: 6px 11px; border: 1px solid #d5e4f6; border-radius: 20px; background: #ffffff99; color: #4c6ea6; font-size: 9px; font-weight: 700; letter-spacing: .7px; }
+.levelChip { display: inline-flex; align-items: center; gap: 5px; padding: 6px 11px; border: 1px solid #d5e4f6; border-radius: 20px; background: #ffffffd9; color: #3f6ca6; font-size: 9px; font-weight: 750; letter-spacing: .5px; text-transform: uppercase; }
 .hero h1 { margin-top: 13px; font-size: clamp(34px, 3.4vw, 43px); font-weight: 800; line-height: 1.12; letter-spacing: -1.8px; }
 .hero h1 > span { position: relative; isolation: isolate; white-space: nowrap; }
 .hero h1 > span::after { position: absolute; z-index: -1; content: ""; left: -3px; right: -5px; bottom: 1px; height: 9px; border-radius: 10px; background: #d5f983; rotate: -1deg; }
@@ -39,6 +41,9 @@
 .tab[aria-pressed="true"] { background: linear-gradient(110deg, #007a66, #00856f); color: #fff; box-shadow: 0 3px 7px #30776814; }
 
 .content { margin-top: 22px; }
+.stack { display: flex; flex-direction: column; gap: 28px; }
+.textLink { display: inline-flex; align-items: center; gap: 7px; flex-shrink: 0; padding: 0; border: none; background: transparent; color: #007c69; font-size: 12px; font-weight: 650; cursor: pointer; }
+.textLink:hover { text-decoration: underline; text-underline-offset: 4px; }
 
 /* ---------------- Feed ---------------- */
 .feedWrap { max-width: 780px; margin-inline: auto; display: flex; flex-direction: column; gap: 24px; }
@@ -100,11 +105,6 @@
 .feedLike[data-liked="true"] svg { fill: #e5547f; color: #e5547f; }
 
 /* ---------------- Students ---------------- */
-.studentSearch { display: flex; align-items: center; gap: 11px; height: 46px; width: 100%; max-width: 420px; margin-bottom: 16px; padding-inline: 17px; border: 1px solid #dfe4f3; border-radius: 24px; background: #fff; color: #737792; box-shadow: 0 3px 7px #4f3a7307; }
-.studentSearch input { width: 0; min-width: 0; flex: 1; height: 100%; background: transparent; outline: none; font-size: 13px; color: #292b4e; }
-.studentSearch input::placeholder { color: #7b809d; }
-.studentSearch input::-webkit-search-cancel-button { appearance: none; }
-.studentSearch:focus-within { border-color: #00a58d; outline: 3px solid #00a58d18; }
 .studentGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 17px; }
 .studentCard { display: flex; flex-direction: column; gap: 12px; padding: 17px; border: 1px solid #e2e7f2; border-radius: 22px; background: #fff; box-shadow: 0 4px 10px #3f406008; transition: transform 150ms, box-shadow 150ms; }
 .studentCard:hover { transform: translateY(-3px); box-shadow: 0 7px 18px #3f406012; }
@@ -146,11 +146,31 @@
 .subscribeButton { display: inline-flex; align-items: center; gap: 9px; min-height: 44px; padding-inline: 20px; border: none; border-radius: 22px; font-size: 13px; font-weight: 700; color: #fff; background: linear-gradient(110deg, #007a66, #00856f); box-shadow: 0 3px 7px #30776814; cursor: pointer; transition: transform 150ms; }
 .subscribeButton[data-subscribed="true"] { color: #00786a; background: #e4f5ef; border: 1px solid #b9ddd1; box-shadow: none; }
 .subscribeButton:hover { transform: translateY(-1px); }
-.streakChip { display: inline-flex; align-items: center; gap: 7px; padding: 9px 14px; border-radius: 17px; background: #fff3e0; color: #b45309; font-size: 11.5px; font-weight: 700; }
-.streakChip svg { color: #ff9f16; fill: #ffd12b; stroke-width: 2; }
+.saveToggle { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding-inline: 18px; border: 1px solid #e2e7f2; border-radius: 22px; background: #fff; font-size: 12.5px; font-weight: 700; color: #4c527a; cursor: pointer; transition: border-color 140ms, background 140ms, color 140ms; }
+.saveToggle svg { width: 15px; height: 15px; }
+.saveToggle:hover { border-color: #b9ddd1; color: #00786a; }
+.saveToggle[data-saved="true"] { background: #e4f5ef; border-color: #b9ddd1; color: #00786a; }
+.saveToggle[data-saved="true"] svg { fill: #00786a; }
+.remixBanner { display: flex; align-items: center; gap: 8px; margin-top: 12px; padding: 11px 15px; border: 1px solid #b9ddd1; border-radius: 16px; background: #e4f5ef; color: #00786a; font-size: 12px; font-weight: 650; }
+.remixBanner svg { flex-shrink: 0; }
+.remixList { display: flex; flex-direction: column; gap: 9px; list-style: none; }
+.remixList li { display: flex; align-items: flex-start; gap: 9px; font-size: 12.5px; line-height: 1.6; color: #3c4160; }
+.remixList svg { flex-shrink: 0; margin-top: 3px; color: #00786a; }
+.dialogBackdrop { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 20px; background: #10112f59; }
+.dialogDismiss { position: absolute; inset: 0; cursor: default; }
+.dialog { position: relative; z-index: 1; width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 16px; padding: 22px; border-radius: 24px; background: #fff; box-shadow: 0 24px 60px #10112f2e; }
+.dialogHead { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.dialogHead h2 { font-size: 18px; font-weight: 800; letter-spacing: -.6px; }
+.dialogDesc { margin-top: 5px; font-size: 12px; line-height: 1.65; color: #6d7292; }
+.dialogClose { display: grid; place-items: center; flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%; background: #f2f6fb; color: #5d6382; cursor: pointer; }
+.dialogNote { display: flex; align-items: flex-start; gap: 6px; font-size: 11px; line-height: 1.6; color: #6d7292; }
+.dialogNote svg { flex-shrink: 0; margin-top: 2px; }
+.dialogActions { display: flex; justify-content: flex-end; gap: 10px; }
+.ghostButton { min-height: 40px; padding-inline: 17px; border: 1px solid #e2e7f2; border-radius: 20px; background: #fff; font-size: 12px; font-weight: 650; color: #4c527a; cursor: pointer; }
+.confirmButton { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding-inline: 19px; border: none; border-radius: 20px; color: #fff; background: linear-gradient(110deg, #007a66, #00856f); font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 3px 7px #30776814; }
 .actionsNote { flex: 1 1 100%; display: flex; align-items: flex-start; gap: 6px; font-size: 11px; line-height: 1.6; color: #6d7292; }
 .actionsNote svg { flex-shrink: 0; margin-top: 2px; }
-.copyButton { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding-inline: 18px; border: 1px solid #e2e7f2; border-radius: 22px; background: #fafbff; font-size: 12.5px; font-weight: 650; color: #6d7292; opacity: .75; cursor: not-allowed; }
+.actionsNote strong { color: #4c527a; }
 .section { margin-top: 28px; }
 .sectionHeading { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 15px; }
 .sectionHeading h2 { font-size: 19px; font-weight: 750; letter-spacing: -.6px; }
@@ -172,12 +192,38 @@
 .badgeCard strong { display: block; font-size: 13px; font-weight: 750; letter-spacing: -.3px; }
 .badgeCard > div > span { display: block; margin-top: 2px; font-size: 10.5px; color: #7c819c; }
 
+/* ---------------- Clubs ---------------- */
+.clubGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 17px; }
+.clubCard { display: flex; flex-direction: column; gap: 11px; padding: 17px; border: 1px solid #e2e7f2; border-radius: 22px; background: #fff; box-shadow: 0 4px 10px #3f406008; transition: transform 150ms, box-shadow 150ms; }
+.clubCard:hover { transform: translateY(-3px); box-shadow: 0 7px 18px #3f406012; }
+.clubTop { display: flex; align-items: center; gap: 12px; }
+.clubArt { display: grid; place-items: center; flex-shrink: 0; width: 54px; height: 54px; border-radius: 16px; background: #f2f8fd; }
+.clubArt img { width: 40px; height: 40px; object-fit: contain; }
+.clubTop h3 { font-size: 15px; font-weight: 750; letter-spacing: -.4px; }
+.clubTop p { margin-top: 2px; font-size: 11px; color: #6d7292; }
+.clubDesc { font-size: 12px; line-height: 1.65; color: #616b90; }
+.clubFooter { display: flex; align-items: center; gap: 10px; margin-top: auto; padding-top: 4px; }
+.clubActivity { display: inline-flex; align-items: center; gap: 5px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; color: #7c819c; }
+.clubActivity svg { flex-shrink: 0; color: #4c6ea6; }
+.clubJoin { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; margin-left: auto; min-height: 32px; padding-inline: 14px; border: none; border-radius: 16px; font-size: 11px; font-weight: 700; color: #fff; background: linear-gradient(110deg, #007a66, #00856f); box-shadow: 0 3px 7px #30776814; cursor: pointer; transition: transform 150ms, background 150ms, color 150ms; }
+.clubJoin:hover { transform: translateY(-1px); }
+.clubJoin[data-joined="true"] { color: #00786a; background: #e4f5ef; border: 1px solid #b9ddd1; box-shadow: none; }
+
+/* ---------------- Followed strip ---------------- */
+.followStrip { display: flex; flex-wrap: wrap; gap: 10px; list-style: none; }
+.followStrip a { display: inline-flex; align-items: center; gap: 10px; padding: 9px 14px 9px 9px; border: 1px solid #e2e7f2; border-radius: 18px; background: #fff; box-shadow: 0 3px 8px #3f406008; transition: border-color 140ms, transform 150ms; }
+.followStrip a:hover { border-color: #b9ddd1; transform: translateY(-1px); }
+.followAvatar { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; font-size: 13px; font-weight: 800; color: #fff; background: linear-gradient(140deg, #4d9de0, #3f6ca6); }
+.followStrip strong { display: block; font-size: 12px; font-weight: 750; }
+.followStrip a > span:last-child > span { display: block; font-size: 10px; color: #7c819c; }
+
 /* ---------------- Empty ---------------- */
 .empty { display: flex; align-items: center; flex-direction: column; padding: 36px 20px; border: 1px dashed #d4dcec; border-radius: 23px; background: #ffffffb8; text-align: center; }
 .empty > svg { color: #4c6ea6; }
 .empty h3 { margin-top: 13px; font-size: 17px; font-weight: 700; }
 .empty p { margin-top: 7px; font-size: 12px; color: #747994; }
 .empty a { margin-top: 16px; display: inline-flex; align-items: center; gap: 7px; padding: 10px 16px; border-radius: 14px; background: linear-gradient(110deg, #007a66, #00856f); color: white; font-size: 12px; font-weight: 650; }
+.empty button { margin-top: 16px; display: inline-flex; align-items: center; gap: 7px; padding: 10px 16px; border: none; border-radius: 14px; background: linear-gradient(110deg, #007a66, #00856f); color: white; font-size: 12px; font-weight: 650; cursor: pointer; }
 
 .privacyNote { display: flex; align-items: flex-start; gap: 6px; margin-top: 24px; font-size: 11px; line-height: 1.6; color: #7c819c; }
 .privacyNote svg { flex-shrink: 0; margin-top: 2px; }
@@ -204,7 +250,7 @@
   .heroCopy { padding-left: 25px; }
   .hero h1 { font-size: 32px; }
   .primaryButton, .secondaryButton { padding-inline: 13px; font-size: 11px; }
-  .studentGrid, .sharedGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .studentGrid, .sharedGrid, .clubGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .badgeGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .detailHero { grid-template-columns: auto minmax(0, 1fr); }
   .detailStats { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; }
@@ -232,7 +278,7 @@
   .feedAside { gap: 6px; }
   .feedThumb { width: 38px; height: 38px; border-radius: 12px; }
   .feedThumb img { width: 28px; height: 28px; }
-  .studentGrid, .sharedGrid { grid-template-columns: 1fr; gap: 14px; }
+  .studentGrid, .sharedGrid, .clubGrid { grid-template-columns: 1fr; gap: 14px; }
   .badgeGrid { grid-template-columns: 1fr; }
   .detailHero { grid-template-columns: 1fr; gap: 14px; padding: 20px; border-radius: 26px; }
   .detailAvatar, .detailArt { width: 78px; height: 78px; border-radius: 22px; }

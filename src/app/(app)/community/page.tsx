@@ -11,7 +11,7 @@ export default async function CommunityPage() {
   return (
     <div className={styles.page}>
       <main id="main" className={`${content.container} ${styles.main}`}>
-        <CommunityHub studentName={student.preferredName} streakDays={student.streakDays} />
+        <CommunityHub studentName={student.preferredName} streakDays={student.streakDays} level={student.level} />
         <p className={styles.attribution}>
           3D icons by{" "}
           <a href="https://www.thiings.co/things" target="_blank" rel="noreferrer">

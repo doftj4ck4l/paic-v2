@@ -5,36 +5,38 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   ArrowRight,
+  Bookmark,
   BookOpen,
+  Check,
   Flame,
+  GraduationCap,
   Heart,
-  Search,
   Share2,
   Sparkles,
   Trophy,
   UsersRound,
-  X,
   Zap,
 } from "lucide-react";
 import { StreakPath } from "@/components/studio/streak-path";
 import { SharedWorkbookTile } from "@/components/studio/shared-workbook-tile";
 import { FollowButton } from "@/components/studio/follow-button";
 import {
+  COMMUNITY_CLUBS,
   COMMUNITY_FEED,
   COMMUNITY_STUDENTS,
   SHARED_WORKBOOKS,
+  SUBJECTS,
   WEEK_STREAK,
   WORKBOOKS,
   communityLevel,
   communityStudentById,
-  sharedWorkbooksByAuthor,
   subjectById,
-  type DemoSharedWorkbook,
+  type SubjectId,
 } from "@/lib/demo-data";
-import { toggleLike, useSocial } from "@/lib/demo-social";
+import { toggleClub, toggleLike, useSocial } from "@/lib/demo-social";
 import styles from "./community.module.css";
 
-type TabId = "suapan" | "pelajar" | "buku-kerja";
+type TabId = "untuk-anda" | "popular" | "subjek" | "kelab" | "disimpan";
 
 type FeedKind = "shared" | "streak" | "achievement" | "update" | "you";
 
@@ -63,10 +65,18 @@ function dayLabel(time: string) {
   return "Beberapa hari lalu";
 }
 
-export function CommunityHub({ studentName, streakDays }: { studentName: string; streakDays: number }) {
+export function CommunityHub({
+  studentName,
+  streakDays,
+  level,
+}: {
+  studentName: string;
+  streakDays: number;
+  level: "primary" | "secondary";
+}) {
   const social = useSocial();
-  const [tab, setTab] = useState<TabId>("suapan");
-  const [query, setQuery] = useState("");
+  const [tab, setTab] = useState<TabId>("untuk-anda");
+  const [subject, setSubject] = useState<SubjectId | "all">("all");
 
   const groups = useMemo(() => {
     const own: FeedEntry[] = social.shared
@@ -114,10 +124,12 @@ export function CommunityHub({ studentName, streakDays }: { studentName: string;
     return order.filter((label) => map.has(label)).map((label) => ({ label, items: map.get(label)! }));
   }, [social.shared]);
 
-  const words = query.trim().toLocaleLowerCase("ms").split(/\s+/).filter(Boolean);
-  const students = COMMUNITY_STUDENTS.filter((s) =>
-    words.every((word) => `${s.name} ${s.className} ${s.yearLabel}`.toLocaleLowerCase("ms").includes(word)),
-  );
+  const featured = SHARED_WORKBOOKS.filter((w) => w.featured);
+  const popularCreators = [...COMMUNITY_STUDENTS].sort((a, b) => b.subscribers - a.subscribers).slice(0, 3);
+  const popularWorkbooks = [...SHARED_WORKBOOKS].sort((a, b) => b.saves - a.saves);
+  const subjectWorkbooks = subject === "all" ? SHARED_WORKBOOKS : SHARED_WORKBOOKS.filter((w) => w.subjectId === subject);
+  const savedWorkbooks = SHARED_WORKBOOKS.filter((w) => social.saved.includes(w.id));
+  const followedStudents = COMMUNITY_STUDENTS.filter((s) => social.followed.includes(s.id));
 
   function goTo(next: TabId) {
     setTab(next);
@@ -128,21 +140,24 @@ export function CommunityHub({ studentName, streakDays }: { studentName: string;
     <>
       <section className={styles.hero} aria-labelledby="community-title">
         <div className={styles.heroCopy}>
-          <span className={styles.eyebrow}>
-            <UsersRound size={14} aria-hidden="true" /> KOMUNITI PIXELSPACE
-          </span>
+          <div className={styles.eyebrowRow}>
+            <span className={styles.eyebrow}>
+              <UsersRound size={14} aria-hidden="true" /> KOMUNITI PIXELSPACE
+            </span>
+            <span className={styles.levelChip}>
+              <GraduationCap size={13} aria-hidden="true" />
+              {level === "primary" ? "Rendah" : "Menengah"}
+            </span>
+          </div>
           <h1 id="community-title">
-            Belajar bersama
+            Belajar lebih seronok
             <br />
-            <span>rakan sekelas.</span>
+            <span>bersama!</span>
           </h1>
-          <p>
-            Ikut rakan, langgan buku kerja mereka dan bina rentetan belajar bersama. Setiap bahan
-            dikongsi oleh pelajar sebenar di sekolah anda.
-          </p>
+          <p>Temui buku kerja menarik, sertai kelab dan kongsi hasil pembelajaran anda.</p>
           <div className={styles.heroActions}>
-            <button type="button" className={styles.primaryButton} onClick={() => goTo("pelajar")}>
-              Cari pelajar <ArrowRight size={17} aria-hidden="true" />
+            <button type="button" className={styles.primaryButton} onClick={() => goTo("popular")}>
+              Terokai komuniti <ArrowRight size={17} aria-hidden="true" />
             </button>
             <Link href="/workbooks" className={styles.secondaryButton}>
               Kongsi buku kerja <ArrowRight size={17} aria-hidden="true" />
@@ -170,116 +185,131 @@ export function CommunityHub({ studentName, streakDays }: { studentName: string;
 
       <div className={styles.tabsWrap} id="komuniti-tabs">
         <div className={styles.tabs} role="group" aria-label="Bahagian komuniti">
-          <button type="button" className={styles.tab} aria-pressed={tab === "suapan"} onClick={() => setTab("suapan")}>
-            Suapan
+          <button type="button" className={styles.tab} aria-pressed={tab === "untuk-anda"} onClick={() => setTab("untuk-anda")}>
+            Untuk Anda
           </button>
-          <button type="button" className={styles.tab} aria-pressed={tab === "pelajar"} onClick={() => setTab("pelajar")}>
-            Pelajar
+          <button type="button" className={styles.tab} aria-pressed={tab === "popular"} onClick={() => setTab("popular")}>
+            Popular
           </button>
-          <button type="button" className={styles.tab} aria-pressed={tab === "buku-kerja"} onClick={() => setTab("buku-kerja")}>
-            Buku kerja
+          <button type="button" className={styles.tab} aria-pressed={tab === "subjek"} onClick={() => setTab("subjek")}>
+            Subjek
+          </button>
+          <button type="button" className={styles.tab} aria-pressed={tab === "kelab"} onClick={() => setTab("kelab")}>
+            Kelab
+          </button>
+          <button type="button" className={styles.tab} aria-pressed={tab === "disimpan"} onClick={() => setTab("disimpan")}>
+            Disimpan
           </button>
         </div>
       </div>
 
       <div className={styles.content}>
-        {tab === "suapan" && (
-          <div className={styles.feedWrap}>
-            {groups.map((group) => (
-              <section key={group.label} className={styles.feedGroup} aria-label={group.label}>
-                <div className={styles.feedDay}>
-                  <span>{group.label}</span>
-                  <i aria-hidden="true" />
+        {tab === "untuk-anda" && (
+          <div className={styles.stack}>
+            <section aria-labelledby="featured-title">
+              <div className={styles.sectionHeading}>
+                <div>
+                  <h2 id="featured-title">Buku kerja pilihan minggu ini</h2>
+                  <p>Dipilih oleh komuniti — ketuk Simpan untuk simpan ke koleksi anda.</p>
                 </div>
-                <ul className={styles.feedList}>
-                  {group.items.map((entry) => {
-                    const liked = social.liked.includes(entry.id);
-                    const KindIcon = KIND_ICON[entry.kind];
-                    return (
-                      <li key={entry.id} className={styles.feedItem} data-kind={entry.kind} data-you={entry.you}>
-                        <span className={styles.feedAvatar} data-you={entry.you} data-student={entry.studentId} aria-hidden="true">
-                          {entry.name.slice(0, 1)}
-                          <span className={styles.feedKindBadge} data-kind={entry.kind}>
-                            <KindIcon aria-hidden="true" />
-                          </span>
-                        </span>
-                        <div className={styles.feedBody}>
-                          <span className={styles.feedType} data-kind={entry.kind}>
-                            <KindIcon aria-hidden="true" />
-                            {KIND_LABEL[entry.kind]}
-                          </span>
-                          <p>
-                            <strong>{entry.name}</strong> {entry.action}
-                            {entry.linkLabel ? ":" : ""}
-                          </p>
-                          {entry.href && entry.linkLabel && (
-                            <Link href={entry.href} className={styles.feedLink}>
-                              {entry.art && (
-                                <span className={styles.feedThumb} data-tint={entry.tint}>
-                                  <Image src={entry.art} alt="" width={64} height={64} />
-                                </span>
-                              )}
-                              <span className={styles.feedLinkBody}>
-                                <strong>{entry.linkLabel}</strong>
-                                {entry.linkMeta && <span>{entry.linkMeta}</span>}
+                <button type="button" className={styles.textLink} onClick={() => goTo("popular")}>
+                  Lihat semua <ArrowRight size={15} aria-hidden="true" />
+                </button>
+              </div>
+              <div className={styles.sharedGrid}>
+                {featured.map((workbook) => (
+                  <SharedWorkbookTile key={workbook.id} workbook={workbook} />
+                ))}
+              </div>
+            </section>
+
+            <section aria-labelledby="feed-title">
+              <div className={styles.sectionHeading}>
+                <div>
+                  <h2 id="feed-title">Suapan komuniti</h2>
+                  <p>Aktiviti terkini daripada rakan dan pencipta yang anda ikuti.</p>
+                </div>
+              </div>
+              <div className={styles.feedWrap}>
+                {groups.map((group) => (
+                  <section key={group.label} className={styles.feedGroup} aria-label={group.label}>
+                    <div className={styles.feedDay}>
+                      <span>{group.label}</span>
+                      <i aria-hidden="true" />
+                    </div>
+                    <ul className={styles.feedList}>
+                      {group.items.map((entry) => {
+                        const liked = social.liked.includes(entry.id);
+                        const KindIcon = KIND_ICON[entry.kind];
+                        return (
+                          <li key={entry.id} className={styles.feedItem} data-kind={entry.kind} data-you={entry.you}>
+                            <span className={styles.feedAvatar} data-you={entry.you} data-student={entry.studentId} aria-hidden="true">
+                              {entry.name.slice(0, 1)}
+                              <span className={styles.feedKindBadge} data-kind={entry.kind}>
+                                <KindIcon aria-hidden="true" />
                               </span>
-                              <ArrowRight size={15} aria-hidden="true" />
-                            </Link>
-                          )}
-                        </div>
-                        <div className={styles.feedAside}>
-                          <span className={styles.feedTime}>{entry.time}</span>
-                          <button
-                            type="button"
-                            onClick={() => toggleLike(entry.id)}
-                            aria-pressed={liked}
-                            data-liked={liked}
-                            aria-label={`Suka kiriman ${entry.name}`}
-                            className={styles.feedLike}
-                          >
-                            <Heart aria-hidden="true" />
-                            {entry.likes + (liked ? 1 : 0)}
-                          </button>
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </section>
-            ))}
+                            </span>
+                            <div className={styles.feedBody}>
+                              <span className={styles.feedType} data-kind={entry.kind}>
+                                <KindIcon aria-hidden="true" />
+                                {KIND_LABEL[entry.kind]}
+                              </span>
+                              <p>
+                                <strong>{entry.name}</strong> {entry.action}
+                                {entry.linkLabel ? ":" : ""}
+                              </p>
+                              {entry.href && entry.linkLabel && (
+                                <Link href={entry.href} className={styles.feedLink}>
+                                  {entry.art && (
+                                    <span className={styles.feedThumb} data-tint={entry.tint}>
+                                      <Image src={entry.art} alt="" width={64} height={64} />
+                                    </span>
+                                  )}
+                                  <span className={styles.feedLinkBody}>
+                                    <strong>{entry.linkLabel}</strong>
+                                    {entry.linkMeta && <span>{entry.linkMeta}</span>}
+                                  </span>
+                                  <ArrowRight size={15} aria-hidden="true" />
+                                </Link>
+                              )}
+                            </div>
+                            <div className={styles.feedAside}>
+                              <span className={styles.feedTime}>{entry.time}</span>
+                              <button
+                                type="button"
+                                onClick={() => toggleLike(entry.id)}
+                                aria-pressed={liked}
+                                data-liked={liked}
+                                aria-label={`Suka kiriman ${entry.name}`}
+                                className={styles.feedLike}
+                              >
+                                <Heart aria-hidden="true" />
+                                {entry.likes + (liked ? 1 : 0)}
+                              </button>
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </section>
+                ))}
+              </div>
+            </section>
           </div>
         )}
 
-        {tab === "pelajar" && (
-          <section aria-label="Cari pelajar">
-            <div className={styles.studentSearch}>
-              <Search size={18} aria-hidden="true" />
-              <label htmlFor="community-search" className={styles.srOnly}>Cari pelajar</label>
-              <input
-                id="community-search"
-                type="search"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Cari nama atau kelas…"
-                autoComplete="off"
-              />
-              {query && (
-                <button type="button" aria-label="Kosongkan carian" onClick={() => setQuery("")}>
-                  <X size={16} />
-                </button>
-              )}
-            </div>
-            {students.length === 0 ? (
-              <div className={styles.empty}>
-                <Search size={30} aria-hidden="true" />
-                <h3>Tiada pelajar sepadan</h3>
-                <p>Cuba nama atau kelas yang lain.</p>
+        {tab === "popular" && (
+          <div className={styles.stack}>
+            <section aria-labelledby="creators-title">
+              <div className={styles.sectionHeading}>
+                <div>
+                  <h2 id="creators-title">Pencipta popular</h2>
+                  <p>Pelajar yang paling banyak dikuti kerana bahan pembelajaran mereka.</p>
+                </div>
               </div>
-            ) : (
               <div className={styles.studentGrid}>
-                {students.map((student) => {
+                {popularCreators.map((student) => {
                   const followed = social.followed.includes(student.id);
-                  const sharedCount = sharedWorkbooksByAuthor(student.id).length;
                   return (
                     <article key={student.id} className={styles.studentCard}>
                       <div className={styles.studentTop}>
@@ -294,35 +324,164 @@ export function CommunityHub({ studentName, streakDays }: { studentName: string;
                       <div className={styles.studentMeta}>
                         <span data-flame><Flame aria-hidden="true" />{student.streakDays} hari</span>
                         <span><Zap aria-hidden="true" />Tahap {communityLevel(student.xp)}</span>
-                        <span><BookOpen aria-hidden="true" />{sharedCount} buku kerja</span>
+                        <span><BookOpen aria-hidden="true" />{student.badges.length} lencana</span>
                       </div>
                       <div className={styles.studentFooter}>
-                        <span>{student.subscribers + (followed ? 1 : 0)} pelanggan</span>
+                        <span>{student.subscribers + (followed ? 1 : 0)} pengikut</span>
                         <FollowButton studentId={student.id} size="small" />
                       </div>
                     </article>
                   );
                 })}
               </div>
-            )}
-          </section>
+            </section>
+
+            <section aria-labelledby="popular-workbooks-title">
+              <div className={styles.sectionHeading}>
+                <div>
+                  <h2 id="popular-workbooks-title">Buku kerja paling disimpan</h2>
+                  <p>Bahan yang paling banyak membantu pelajar lain.</p>
+                </div>
+              </div>
+              <div className={styles.sharedGrid}>
+                {popularWorkbooks.map((workbook) => (
+                  <SharedWorkbookTile key={workbook.id} workbook={workbook} />
+                ))}
+              </div>
+            </section>
+          </div>
         )}
 
-        {tab === "buku-kerja" && (
-          <section aria-label="Buku kerja komuniti">
-            <div className={styles.sharedGrid}>
-              {SHARED_WORKBOOKS.map((workbook: DemoSharedWorkbook) => (
-                <SharedWorkbookTile key={workbook.id} workbook={workbook} />
-              ))}
-            </div>
-          </section>
+        {tab === "subjek" && (
+          <div className={styles.stack}>
+            <section aria-label="Tapis mengikut subjek">
+              <div className={styles.tabs} role="group" aria-label="Subjek komuniti">
+                <button type="button" className={styles.tab} aria-pressed={subject === "all"} onClick={() => setSubject("all")}>
+                  Semua
+                </button>
+                {SUBJECTS.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={styles.tab}
+                    aria-pressed={subject === item.id}
+                    onClick={() => setSubject(item.id)}
+                  >
+                    {item.name}
+                  </button>
+                ))}
+              </div>
+            </section>
+            {subjectWorkbooks.length === 0 ? (
+              <div className={styles.empty}>
+                <BookOpen size={30} aria-hidden="true" />
+                <h3>Tiada buku kerja untuk subjek ini lagi</h3>
+                <p>Jadilah yang pertama berkongsi bahan {subjectById(subject as SubjectId).name}!</p>
+                <Link href="/workbooks">Kongsi buku kerja</Link>
+              </div>
+            ) : (
+              <div className={styles.sharedGrid}>
+                {subjectWorkbooks.map((workbook) => (
+                  <SharedWorkbookTile key={workbook.id} workbook={workbook} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {tab === "kelab" && (
+          <div className={styles.clubGrid}>
+            {COMMUNITY_CLUBS.map((club) => {
+              const joined = social.clubs.includes(club.id);
+              const subjectInfo = subjectById(club.subjectId);
+              return (
+                <article key={club.id} className={styles.clubCard}>
+                  <div className={styles.clubTop}>
+                    <span className={styles.clubArt} aria-hidden="true">
+                      <Image src={club.art} alt="" width={1024} height={1024} />
+                    </span>
+                    <div>
+                      <h3>{club.name}</h3>
+                      <p>{subjectInfo.name} · {club.members + (joined ? 1 : 0)} ahli</p>
+                    </div>
+                  </div>
+                  <p className={styles.clubDesc}>{club.description}</p>
+                  <div className={styles.clubFooter}>
+                    <span className={styles.clubActivity}>
+                      <Sparkles size={12} aria-hidden="true" />
+                      {club.activity}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => toggleClub(club.id)}
+                      aria-pressed={joined}
+                      data-joined={joined}
+                      className={styles.clubJoin}
+                    >
+                      {joined ? <><Check size={13} aria-hidden="true" />Ahli</> : "Sertai"}
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+
+        {tab === "disimpan" && (
+          <div className={styles.stack}>
+            {followedStudents.length > 0 && (
+              <section aria-labelledby="followed-title">
+                <div className={styles.sectionHeading}>
+                  <div>
+                    <h2 id="followed-title">Pencipta diikuti</h2>
+                    <p>Bahan baharu daripada mereka akan muncul di Suapan anda.</p>
+                  </div>
+                </div>
+                <ul className={styles.followStrip}>
+                  {followedStudents.map((student) => (
+                    <li key={student.id}>
+                      <Link href={`/community/students/${student.id}`}>
+                        <span className={styles.followAvatar} aria-hidden="true">{student.name.slice(0, 1)}</span>
+                        <span>
+                          <strong>{student.name}</strong>
+                          <span>{student.className}</span>
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+            <section aria-labelledby="saved-title">
+              <div className={styles.sectionHeading}>
+                <div>
+                  <h2 id="saved-title">Buku kerja disimpan</h2>
+                  <p>Koleksi peribadi anda — hanya anda yang melihat senarai ini.</p>
+                </div>
+              </div>
+              {savedWorkbooks.length === 0 ? (
+                <div className={styles.empty}>
+                  <Bookmark size={30} aria-hidden="true" />
+                  <h3>Belum ada simpanan</h3>
+                  <p>Terokai buku kerja komuniti dan ketuk ikon simpan pada mana-mana kad.</p>
+                  <button type="button" onClick={() => goTo("popular")}>Terokai komuniti</button>
+                </div>
+              ) : (
+                <div className={styles.sharedGrid}>
+                  {savedWorkbooks.map((workbook) => (
+                    <SharedWorkbookTile key={workbook.id} workbook={workbook} />
+                  ))}
+                </div>
+              )}
+            </section>
+          </div>
         )}
       </div>
 
       <p className={styles.privacyNote}>
         <Sparkles size={12} aria-hidden="true" />
-        Komuniti menunjukkan nama pertama dan kelas sahaja. Buku kerja hanya kelihatan selepas pelajar
-        berkongsi secara terbuka.
+        Komuniti menunjukkan nama paparan dan kelas sahaja. Bahan peribadi dan sembang AI tidak pernah
+        dipaparkan tanpa kebenaran.
       </p>
     </>
   );

@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useSyncExternalStore } from "react";
-import { COMMUNITY_STUDENTS, SHARED_WORKBOOKS } from "@/lib/demo-data";
+import { COMMUNITY_CLUBS, COMMUNITY_STUDENTS, SHARED_WORKBOOKS } from "@/lib/demo-data";
 
 export type SocialState = {
   followed: string[];
-  subscribed: string[];
+  saved: string[];
+  clubs: string[];
+  remixed: string[];
   shared: string[];
   liked: string[];
 };
@@ -14,7 +16,9 @@ const STORAGE_KEY = "paicv3_demo_social";
 
 const DEFAULT_STATE: SocialState = {
   followed: COMMUNITY_STUDENTS.filter((s) => s.followed).map((s) => s.id),
-  subscribed: SHARED_WORKBOOKS.filter((w) => w.defaultSubscribed).map((w) => w.id),
+  saved: SHARED_WORKBOOKS.filter((w) => w.defaultSaved).map((w) => w.id),
+  clubs: COMMUNITY_CLUBS.filter((c) => c.defaultJoined).map((c) => c.id),
+  remixed: [],
   shared: [],
   liked: [],
 };
@@ -59,7 +63,9 @@ export function hydrateSocial() {
     const parsed = JSON.parse(raw) as Partial<SocialState>;
     state = {
       followed: Array.isArray(parsed.followed) ? parsed.followed : DEFAULT_STATE.followed,
-      subscribed: Array.isArray(parsed.subscribed) ? parsed.subscribed : DEFAULT_STATE.subscribed,
+      saved: Array.isArray(parsed.saved) ? parsed.saved : DEFAULT_STATE.saved,
+      clubs: Array.isArray(parsed.clubs) ? parsed.clubs : DEFAULT_STATE.clubs,
+      remixed: Array.isArray(parsed.remixed) ? parsed.remixed : DEFAULT_STATE.remixed,
       shared: Array.isArray(parsed.shared) ? parsed.shared : DEFAULT_STATE.shared,
       liked: Array.isArray(parsed.liked) ? parsed.liked : DEFAULT_STATE.liked,
     };
@@ -84,11 +90,23 @@ export function toggleFollow(id: string) {
   });
 }
 
-export function toggleSubscribe(id: string) {
+export function toggleSave(id: string) {
   setState({
     ...state,
-    subscribed: state.subscribed.includes(id) ? state.subscribed.filter((x) => x !== id) : [...state.subscribed, id],
+    saved: state.saved.includes(id) ? state.saved.filter((x) => x !== id) : [...state.saved, id],
   });
+}
+
+export function toggleClub(id: string) {
+  setState({
+    ...state,
+    clubs: state.clubs.includes(id) ? state.clubs.filter((x) => x !== id) : [...state.clubs, id],
+  });
+}
+
+export function remixWorkbook(id: string) {
+  if (state.remixed.includes(id)) return;
+  setState({ ...state, remixed: [...state.remixed, id] });
 }
 
 export function shareWorkbook(id: string) {

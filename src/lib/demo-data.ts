@@ -725,18 +725,20 @@ export type DemoSharedWorkbook = {
   authorId: string;
   sharedAt: string;
   subscribers: number;
+  saves: number;
+  featured?: boolean;
   modules: DemoCreation["kind"][];
   asset: string;
-  defaultSubscribed?: boolean;
+  defaultSaved?: boolean;
   yourStreak?: number;
 };
 
 export const SHARED_WORKBOOKS: DemoSharedWorkbook[] = [
-  { id: "peta-kitaran-air", title: "Peta Kitaran Air", subjectId: "science", topic: "Nota ringkas, kad imbas dan kuiz kitaran air", authorId: "mei-lin", sharedAt: "2 jam lalu", subscribers: 18, modules: ["notes", "flashcards", "quizzes"], asset: "/assets/thiings/workbook-flask.png", defaultSubscribed: true, yourStreak: 3 },
-  { id: "tatabahasa-mudah", title: "Tatabahasa Mudah", subjectId: "language", topic: "Kata nama, kata kerja dan ayat mudah", authorId: "danial", sharedAt: "Semalam", subscribers: 11, modules: ["notes", "slides", "study-guides"], asset: "/assets/thiings/workbook-pencil.png" },
-  { id: "trik-pecahan-pantas", title: "Trik Pecahan Pantas", subjectId: "math", topic: "Cara cepat banding dan tambah pecahan", authorId: "priya", sharedAt: "2 hari lalu", subscribers: 24, modules: ["notes", "slides", "quizzes", "mindmaps"], asset: "/assets/thiings/workbook-calculator.png" },
-  { id: "cerita-pendek-kreatif", title: "Cerita Pendek Kreatif", subjectId: "language", topic: "Contoh cerita dan struktur watak untuk projek kelas", authorId: "sofia", sharedAt: "3 hari lalu", subscribers: 14, modules: ["notes", "study-guides"], asset: "/assets/thiings/subject-language.png" },
-  { id: "eksperimen-rumah", title: "Eksperimen Sains Rumah", subjectId: "science", topic: "5 eksperimen mudah dengan bahan dapur", authorId: "hafiz", sharedAt: "4 hari lalu", subscribers: 9, modules: ["notes", "flashcards"], asset: "/assets/thiings/subject-science.png" },
+  { id: "peta-kitaran-air", title: "Peta Kitaran Air", subjectId: "science", topic: "Nota ringkas, kad imbas dan kuiz kitaran air", authorId: "mei-lin", sharedAt: "2 jam lalu", subscribers: 18, saves: 124, featured: true, modules: ["notes", "flashcards", "quizzes"], asset: "/assets/thiings/workbook-flask.png", defaultSaved: true, yourStreak: 3 },
+  { id: "tatabahasa-mudah", title: "Tatabahasa Mudah", subjectId: "language", topic: "Kata nama, kata kerja dan ayat mudah", authorId: "danial", sharedAt: "Semalam", subscribers: 11, saves: 57, modules: ["notes", "slides", "study-guides"], asset: "/assets/thiings/workbook-pencil.png" },
+  { id: "trik-pecahan-pantas", title: "Trik Pecahan Pantas", subjectId: "math", topic: "Cara cepat banding dan tambah pecahan", authorId: "priya", sharedAt: "2 hari lalu", subscribers: 24, saves: 86, featured: true, modules: ["notes", "slides", "quizzes", "mindmaps"], asset: "/assets/thiings/workbook-calculator.png" },
+  { id: "cerita-pendek-kreatif", title: "Cerita Pendek Kreatif", subjectId: "language", topic: "Contoh cerita dan struktur watak untuk projek kelas", authorId: "sofia", sharedAt: "3 hari lalu", subscribers: 14, saves: 41, featured: true, modules: ["notes", "study-guides"], asset: "/assets/thiings/subject-language.png" },
+  { id: "eksperimen-rumah", title: "Eksperimen Sains Rumah", subjectId: "science", topic: "5 eksperimen mudah dengan bahan dapur", authorId: "hafiz", sharedAt: "4 hari lalu", subscribers: 9, saves: 23, modules: ["notes", "flashcards"], asset: "/assets/thiings/subject-science.png" },
 ];
 
 export function sharedWorkbookById(id: string): DemoSharedWorkbook {
@@ -745,6 +747,29 @@ export function sharedWorkbookById(id: string): DemoSharedWorkbook {
 
 export function sharedWorkbooksByAuthor(authorId: string): DemoSharedWorkbook[] {
   return SHARED_WORKBOOKS.filter((w) => w.authorId === authorId);
+}
+
+export type DemoClub = {
+  id: string;
+  name: string;
+  subjectId: SubjectId;
+  description: string;
+  members: number;
+  activity: string;
+  art: string;
+  defaultJoined?: boolean;
+};
+
+export const COMMUNITY_CLUBS: DemoClub[] = [
+  { id: "kelab-sains", name: "Kelab Sains", subjectId: "science", description: "Eksperimen, kitaran alam dan penemuan baharu setiap minggu.", members: 48, activity: "Eksperimen baharu dikongsi semalam", art: "/assets/thiings/subject-science.png", defaultJoined: true },
+  { id: "kelab-matematik", name: "Kelab Matematik", subjectId: "math", description: "Trik pengiraan pantas, teka-teki nombor dan cabaran mingguan.", members: 39, activity: "Cabaran pecahan bermula hari ini", art: "/assets/thiings/subject-math.png" },
+  { id: "kelab-stem", name: "Kelab STEM", subjectId: "science", description: "Projek binaan, teknologi dan sains untuk penyelesai masalah.", members: 27, activity: "Projek sistem suria dibuka", art: "/assets/thiings/welcome-rocket.png" },
+  { id: "kelab-bahasa", name: "Kelab Bahasa Melayu", subjectId: "language", description: "Cerita, karangan dan peribahasa untuk pencinta bahasa.", members: 33, activity: "Pertandingan cerita pendek", art: "/assets/thiings/subject-language.png" },
+  { id: "kelab-english", name: "Kelab English", subjectId: "english", description: "Reading, writing and speaking practice bersama rakan.", members: 21, activity: "Vocabulary challenge mingguan", art: "/assets/thiings/subject-english.png" },
+];
+
+export function clubById(id: string): DemoClub {
+  return COMMUNITY_CLUBS.find((c) => c.id === id) ?? COMMUNITY_CLUBS[0];
 }
 
 export type DemoFeedItem = {
