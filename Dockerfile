@@ -32,6 +32,8 @@ COPY --from=build /app/.next ./.next
 COPY --from=build /app/public ./public
 COPY --from=build /app/src ./src
 COPY --from=build /app/drizzle ./drizzle
+# Next.js image-optimizer cache must be writable by the runtime user
+RUN mkdir -p .next/cache/images && chown -R nextjs:nodejs .next/cache
 USER nextjs
 EXPOSE 3000
 CMD ["npm", "run", "start"]
