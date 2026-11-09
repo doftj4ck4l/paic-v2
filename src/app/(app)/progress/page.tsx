@@ -81,7 +81,7 @@ export default async function ProgressPage() {
       <Section
         title="Penguasaan subjek"
         action={
-          <Link href="/quizzes" className="text-xs font-semibold text-[#00786a] hover:underline">
+          <Link href="/subjects" className="text-xs font-semibold text-[#00786a] hover:underline">
             Latih topik lemah
           </Link>
         }

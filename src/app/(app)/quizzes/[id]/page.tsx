@@ -23,8 +23,8 @@ export default async function QuizPage({ params }: { params: Promise<{ id: strin
       <PageHeader
         title={quiz.title}
         description={`${subject.name} · ${quiz.teacherName} · Tarikh akhir ${quiz.due}`}
-        backHref="/quizzes"
-        backLabel="Kembali ke kuiz"
+        backHref={`/subjects/${quiz.subjectId}/quizzes`}
+        backLabel="Kembali ke kuiz subjek"
         actions={
           <Chip tone="amber">
             <Sparkles className="size-3.5" aria-hidden="true" /> Dijana AI daripada sumber

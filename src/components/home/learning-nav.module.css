@@ -70,12 +70,3 @@
   .navLink { font-size: 9px; }
 }
 
-.more { position: relative; }
-.moreButton { cursor: pointer; }
-.moreChevron { width: 13px !important; height: 13px !important; margin-left: -3px; }
-.moreButton[aria-current="page"] { background: #e0f6f2; box-shadow: 0 4px 7px #44527609; }
-.moreButton[aria-current="page"] .navIcon > svg { color: #00786a; }
-.moreMenu { position: absolute; z-index: 42; left: 50%; top: calc(100% + 10px); translate: -50% 0; width: 210px; overflow: hidden; padding: 6px; border: 1px solid #e2e4f1; border-radius: 19px; background: #fff; box-shadow: 0 12px 40px #33336120; }
-.moreMenu > a { display: flex; align-items: center; gap: 10px; width: 100%; padding: 11px; text-align: left; font-size: 13px; font-weight: 550; border-radius: 12px; cursor: pointer; }
-.moreMenu > a:hover { background: #f2f8f7; }
-.moreMenu > a[aria-current="page"] { background: #e0f6f2; color: #00786a; }

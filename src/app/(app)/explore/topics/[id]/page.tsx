@@ -38,7 +38,7 @@ export default async function TopicDetailPage({ params }: { params: Promise<{ id
         </div>
         <div className="flex gap-2">
           <Link
-            href="/quizzes"
+            href={`/subjects/${subject.id}/quizzes`}
             className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-border bg-card px-4 text-xs font-semibold shadow-soft hover:bg-secondary"
           >
             <ListChecks className="size-3.5" aria-hidden="true" /> Latihan
