@@ -13,7 +13,7 @@ import { authClient } from "@/lib/auth-client";
 import styles from "@/components/auth/auth-form.module.css";
 
 const schema = z.object({
-  identifier: z.string().trim().min(3, "Masukkan emel atau ID pelajar anda."),
+  identifier: z.string().trim().min(3, "Masukkan emel atau ID anda."),
   password: z.string().min(8, "Kata laluan mesti sekurang-kurangnya 8 aksara."),
 });
 
@@ -52,7 +52,7 @@ export function LoginForm() {
         );
         return;
       }
-      setFormError("Emel/ID pelajar atau kata laluan tidak sah. Sila cuba lagi.");
+      setFormError("Emel/ID atau kata laluan tidak sah. Sila cuba lagi.");
       return;
     }
     // Hard navigation: the client router may hold a prefetched redirect for "/"
@@ -72,7 +72,7 @@ export function LoginForm() {
     <div>
       <form onSubmit={handleSubmit(onSubmit)} className={styles.form} noValidate aria-busy={isSubmitting}>
         <div className={styles.field}>
-          <Label htmlFor="identifier">Emel atau ID pelajar</Label>
+          <Label htmlFor="identifier">Emel atau ID</Label>
           <div className={styles.inputWrap}>
             <UserRound aria-hidden="true" />
             <Input
@@ -178,11 +178,10 @@ export function LoginForm() {
           Google
         </Button>
         <Button variant="white" type="button" disabled className={styles.socialButton} aria-describedby="social-hint">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#1877F2" /><path d="M13.7 22v-8.9h3l.5-3.4h-3.5V7.6c0-1 .3-1.7 1.8-1.7h1.9v-3c-.3 0-1.5-.1-2.8-.1-2.8 0-4.7 1.7-4.7 4.8v2.1H7v3.4h2.9V22Z" fill="white" /></svg>
-          Facebook
+          <img src="/assets/login/delima.png" alt="DELIMA" className={styles.delimaLogo} />
         </Button>
       </div>
-      <p id="social-hint" className={styles.socialHint}>Log masuk sosial akan datang.</p>
+      <p id="social-hint" className={styles.socialHint}>Log masuk Google dan DELIMA akan datang.</p>
       <p className={styles.register}>Tiada akaun? <Link href="/register">Daftar di sini</Link></p>
     </div>
   );

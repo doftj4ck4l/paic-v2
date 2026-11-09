@@ -227,7 +227,6 @@ export function RegisterForm() {
         {step === 1 && (
           <>
             <div className={styles.field}>
-              <Label>Jenis akaun</Label>
               <div className={styles.roleToggle} role="group" aria-label="Jenis akaun">
                 <button
                   type="button"
