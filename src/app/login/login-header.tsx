@@ -47,7 +47,7 @@ export function LoginHeader() {
       {role === "teacher" && (
         <p className={styles.teacherNote}>
           <Info aria-hidden="true" />
-          Akaun guru disediakan oleh pihak sekolah. Hubungi pentadbir sekolah anda untuk akses.
+          Guru kini boleh mendaftar sendiri — pilih opsyen Guru semasa mendaftar.
         </p>
       )}
     </div>

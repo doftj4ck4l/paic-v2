@@ -12,10 +12,12 @@ import {
   Eye,
   EyeOff,
   GraduationCap,
+  Info,
   Loader2,
   LockKeyhole,
   Mail,
   MailCheck,
+  Presentation,
   ShieldCheck,
   Smile,
   User,
@@ -34,14 +36,15 @@ const YEARS_SECONDARY = ["Tingkatan 1", "Tingkatan 2", "Tingkatan 3", "Tingkatan
 
 const schema = z
   .object({
+    role: z.enum(["student", "teacher"]),
     fullName: z.string().trim().min(3, "Masukkan nama penuh anda."),
     username: z
       .string()
       .trim()
-      .regex(/^[a-zA-Z0-9][a-zA-Z0-9._]{2,19}$/, "ID pelajar: 3–20 aksara (huruf, nombor, titik atau garis bawah)."),
+      .regex(/^[a-zA-Z0-9][a-zA-Z0-9._]{2,19}$/, "ID: 3–20 aksara (huruf, nombor, titik atau garis bawah)."),
     displayName: z.string().trim().max(30, "Maksimum 30 aksara.").optional().or(z.literal("")),
     email: z.string().trim().email("Masukkan emel yang sah."),
-    yearLabel: z.string().min(1, "Pilih tahun/tingkatan anda."),
+    yearLabel: z.string(),
     password: z.string().min(8, "Kata laluan mesti sekurang-kurangnya 8 aksara."),
     confirm: z.string(),
     terms: z.literal(true, { message: "Sila terima terma penggunaan." }),
@@ -49,6 +52,10 @@ const schema = z
   .refine((values) => values.password === values.confirm, {
     path: ["confirm"],
     message: "Kata laluan tidak sepadan.",
+  })
+  .refine((values) => values.role === "teacher" || values.yearLabel.trim().length > 0, {
+    path: ["yearLabel"],
+    message: "Pilih tahun/tingkatan anda.",
   });
 
 type RegisterValues = z.infer<typeof schema>;
@@ -85,12 +92,14 @@ export function RegisterForm() {
     setError,
     getValues,
     trigger,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<RegisterValues>({
     resolver: zodResolver(schema),
-    defaultValues: { fullName: "", username: "", displayName: "", email: "", yearLabel: "", password: "", confirm: "" },
+    defaultValues: { role: "student", fullName: "", username: "", displayName: "", email: "", yearLabel: "", password: "", confirm: "" },
   });
 
+  const role = watch("role");
   const yearOptions = school?.type === "secondary" ? YEARS_SECONDARY : YEARS_PRIMARY;
 
   function onSchoolSelect(next: SchoolOption | null) {
@@ -104,7 +113,7 @@ export function RegisterForm() {
       setSchoolError("Pilih sekolah anda untuk meneruskan.");
       return;
     }
-    if (!getValues("yearLabel")) {
+    if (role === "student" && !getValues("yearLabel")) {
       setError("yearLabel", { message: "Pilih tahun/tingkatan anda." });
       return;
     }
@@ -130,13 +139,14 @@ export function RegisterForm() {
       username: values.username.trim(),
       displayName: values.displayName?.trim() || values.fullName.trim().split(" ")[0],
       schoolId: school.id,
-      yearLabel: values.yearLabel,
+      role: values.role,
+      yearLabel: values.role === "student" ? values.yearLabel : undefined,
     });
 
     if (error) {
       const code = error.code ?? "";
       if (code.includes("USERNAME")) {
-        setError("username", { message: "ID pelajar ini telah digunakan. Cuba yang lain." });
+        setError("username", { message: "ID ini telah digunakan. Cuba yang lain." });
         setStep(2);
       } else if (code.includes("EXISTS")) {
         setError("email", { message: "Emel ini sudah didaftarkan. Cuba log masuk." });
@@ -217,6 +227,37 @@ export function RegisterForm() {
         {step === 1 && (
           <>
             <div className={styles.field}>
+              <Label>Jenis akaun</Label>
+              <div className={styles.roleToggle} role="group" aria-label="Jenis akaun">
+                <button
+                  type="button"
+                  className={styles.roleButton}
+                  aria-pressed={role === "student"}
+                  onClick={() => setValue("role", "student")}
+                >
+                  <GraduationCap aria-hidden="true" /> Pelajar
+                </button>
+                <button
+                  type="button"
+                  className={styles.roleButton}
+                  aria-pressed={role === "teacher"}
+                  onClick={() => {
+                    setValue("role", "teacher");
+                    setValue("yearLabel", "");
+                  }}
+                >
+                  <Presentation aria-hidden="true" /> Guru
+                </button>
+              </div>
+              {role === "teacher" && (
+                <p className={styles.teacherNote}>
+                  <Info aria-hidden="true" />
+                  Akaun guru: cipta buku kerja, bahan pembelajaran dan kongsi dengan pelajar anda.
+                </p>
+              )}
+            </div>
+
+            <div className={styles.field}>
               <Label htmlFor="school-search">Sekolah</Label>
               <SchoolPicker selected={school} onSelect={onSchoolSelect} disabled={isSubmitting} />
               {schoolError && (
@@ -225,29 +266,31 @@ export function RegisterForm() {
               <p className={styles.hint}>Taip untuk mencari sekolah anda — pengalaman pembelajaran menyesuaikan sekolah anda.</p>
             </div>
 
-            <div className={styles.field}>
-              <Label htmlFor="yearLabel">{school?.type === "secondary" ? "Tingkatan" : "Tahun"}</Label>
-              <div className={styles.inputWrap}>
-                <GraduationCap aria-hidden="true" />
-                <select
-                  id="yearLabel"
-                  disabled={!school || isSubmitting}
-                  aria-invalid={!!errors.yearLabel}
-                  {...register("yearLabel")}
-                >
-                  <option value="">{school ? "Pilih tahun/tingkatan" : "Pilih sekolah dahulu"}</option>
-                  {yearOptions.map((year) => (
-                    <option key={year} value={year}>
-                      {year}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className={styles.selectChevron} aria-hidden="true" />
+            {role === "student" && (
+              <div className={styles.field}>
+                <Label htmlFor="yearLabel">{school?.type === "secondary" ? "Tingkatan" : "Tahun"}</Label>
+                <div className={styles.inputWrap}>
+                  <GraduationCap aria-hidden="true" />
+                  <select
+                    id="yearLabel"
+                    disabled={!school || isSubmitting}
+                    aria-invalid={!!errors.yearLabel}
+                    {...register("yearLabel")}
+                  >
+                    <option value="">{school ? "Pilih tahun/tingkatan" : "Pilih sekolah dahulu"}</option>
+                    {yearOptions.map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className={styles.selectChevron} aria-hidden="true" />
+                </div>
+                {errors.yearLabel && (
+                  <p className={styles.error} role="alert">{errors.yearLabel.message}</p>
+                )}
               </div>
-              {errors.yearLabel && (
-                <p className={styles.error} role="alert">{errors.yearLabel.message}</p>
-              )}
-            </div>
+            )}
 
             <button type="button" onClick={nextFromSchool} disabled={!school} className={styles.continueButton}>
               Seterusnya <ArrowRight className="size-4" aria-hidden="true" />
@@ -282,7 +325,7 @@ export function RegisterForm() {
             </div>
 
             <div className={styles.field}>
-              <Label htmlFor="username">ID pelajar</Label>
+              <Label htmlFor="username">{role === "student" ? "ID pelajar" : "ID guru"}</Label>
               <div className={styles.inputWrap}>
                 <UserRound aria-hidden="true" />
                 <Input

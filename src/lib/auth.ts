@@ -54,7 +54,7 @@ export const auth = betterAuth({
       displayName: { type: "string", required: false },
       yearLabel: { type: "string", required: false },
       className: { type: "string", required: false },
-      role: { type: "string", required: false, defaultValue: "student", input: false },
+      role: { type: "string", required: false, defaultValue: "student", input: true },
       status: { type: "string", required: false, defaultValue: "active", input: false },
       language: { type: "string", required: false, defaultValue: "bm", input: false },
       xp: { type: "number", required: false, defaultValue: 0, input: false },
@@ -81,8 +81,14 @@ export const auth = betterAuth({
   databaseHooks: {
     user: {
       create: {
+        // Clients may only pick between the two known roles — anything else
+        // (or a missing value) becomes "student".
+        before: async (user) => {
+          const role = (user as { role?: unknown }).role === "teacher" ? "teacher" : "student";
+          return { data: { ...user, role } };
+        },
         after: async (user) => {
-          await recordAuthEvent("register", user.id, { email: user.email });
+          await recordAuthEvent("register", user.id, { email: user.email, role: user.role });
         },
       },
     },

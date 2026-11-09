@@ -15,7 +15,7 @@ export default async function RegisterPage() {
   return (
     <AuthLayout
       title="Cipta akaun anda"
-      subtitle="Mulakan perjalanan pembelajaran anda hari ini — sahkan emel selepas mendaftar."
+      subtitle="Daftar sebagai pelajar atau guru — sahkan emel selepas mendaftar."
     >
       <RegisterForm />
     </AuthLayout>

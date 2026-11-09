@@ -29,7 +29,7 @@ export default async function HomePage() {
       <main id="main" className={`${content.container} ${styles.main}`}>
         <section className={styles.hero} aria-labelledby="welcome-title">
           <div className={styles.heroCopy}>
-            <span className={styles.classBadge}>{student.yearLabel} · {student.className}</span>
+            <span className={styles.classBadge}>{student.role === "teacher" ? `Cikgu · ${student.school}` : `${student.yearLabel} · ${student.className}`}</span>
             <h1 id="welcome-title">Selamat kembali,<br /><span className={styles.name}>{student.preferredName}!</span> <span className={styles.wave} role="img" aria-label="Hai">👋</span></h1>
             <p>Teruskan pengembaraan pembelajaran anda dengan bantuan AI, buku kerja pintar dan aktiviti interaktif.</p>
             <div className={styles.heroActions}>

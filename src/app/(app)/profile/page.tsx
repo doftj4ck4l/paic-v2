@@ -34,8 +34,8 @@ export default async function ProfilePage() {
             <h2 className="text-lg font-extrabold">{student.fullName}</h2>
             <p className="mt-0.5 text-sm text-muted-foreground">{student.school}</p>
             <div className="mt-2 flex flex-wrap gap-1.5">
-              <Chip tone="purple">{student.yearLabel}</Chip>
-              <Chip tone="neutral">{student.className}</Chip>
+              <Chip tone="purple">{student.role === "teacher" ? "Guru" : student.yearLabel}</Chip>
+              {student.role !== "teacher" && <Chip tone="neutral">{student.className}</Chip>}
               <Chip tone="teal">Bahasa Melayu</Chip>
             </div>
           </div>
