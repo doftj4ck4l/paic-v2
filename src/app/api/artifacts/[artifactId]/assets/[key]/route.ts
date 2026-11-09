@@ -10,13 +10,13 @@ export async function GET(
   if (!user) return NextResponse.json({ error: "Tidak dibenarkan." }, { status: 401 });
 
   const { artifactId, key } = await params;
-  const safeKey = key.replace(/[^a-z0-9-]/gi, "");
-  const bytes = await getAsset(`artifacts/${artifactId}/${safeKey}.png`);
-  if (!bytes) return NextResponse.json({ error: "Imej belum sedia." }, { status: 404 });
+  const safeKey = key.replace(/[^a-z0-9.-]/gi, "");
+  const asset = await getAsset(`artifacts/${artifactId}/${safeKey}`);
+  if (!asset) return NextResponse.json({ error: "Aset belum sedia." }, { status: 404 });
 
-  return new NextResponse(new Uint8Array(bytes), {
+  return new NextResponse(new Uint8Array(asset.bytes), {
     headers: {
-      "Content-Type": "image/png",
+      "Content-Type": asset.contentType,
       "Cache-Control": "private, max-age=3600",
     },
   });

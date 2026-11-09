@@ -5,7 +5,7 @@ import { Check, Circle } from "lucide-react";
 import { STUDY_GUIDE } from "@/lib/demo-data";
 import { cn } from "@/lib/utils";
 
-export function StudyGuideView() {
+export function StudyGuideView({ guide = STUDY_GUIDE }: { guide?: typeof STUDY_GUIDE } = {}) {
   const [checked, setChecked] = useState<Set<number>>(new Set());
 
   function toggle(i: number) {
@@ -21,13 +21,13 @@ export function StudyGuideView() {
     <div className="flex flex-col gap-5">
       <section className="rounded-[22px] border border-border bg-card p-5 shadow-soft">
         <h2 className="text-sm font-extrabold uppercase tracking-wide text-[#00786a]">Gambaran keseluruhan</h2>
-        <p className="mt-2 text-sm leading-relaxed">{STUDY_GUIDE.overview}</p>
+        <p className="mt-2 text-sm leading-relaxed">{guide.overview}</p>
       </section>
 
       <section className="rounded-[22px] border border-border bg-card p-5 shadow-soft">
         <h2 className="text-sm font-extrabold uppercase tracking-wide text-[#00786a]">Objektif pembelajaran</h2>
         <ul className="mt-3 flex flex-col gap-2">
-          {STUDY_GUIDE.objectives.map((o) => (
+          {guide.objectives.map((o) => (
             <li key={o} className="flex items-start gap-2.5 text-sm leading-relaxed">
               <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-[#00b6a2]" aria-hidden="true" />
               {o}
@@ -39,7 +39,7 @@ export function StudyGuideView() {
       <section className="rounded-[22px] border border-border bg-card p-5 shadow-soft">
         <h2 className="text-sm font-extrabold uppercase tracking-wide text-[#00786a]">Konsep penting</h2>
         <dl className="mt-3 grid gap-3 sm:grid-cols-2">
-          {STUDY_GUIDE.concepts.map((c) => (
+          {guide.concepts.map((c) => (
             <div key={c.term} className="rounded-2xl bg-secondary p-3.5">
               <dt className="text-sm font-bold">{c.term}</dt>
               <dd className="mt-1 text-xs leading-relaxed text-muted-foreground">{c.definition}</dd>
@@ -50,9 +50,9 @@ export function StudyGuideView() {
 
       <section className="rounded-[22px] border border-border bg-card p-5 shadow-soft">
         <h2 className="text-sm font-extrabold uppercase tracking-wide text-[#00786a]">Contoh soalan</h2>
-        <p className="mt-2 text-sm font-semibold">{STUDY_GUIDE.example.question}</p>
+        <p className="mt-2 text-sm font-semibold">{guide.example.question}</p>
         <ol className="mt-3 flex flex-col gap-2">
-          {STUDY_GUIDE.example.steps.map((s, i) => (
+          {guide.example.steps.map((s, i) => (
             <li key={s} className="flex items-start gap-2.5 text-sm leading-relaxed">
               <span className="grid size-5 shrink-0 place-items-center rounded-full bg-accent text-[10px] font-extrabold text-accent-foreground">
                 {i + 1}
@@ -66,7 +66,7 @@ export function StudyGuideView() {
       <section className="rounded-[22px] border border-border bg-card p-5 shadow-soft">
         <h2 className="text-sm font-extrabold uppercase tracking-wide text-[#00786a]">Senarai semak ulang kaji</h2>
         <ul className="mt-3 flex flex-col gap-2">
-          {STUDY_GUIDE.checklist.map((item, i) => {
+          {guide.checklist.map((item, i) => {
             const done = checked.has(i);
             return (
               <li key={item}>
@@ -91,7 +91,7 @@ export function StudyGuideView() {
           })}
         </ul>
         <p className="mt-3 text-xs text-muted-foreground">
-          {checked.size}/{STUDY_GUIDE.checklist.length} selesai · senarai semak disimpan dalam demo ini sahaja.
+          {checked.size}/{guide.checklist.length} selesai · senarai semak disimpan dalam demo ini sahaja.
         </p>
       </section>
     </div>

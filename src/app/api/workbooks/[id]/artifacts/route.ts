@@ -3,7 +3,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { db } from "@/db";
 import { artifacts } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth-session";
-import { isSlidesGenerationAvailable, sweepStaleGenerations } from "@/lib/generation/slides";
+import { isGenerationAvailable, sweepStaleGenerations } from "@/lib/generation/shared";
+import { ARTIFACT_KINDS } from "@/lib/generation/registry";
 import type { DeckData } from "@/lib/generation/schemas";
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -12,7 +13,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
   const { id } = await params;
   const kind = request.nextUrl.searchParams.get("kind") ?? "slides";
-  await sweepStaleGenerations(id, kind);
+  if ((ARTIFACT_KINDS as readonly string[]).includes(kind)) {
+    await sweepStaleGenerations(id, kind);
+  }
 
   const rows = await db
     .select()
@@ -23,10 +26,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const items = rows
     .filter((row) => row.kind === kind)
     .map((row) => {
-      const data = row.data as DeckData | null;
-      const slideCount = data?.slides?.length ?? 0;
-      const imagesReady = data?.slides?.filter((s) => s.image_status === "ready").length ?? 0;
-      const imagesPending = data?.slides?.filter((s) => s.image_status === "pending").length ?? 0;
+      const data = row.data as (DeckData & { image_status?: string }) | null;
+      const slideCount = Array.isArray(data?.slides) ? data.slides.length : 0;
+      const imagesReady = Array.isArray(data?.slides) ? data.slides.filter((s) => s.image_status === "ready").length : 0;
+      const imagesPending = Array.isArray(data?.slides) ? data.slides.filter((s) => s.image_status === "pending").length : 0;
       return {
         id: row.id,
         workbookId: row.workbookId,
@@ -41,5 +44,5 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       };
     });
 
-  return NextResponse.json({ artifacts: items, available: isSlidesGenerationAvailable() });
+  return NextResponse.json({ artifacts: items, available: isGenerationAvailable() });
 }

@@ -6,7 +6,6 @@ import Image from "next/image";
 import {
   ArrowLeft,
   ArrowRight,
-  AudioLines,
   BookOpenText,
   Check,
   FileText,
@@ -15,7 +14,6 @@ import {
   Layers,
   Loader2,
   MessageSquareText,
-  Play,
   Settings2,
   Share2,
   Sparkles,
@@ -26,18 +24,12 @@ import {
   XCircle,
 } from "lucide-react";
 import { Chip } from "@/components/studio/ui";
-import { QuizPlayer } from "@/components/studio/quiz-player";
-import { FlashcardPlayer } from "@/components/studio/flashcard-player";
-import { MindMapViewer } from "@/components/studio/mindmap-viewer";
-import { StudyGuideView } from "@/components/studio/study-guide-view";
-import { SlidesTab } from "./slides-tab";
+import { ArtifactTab } from "./artifact-tab";
 import { SUBJECT_ICONS } from "@/components/studio/content-tile";
 import content from "@/components/studio/content-width.module.css";
 import { shareWorkbook, useSocial } from "@/lib/demo-social";
 import {
-  AUDIO_TRANSCRIPT,
   CREATIONS,
-  NOTE_SECTIONS,
   SUGGESTED_QUESTIONS,
   WORKBOOK_CHAT,
   WORKBOOK_SOURCES,
@@ -128,92 +120,6 @@ export function WorkbookWorkspace({
 
   function toggleSource(id: string) {
     setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
-  }
-
-  function renderModule(creation: DemoCreation) {
-    switch (creation.kind) {
-      case "notes":
-        return (
-          <article className="flex flex-col gap-4">
-            {NOTE_SECTIONS.map((section, i) => (
-              <section key={section.id} className="rounded-[22px] border border-border bg-card p-5 shadow-soft">
-                <div className="flex items-start gap-3">
-                  <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-[#E7F6F4] text-xs font-extrabold text-[#00786a]">
-                    {i + 1}
-                  </span>
-                  <div className="min-w-0">
-                    <h2 className="text-[15px] font-extrabold tracking-tight">{section.heading}</h2>
-                    <ul className="mt-2.5 flex flex-col gap-1.5">
-                      {section.bullets.map((b) => (
-                        <li key={b} className="flex items-start gap-2 text-sm leading-relaxed">
-                          <span className="mt-2 size-1.5 shrink-0 rounded-full bg-[#00b6a2]" aria-hidden="true" />
-                          {b}
-                        </li>
-                      ))}
-                    </ul>
-                    {section.citation && (
-                      <p className="mt-3 flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
-                        <FileText className="size-3" aria-hidden="true" />
-                        Sumber: {section.citation.label}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </section>
-            ))}
-          </article>
-        );
-      case "quizzes":
-        return <QuizPlayer aiExplain sourceWorkbookId={workbook.id} onFinishHref={`/quizzes/${creation.id}/hasil`} />;
-      case "flashcards":
-        return <FlashcardPlayer />;
-      case "slides":
-        return <SlidesTab workbookId={workbook.id} />;
-      case "mindmaps":
-        return <MindMapViewer />;
-      case "audio":
-        return (
-          <div className="flex flex-col gap-5">
-            <div className="flex items-start gap-3 rounded-2xl bg-[#FFE9E9] px-4 py-3.5">
-              <Info className="mt-0.5 size-4 shrink-0 text-[#b3383e]" aria-hidden="true" />
-              <p className="text-xs leading-relaxed text-[#7d2a30]">
-                Penjanaan audio gagal dalam binaan demo ini kerana perkhidmatan TTS belum disambung
-                (Fasa 4). Transkrip di bawah menunjukkan kandungan yang akan dijana.
-              </p>
-            </div>
-            <div className="flex items-center gap-4 rounded-[24px] border border-border bg-card p-5 shadow-soft">
-              <span className="grid size-12 shrink-0 place-items-center rounded-full bg-secondary text-muted-foreground">
-                <Play className="size-5" aria-hidden="true" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="h-2.5 w-full overflow-hidden rounded-full bg-[#e5eaf6]">
-                  <span className="block h-full w-0 rounded-full bg-[#c8cede]" />
-                </div>
-                <div className="mt-2 flex items-center justify-between text-[11px] font-semibold text-muted-foreground">
-                  <span>0:00</span>
-                  <span>0:58</span>
-                </div>
-              </div>
-              <AudioLines className="size-5 shrink-0 text-muted-foreground/50" aria-hidden="true" />
-            </div>
-            <div className="rounded-[22px] border border-border bg-card p-5 shadow-soft">
-              <h2 className="text-sm font-bold">Transkrip</h2>
-              <ul className="mt-3 flex flex-col gap-2.5">
-                {AUDIO_TRANSCRIPT.map((line) => (
-                  <li key={line.id} className="flex items-start gap-3 text-sm leading-relaxed">
-                    <span className="w-10 shrink-0 pt-0.5 text-right font-mono text-[11px] text-muted-foreground">
-                      {line.time}
-                    </span>
-                    {line.text}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        );
-      case "study-guides":
-        return <StudyGuideView />;
-    }
   }
 
   return (
@@ -411,7 +317,7 @@ export function WorkbookWorkspace({
           {modules.map((m) =>
             tab === m.kind ? (
               <div key={m.kind} className={styles.module}>
-                {renderModule(m.creation)}
+                <ArtifactTab workbookId={workbook.id} kind={m.kind} />
               </div>
             ) : null,
           )}

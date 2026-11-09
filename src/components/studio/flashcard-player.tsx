@@ -6,13 +6,13 @@ import { ProgressBar } from "@/components/studio/ui";
 import { FLASHCARDS } from "@/lib/demo-data";
 import { cn } from "@/lib/utils";
 
-export function FlashcardPlayer() {
-  const [order, setOrder] = useState(() => FLASHCARDS.map((_, i) => i));
+export function FlashcardPlayer({ cards: sourceCards = FLASHCARDS }: { cards?: typeof FLASHCARDS } = {}) {
+  const [order, setOrder] = useState(() => sourceCards.map((_, i) => i));
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [known, setKnown] = useState<Set<string>>(new Set());
 
-  const card = FLASHCARDS[order[index]];
+  const card = sourceCards[order[index]];
   const knownCount = useMemo(() => known.size, [known]);
 
   function go(delta: number) {
@@ -27,7 +27,7 @@ export function FlashcardPlayer() {
   }
 
   function reset() {
-    setOrder(FLASHCARDS.map((_, i) => i));
+    setOrder(sourceCards.map((_, i) => i));
     setIndex(0);
     setFlipped(false);
     setKnown(new Set());

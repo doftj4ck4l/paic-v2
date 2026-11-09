@@ -51,11 +51,11 @@ function Node({ node, depth = 0 }: { node: DemoMindmapNode; depth?: number }) {
   );
 }
 
-export function MindMapViewer() {
+export function MindMapViewer({ root = MINDMAP }: { root?: DemoMindmapNode } = {}) {
   return (
     <div className="rounded-[24px] border border-border bg-card p-6 shadow-soft">
       <ul className="flex flex-col gap-2" aria-label="Peta minda Kitaran Air">
-        <Node node={MINDMAP} />
+        <Node node={root} />
       </ul>
       <p className="mt-5 text-xs text-muted-foreground">
         Ketuk anak panah untuk kembang/tutup cabang. Zoom &amp; pan penuh serta eksport dalam Fasa 4.

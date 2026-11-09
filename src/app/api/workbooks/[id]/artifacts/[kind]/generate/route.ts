@@ -5,7 +5,8 @@ import { db } from "@/db";
 import { artifacts } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth-session";
 import { WORKBOOKS } from "@/lib/demo-data";
-import { enqueueArtifactJob, isSlidesGenerationAvailable, runSlidesGeneration, slideCountFor } from "@/lib/generation/slides";
+import { enqueueArtifactJob } from "@/lib/generation/queue";
+import { countFor, isArtifactKind, isGenerationAvailable, runArtifactGeneration } from "@/lib/generation/registry";
 
 const bodySchema = z.object({
   count: z.enum(["fewer", "standard", "more"]).default("standard"),
@@ -13,15 +14,19 @@ const bodySchema = z.object({
   sourceIds: z.array(z.string()).optional(),
 });
 
-export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string; kind: string }> }) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Tidak dibenarkan." }, { status: 401 });
 
-  const { id } = await params;
+  const { id, kind } = await params;
+  if (!isArtifactKind(kind)) {
+    return NextResponse.json({ error: "Jenis artifak tidak dikenali." }, { status: 404 });
+  }
+
   const workbook = WORKBOOKS.find((w) => w.id === id);
   if (!workbook) return NextResponse.json({ error: "Buku kerja tidak dijumpai." }, { status: 404 });
 
-  if (!isSlidesGenerationAvailable()) {
+  if (!isGenerationAvailable()) {
     return NextResponse.json(
       { error: "Penjanaan AI belum dikonfigurasi pada pelayan ini." },
       { status: 503 },
@@ -38,17 +43,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     id: artifactId,
     workbookId: id,
     userId: user.id,
-    kind: "slides",
+    kind,
     title: "Menjana…",
     status: "generating",
     params: {
       ...parsed.data,
-      count: parsed.data.count,
-      slideCount: slideCountFor(parsed.data.count),
+      itemCount: countFor(kind, parsed.data.count),
     },
   });
 
-  enqueueArtifactJob(() => runSlidesGeneration(artifactId));
+  enqueueArtifactJob(() => runArtifactGeneration(artifactId, kind));
 
   return NextResponse.json({ id: artifactId, status: "generating" }, { status: 201 });
 }

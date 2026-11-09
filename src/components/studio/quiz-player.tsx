@@ -5,13 +5,25 @@ import Link from "next/link";
 import { Check, RotateCcw, Sparkles, X } from "lucide-react";
 import { Chip, ProgressBar } from "@/components/studio/ui";
 import { QUIZ_QUESTIONS } from "@/lib/demo-data";
+
+export type QuizQuestion = {
+  id: string;
+  question: string;
+  options: string[];
+  answer: number;
+  explanation: string;
+  aiExplain?: string;
+  citation?: string;
+};
 import { cn } from "@/lib/utils";
 
 export function QuizPlayer({
+  questions = QUIZ_QUESTIONS,
   onFinishHref = "/creations",
   aiExplain = false,
   sourceWorkbookId,
 }: {
+  questions?: QuizQuestion[];
   onFinishHref?: string;
   aiExplain?: boolean;
   sourceWorkbookId?: string;
@@ -22,8 +34,8 @@ export function QuizPlayer({
   const [done, setDone] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
 
-  const question = QUIZ_QUESTIONS[index];
-  const score = answers.filter((a, i) => a === QUIZ_QUESTIONS[i].answer).length;
+  const question = questions[index];
+  const score = answers.filter((a, i) => a === questions[i]?.answer).length;
 
   function choose(option: number) {
     if (picked !== null) return;
@@ -32,7 +44,7 @@ export function QuizPlayer({
   }
 
   function next() {
-    if (index + 1 >= QUIZ_QUESTIONS.length) {
+    if (index + 1 >= questions.length) {
       setDone(true);
       return;
     }
@@ -50,7 +62,7 @@ export function QuizPlayer({
   }
 
   if (done) {
-    const percent = Math.round((score / QUIZ_QUESTIONS.length) * 100);
+    const percent = Math.round((score / questions.length) * 100);
     return (
       <div className="flex flex-col items-center gap-4 rounded-[24px] border border-border bg-card p-8 text-center shadow-soft">
         <span
@@ -63,7 +75,7 @@ export function QuizPlayer({
           {percent}%
         </span>
         <h2 className="text-xl font-extrabold" role="status">
-          {percent >= 75 ? "Syabas!" : "Teruskan usaha!"} {score}/{QUIZ_QUESTIONS.length} betul
+          {percent >= 75 ? "Syabas!" : "Teruskan usaha!"} {score}/{questions.length} betul
         </h2>
         <p className="max-w-sm text-sm text-muted-foreground">
           {percent >= 75
@@ -88,7 +100,7 @@ export function QuizPlayer({
         <div className="mt-4 w-full max-w-md text-left">
           <h3 className="text-sm font-bold">Semak jawapan</h3>
           <ul className="mt-3 flex flex-col gap-2">
-            {QUIZ_QUESTIONS.map((q, i) => {
+            {questions.map((q, i) => {
               const correct = answers[i] === q.answer;
               return (
                 <li key={q.id} className="flex items-start gap-2.5 rounded-xl border border-border bg-background p-3 text-sm">
@@ -120,14 +132,14 @@ export function QuizPlayer({
     <div className="flex flex-col gap-5 rounded-[24px] border border-border bg-card p-6 shadow-soft">
       <div className="flex items-center justify-between gap-4">
         <p className="text-xs font-bold text-muted-foreground">
-          Soalan {index + 1} / {QUIZ_QUESTIONS.length}
+          Soalan {index + 1} / {questions.length}
         </p>
         <p className="text-xs font-bold text-[#00786a]" aria-live="polite">
           {score} betul
         </p>
       </div>
       <ProgressBar
-        value={((index + (picked !== null ? 1 : 0)) / QUIZ_QUESTIONS.length) * 100}
+        value={((index + (picked !== null ? 1 : 0)) / questions.length) * 100}
         label="Kemajuan kuiz"
         className="h-2"
       />
@@ -177,7 +189,7 @@ export function QuizPlayer({
               onClick={next}
               className="focus-ring inline-flex h-11 items-center rounded-xl bg-gradient-to-r from-[#007a66] to-[#00856f] px-6 text-sm font-semibold text-white shadow-soft"
             >
-              {index + 1 >= QUIZ_QUESTIONS.length ? "Lihat keputusan" : "Soalan seterusnya"}
+              {index + 1 >= questions.length ? "Lihat keputusan" : "Soalan seterusnya"}
             </button>
             {aiExplain && (
               <button
@@ -223,10 +235,10 @@ export function QuizPlayer({
             </div>
             <div className="flex flex-col gap-4 p-4">
               <div className="rounded-2xl border border-border bg-background p-4">
-                <p className="text-sm leading-relaxed">{question.aiExplain}</p>
+                <p className="text-sm leading-relaxed">{question.aiExplain ?? question.explanation}</p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <Chip tone="teal">Sumber: {question.citation}</Chip>
+                {question.citation && <Chip tone="teal">Sumber: {question.citation}</Chip>}
                 {sourceWorkbookId && (
                   <Link
                     href={`/workbooks/${sourceWorkbookId}`}
