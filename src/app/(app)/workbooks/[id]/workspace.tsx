@@ -121,6 +121,8 @@ function WorkbookWorkspaceInner({ workbook, viewerId, initialTab = "sumber" }: W
   function setTab(next: TabId) { updateTab(next); setVisited(current => current.includes(next) ? current : [...current, next]); }
   const savedWorkbooks = useSavedWorkbooks();
   const isSaved = savedWorkbooks.includes(workbook.id);
+  // Real published workbooks and demo student-shared ones can be saved to Disimpan.
+  const saveable = readOnly && (workbook.isDb || workbook.ownerRole === "student");
 
   return (
     <div className={styles.page}>
@@ -142,7 +144,7 @@ function WorkbookWorkspaceInner({ workbook, viewerId, initialTab = "sumber" }: W
                 {publishing ? "Mengemas kini…" : isPublished ? "Diterbitkan" : "Terbitkan"}
               </button>
             )}
-            {readOnly && workbook.isDb && (
+            {saveable && (
               <button
                 type="button"
                 onClick={() => toggleSavedWorkbook(workbook.id)}

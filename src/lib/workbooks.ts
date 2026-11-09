@@ -1,7 +1,7 @@
 import { and, countDistinct, desc, eq, inArray } from "drizzle-orm";
 import { db } from "@/db";
 import { artifacts, workbooks } from "@/db/schema";
-import { WORKBOOKS, type DemoWorkbook, type SubjectId } from "@/lib/demo-data";
+import { SHARED_WORKBOOKS, WORKBOOKS, communityStudentById, type DemoSharedWorkbook, type DemoWorkbook, type SubjectId } from "@/lib/demo-data";
 
 /**
  * App view model for a workbook — the demo shape plus ownership fields.
@@ -71,6 +71,28 @@ export function demoToAppWorkbook(workbook: DemoWorkbook): AppWorkbook {
 
 const DEMO_APP_WORKBOOKS = WORKBOOKS.map(demoToAppWorkbook);
 
+/** Demo student-shared workbooks (Jelajah tiles) open as read-only demo workbooks. */
+export function sharedToAppWorkbook(workbook: DemoSharedWorkbook): AppWorkbook {
+  return {
+    id: workbook.id,
+    title: workbook.title,
+    subjectId: workbook.subjectId,
+    topic: workbook.topic,
+    progress: 0,
+    teacherName: communityStudentById(workbook.authorId).name,
+    yearLabel: workbook.yearLabel,
+    updatedDaysAgo: 0,
+    ownerId: null,
+    ownerRole: "student",
+    visibility: "published",
+    publishedAt: null,
+    createdAt: null,
+    isDb: false,
+  };
+}
+
+export const SHARED_APP_WORKBOOKS = SHARED_WORKBOOKS.map(sharedToAppWorkbook);
+
 /** All workbooks for the library: the user's own DB workbooks + demo ones. */
 export async function listWorkbooksForUser(userId: string): Promise<AppWorkbook[]> {
   const rows = await db.select().from(workbooks).where(eq(workbooks.ownerId, userId)).orderBy(desc(workbooks.updatedAt));
@@ -86,7 +108,9 @@ export async function getAppWorkbook(id: string): Promise<AppWorkbook | null> {
     return toAppWorkbook(row, progress.get(id) ?? 0);
   }
   const demo = WORKBOOKS.find((w) => w.id === id);
-  return demo ? demoToAppWorkbook(demo) : null;
+  if (demo) return demoToAppWorkbook(demo);
+  const shared = SHARED_WORKBOOKS.find((w) => w.id === id);
+  return shared ? sharedToAppWorkbook(shared) : null;
 }
 
 /** Workbooks created by a specific user (DB only). */

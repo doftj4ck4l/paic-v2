@@ -72,12 +72,12 @@ test("ready sources recover an automatic empty selection and late embeddings joi
   assert.deepEqual(reconcileSelection(["a"], ["a", "deleted"], ["still-processing"], true), ["a"]);
 });
 test("chat citations can only reference the source excerpts supplied to the model", async () => {
-  const { checkedChatAnswer } = await import("../src/lib/workbook/chat");
+  const { finalizeChatAnswer } = await import("../src/lib/workbook/chat");
   const references = [{ index: 1, sourceId: "a", title: "Nota", excerpt: "Teks sumber" }];
-  const result = checkedChatAnswer({ answer: "Jawapan [1]. Rujukan palsu [99].", citations: [1, 99] }, references);
+  const result = finalizeChatAnswer("Jawapan [1]. Rujukan palsu [99].", references);
   assert.equal(result.answer.includes("[99]"), false);
   assert.deepEqual(result.citations, references);
-  assert.throws(() => checkedChatAnswer({ answer: "", citations: [] }, references));
+  assert.deepEqual(finalizeChatAnswer("Jawapan tanpa rujukan.", references).citations, []);
 });
 
 

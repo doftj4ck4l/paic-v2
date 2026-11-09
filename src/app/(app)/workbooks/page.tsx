@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Plus, Sparkles } from "lucide-react";
 import { requireUser } from "@/lib/auth-session";
-import { listPublishedWorkbooks, listWorkbooksForUser } from "@/lib/workbooks";
+import { SHARED_APP_WORKBOOKS, listPublishedWorkbooks, listWorkbooksForUser } from "@/lib/workbooks";
 import { WorkbookList } from "./workbook-list";
 import styles from "./workbooks.module.css";
 import content from "@/components/studio/content-width.module.css";
@@ -35,7 +35,7 @@ export default async function WorkbooksPage() {
             <Image src="/assets/workbooks/books-robot.png" alt="" width={1536} height={1024} loading="eager" sizes="(max-width: 600px) 340px, (max-width: 1000px) 410px, 560px" />
           </div>
         </section>
-        <WorkbookList workbooks={workbooks} published={published} />
+        <WorkbookList workbooks={workbooks} published={[...published, ...SHARED_APP_WORKBOOKS]} />
         <p className={styles.attribution}>3D icons by <a href="https://www.thiings.co/things" target="_blank" rel="noreferrer">Thiings</a></p>
       </main>
     </div>

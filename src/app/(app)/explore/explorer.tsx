@@ -5,10 +5,13 @@ import Link from "next/link";
 import { ArrowRight, BookOpen, ChevronDown, Compass, GraduationCap, ListChecks, RotateCcw, Search, SlidersHorizontal, UsersRound, X } from "lucide-react";
 import { ContentTile, SUBJECT_ICONS } from "@/components/studio/content-tile";
 import { WorkbookTile } from "@/app/(app)/workbooks/workbook-list";
+import { SharedWorkbookTile } from "@/components/studio/shared-workbook-tile";
 import {
+  SHARED_WORKBOOKS,
   SUBJECTS,
   TOPICS,
   WORKBOOKS,
+  communityStudentById,
   subjectById,
   type DemoWorkbook,
   type SubjectId,
@@ -79,6 +82,7 @@ export function Explorer({ publishedWorkbooks = [], viewerId = null }: { publish
     const years = new Set<string>([
       ...TOPICS.map((t) => t.yearLabel),
       ...teacherWorkbooks.map((w) => w.yearLabel),
+      ...SHARED_WORKBOOKS.map((w) => w.yearLabel),
       ...studentPublished.map((w) => w.yearLabel),
     ]);
     return [...years].filter(Boolean).sort((a, b) => yearRank(a) - yearRank(b));
@@ -87,7 +91,7 @@ export function Explorer({ publishedWorkbooks = [], viewerId = null }: { publish
   const authorOptions = useMemo(() => {
     const names =
       scope === "pelajar"
-        ? studentPublished.map((w) => w.teacherName)
+        ? [...SHARED_WORKBOOKS.map((w) => communityStudentById(w.authorId).name), ...studentPublished.map((w) => w.teacherName)]
         : teacherWorkbooks.map((w) => w.teacherName);
     return [...new Set(names)].filter(Boolean).sort((a, b) => a.localeCompare(b, "ms"));
   }, [scope, teacherWorkbooks, studentPublished]);
@@ -126,6 +130,20 @@ export function Explorer({ publishedWorkbooks = [], viewerId = null }: { publish
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [teacherWorkbooks, subject, year, author, query, sort]);
 
+  const pelajarShared = useMemo(() => {
+    const filtered = SHARED_WORKBOOKS.filter(
+      (workbook) =>
+        (subject === "all" || workbook.subjectId === subject) &&
+        (year === "all" || workbook.yearLabel === year) &&
+        (author === "all" || communityStudentById(workbook.authorId).name === author) &&
+        matches(`${workbook.title} ${workbook.topic} ${communityStudentById(workbook.authorId).name} ${subjectById(workbook.subjectId).name}`),
+    );
+    if (sort === "az") return [...filtered].sort((a, b) => a.title.localeCompare(b.title, "ms"));
+    if (sort === "complete") return [...filtered].sort((a, b) => b.saves - a.saves);
+    return filtered;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subject, year, author, query, sort]);
+
   const pelajarPublished = useMemo(() => {
     const filtered = studentPublished.filter(
       (workbook) =>
@@ -152,7 +170,7 @@ export function Explorer({ publishedWorkbooks = [], viewerId = null }: { publish
   const resultLabel =
     scope === "topik"
       ? `${topics.length} topik`
-      : `${scope === "guru" ? guruWorkbooks.length : pelajarPublished.length} buku kerja`;
+      : `${scope === "guru" ? guruWorkbooks.length : pelajarShared.length + pelajarPublished.length} buku kerja`;
 
   return (
     <div className={styles.library} id="explore-library">
@@ -266,10 +284,11 @@ export function Explorer({ publishedWorkbooks = [], viewerId = null }: { publish
 
       {scope === "pelajar" && (
         <section className={styles.topicsSection} aria-label="Buku kerja daripada pelajar">
-          {pelajarPublished.length === 0 ? (
+          {pelajarShared.length === 0 && pelajarPublished.length === 0 ? (
             <div className={styles.empty}><BookOpen size={30} aria-hidden="true" /><h3>Tiada buku kerja sepadan</h3><p>Cuba kata kunci atau tapisan lain.</p><button type="button" onClick={reset}>Tetapkan semula tapisan</button></div>
           ) : (
             <div className={styles.communityGrid}>
+              {pelajarShared.map((workbook) => <SharedWorkbookTile key={workbook.id} workbook={workbook} />)}
               {pelajarPublished.map((workbook) => <WorkbookTile key={workbook.id} workbook={workbook} owned={workbook.ownerId === viewerId && workbook.ownerId !== null} canSave={workbook.ownerId !== null && workbook.ownerId !== viewerId} />)}
             </div>
           )}

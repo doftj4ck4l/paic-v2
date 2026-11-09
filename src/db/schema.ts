@@ -215,13 +215,25 @@ export const artifacts = pgTable(
 );
 
 /** Saved chat turns, isolated by workbook and learner. A turn is written atomically. */
+/** Private chat sessions per workbook per learner (owner and viewers alike). */
+export const workbookChatSessions = pgTable("workbook_chat_sessions", {
+  id: text("id").primaryKey(),
+  workbookId: text("workbook_id").notNull(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  title: text("title").notNull().default("Sembang baharu"),
+  sourceIds: jsonb("source_ids").$type<string[]>().notNull().default([]),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, table => [index("workbook_chat_sessions_scope_idx").on(table.workbookId, table.userId)]);
+
 export const workbookChatTurns = pgTable("workbook_chat_turns", {
   id: text("id").primaryKey(),
   workbookId: text("workbook_id").notNull(),
   userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  sessionId: text("session_id"),
   question: text("question").notNull(),
   answer: text("answer").notNull(),
   sourceIds: jsonb("source_ids").$type<string[]>().notNull(),
   citations: jsonb("citations").$type<{ index: number; sourceId: string; title: string; excerpt: string; url?: string }[]>().notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-}, table => [index("workbook_chat_turns_scope_idx").on(table.workbookId, table.userId)]);
+}, table => [index("workbook_chat_turns_scope_idx").on(table.workbookId, table.userId), index("workbook_chat_turns_session_idx").on(table.sessionId)]);

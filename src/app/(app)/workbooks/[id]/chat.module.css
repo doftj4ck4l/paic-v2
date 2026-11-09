@@ -19,7 +19,7 @@
 .question p { font-size: 13px; color: #235749; line-height: 1.8; white-space: pre-wrap; overflow-wrap: anywhere; }
 .answer { padding: 16px 18px; background: #fbfcff; border: 1px solid #e8ecf6; border-radius: 5px 18px 18px; max-width: 94%; }
 .answerLabel { display: flex; align-items: center; gap: 7px; color: #8565b9; font-size: 11px; font-weight: 750; margin-bottom: 12px; }
-.answerText { white-space: pre-wrap; overflow-wrap: anywhere; color: #4a5670; font-size: 13px; line-height: 1.9; }
+.answerText { overflow-wrap: anywhere; color: #4a5670; font-size: 13px; line-height: 1.9; }
 .citations { margin-top: 16px; border-top: 1px solid #e4e9f3; padding-top: 12px; }
 .citations summary { display: flex; align-items: center; gap: 6px; color: #008d7c; font-size: 10px; font-weight: 700; cursor: pointer; }
 .citations > div { display: grid; gap: 8px; margin-top: 10px; }
@@ -42,3 +42,79 @@
 @keyframes spin { to { transform: rotate(360deg); } }
 .panel :focus-visible { outline: 3px solid #83dfcd; outline-offset: 3px; }
 @media (max-width: 620px) { .panel { padding: 20px 15px; border-radius: 21px; } .header h2 { font-size: 21px; } .header p { font-size: 11px; } .header { gap: 12px; } .empty { padding-inline: 0; } .empty h3 { font-size: 19px; } .suggestions { flex-direction: column; width: 100%; } .suggestions button { text-align: left; } .answer { max-width: 100%; padding: 13px; } .answerText, .question p { font-size: 12px; } .composerHint { flex-direction: column; gap: 3px; } .conversation { max-height: 500px; } }
+
+/* ---------------- Sessions ---------------- */
+.sessionBar { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+.sessionMenu { position: relative; }
+.sessionTrigger { display: inline-flex; align-items: center; gap: 8px; max-width: 340px; height: 37px; padding: 0 13px; border: 1px solid #dfe4f3; border-radius: 19px; background: #fff; color: #3c4160; font-size: 12px; font-weight: 650; letter-spacing: -.2px; cursor: pointer; transition: border-color 140ms; }
+.sessionTrigger:hover { border-color: #b9ddd1; }
+.sessionTrigger[aria-expanded="true"] { border-color: #00a58d; box-shadow: 0 0 0 3px #00a58d18; }
+.sessionTrigger > span:first-of-type { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sessionCount { display: grid; place-items: center; min-width: 19px; height: 19px; padding-inline: 5px; border-radius: 10px; background: #eef4ff; color: #4a5670; font-size: 10.5px; font-weight: 750; }
+.sessionChevron { color: #6d7292; flex-shrink: 0; }
+.sessionPanel { position: absolute; z-index: 30; top: calc(100% + 10px); left: 0; width: 340px; max-width: min(340px, calc(100vw - 40px)); padding: 10px; border: 1px solid #e2e7f2; border-radius: 18px; background: #fff; box-shadow: 0 18px 44px #23284d1f; }
+.newSession { display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%; height: 38px; border-radius: 12px; background: linear-gradient(110deg, #007a66, #00856f); color: #fff; font-size: 12px; font-weight: 750; cursor: pointer; }
+.sessionEmpty { padding: 14px 6px 6px; color: #7c819c; font-size: 11px; text-align: center; }
+.sessionList { display: grid; gap: 4px; margin-top: 8px; max-height: 300px; overflow-y: auto; }
+.sessionRow { display: flex; align-items: center; gap: 6px; border-radius: 12px; }
+.sessionRow[data-active="true"] { background: #f2f8f7; }
+.sessionOpen { flex: 1; min-width: 0; display: grid; gap: 2px; padding: 9px 10px; text-align: left; border-radius: 12px; cursor: pointer; }
+.sessionOpen:hover { background: #f6f9fe; }
+.sessionOpen strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 700; color: #23264a; }
+.sessionOpen small { font-size: 10px; color: #7c819c; }
+.sessionActions { display: flex; gap: 2px; padding-right: 4px; }
+.sessionActions button { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 8px; color: #6d7292; cursor: pointer; }
+.sessionActions button:hover { background: #eef3fa; color: #1c2242; }
+.renameForm { display: flex; align-items: center; gap: 4px; width: 100%; padding: 4px; }
+.renameForm input { flex: 1; min-width: 0; height: 30px; padding: 0 9px; border: 1px solid #d6deee; border-radius: 9px; font-size: 12px; }
+.renameForm button { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; color: #007c69; cursor: pointer; }
+.renameForm button:hover { background: #eef7f4; }
+.newSessionInline { display: inline-flex; align-items: center; gap: 6px; height: 37px; padding: 0 13px; border: 1px dashed #c9d6ea; border-radius: 19px; background: #ffffffb8; color: #5d6b8c; font-size: 12px; font-weight: 650; cursor: pointer; }
+.newSessionInline:hover { border-color: #b9ddd1; color: #007c69; }
+
+/* ---------------- Session source banner ---------------- */
+.sourceBanner { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 12px; padding: 10px 12px; border: 1px solid #f0e0c0; border-radius: 14px; background: #fffaf0; color: #6f6a52; font-size: 11px; line-height: 1.6; }
+.sourceBanner > svg { color: #b78a2e; flex-shrink: 0; }
+.sourceBanner > span { flex: 1; min-width: 160px; }
+.sourceBanner strong { color: #5d5636; }
+.sourceBanner > button:not(.bannerDismiss) { padding: 7px 12px; border-radius: 11px; background: linear-gradient(110deg, #007a66, #00856f); color: #fff; font-size: 11px; font-weight: 700; cursor: pointer; }
+.bannerDismiss { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 8px; color: #9a8f6a; cursor: pointer; }
+.bannerDismiss:hover { background: #f7eeda; }
+
+/* ---------------- Streaming ---------------- */
+.cursor { display: inline-block; width: 7px; height: 14px; margin-left: 2px; vertical-align: -2px; background: #008a78; border-radius: 2px; animation: cursorBlink 1s steps(1) infinite; }
+@keyframes cursorBlink { 50% { opacity: 0; } }
+.composer .stopButton { background: #fff0f2; color: #b94c64; border: 1px solid #f1d2db; }
+
+/* ---------------- Markdown answer typography ---------------- */
+.answerText > *:first-child { margin-top: 0; }
+.answerText > *:last-child { margin-bottom: 0; }
+.answerText p { margin: 0 0 10px; }
+.answerText h1, .answerText h2, .answerText h3 { margin: 14px 0 8px; font-weight: 800; letter-spacing: -.4px; color: #23264a; }
+.answerText h1 { font-size: 17px; }
+.answerText h2 { font-size: 15px; }
+.answerText h3 { font-size: 13.5px; }
+.answerText ul, .answerText ol { margin: 0 0 10px; padding-left: 22px; }
+.answerText li { margin: 4px 0; }
+.answerText strong { color: #1c2242; font-weight: 750; }
+.answerText code { padding: 2px 6px; border-radius: 7px; background: #eef3fa; font-size: 12px; }
+.answerText pre { margin: 0 0 10px; padding: 12px; border-radius: 12px; background: #f4f7fc; overflow-x: auto; }
+.answerText pre code { padding: 0; background: transparent; }
+.answerText blockquote { margin: 0 0 10px; padding: 8px 12px; border-left: 3px solid #b9ddd1; background: #f7fbfa; border-radius: 0 10px 10px 0; color: #5d6b8c; }
+.answerText hr { margin: 12px 0; border: 0; border-top: 1px solid #e6ecf5; }
+.answerText table { width: 100%; border-collapse: collapse; margin: 0 0 10px; font-size: 12px; }
+.answerText th, .answerText td { padding: 6px 9px; border: 1px solid #e3e9f4; text-align: left; }
+.answerText th { background: #f4f7fc; font-weight: 700; }
+.answerText a { color: #007c69; text-decoration: underline; text-underline-offset: 3px; }
+
+/* ---------------- Delete confirm dialog ---------------- */
+.confirmDelete { display: grid; gap: 10px; padding: 24px 22px; }
+.confirmDelete h2 { font-size: 17px; font-weight: 800; }
+.confirmDelete strong { font-size: 13px; color: #23264a; }
+.confirmDelete p { font-size: 12px; color: #6d7292; line-height: 1.7; }
+.confirmDelete > div { display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; }
+.secondary, .danger { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 41px; padding: 10px 16px; border-radius: 15px; font-size: 11px; font-weight: 750; cursor: pointer; white-space: nowrap; }
+.secondary { color: #576485; background: #fff; border: 1px solid #e0e7f3; }
+.secondary:hover:enabled { border-color: #bfded6; background: #f4fcf8; }
+.danger { color: #b94c64; background: #fff0f2; border: 1px solid #f1d2db; }
+.danger:hover:enabled { background: #ffe5e9; }

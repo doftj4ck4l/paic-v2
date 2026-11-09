@@ -74,6 +74,62 @@ export async function chatJSON(
   return extractJson(content);
 }
 
+/**
+ * Streaming chat completion. Emits `delta.content` chunks through onDelta
+ * (reasoning chunks are ignored) and resolves with the full answer text.
+ */
+export async function chatStreamText(
+  messages: ChatMessage[],
+  { maxTokens = 8000, model = textModel(), onDelta, signal }: { maxTokens?: number; model?: string; onDelta: (text: string) => void; signal?: AbortSignal },
+): Promise<string> {
+  const { baseUrl, apiKey } = config();
+  const timeout = AbortSignal.timeout(180_000);
+  const combined = signal ? AbortSignal.any([signal, timeout]) : timeout;
+  const response = await fetch(`${baseUrl}/chat/completions`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify({ model, messages, max_tokens: maxTokens, temperature: 0.6, stream: true }),
+    signal: combined,
+  });
+  if (!response.ok || !response.body) {
+    const body = await response.text().catch(() => "");
+    throw new Error(`Ralat model (${response.status}): ${body.slice(0, 300)}`);
+  }
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let content = "";
+  let sawReasoning = false;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() ?? "";
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed.startsWith("data:")) continue;
+      const data = trimmed.slice(5).trim();
+      if (!data || data === "[DONE]") continue;
+      try {
+        const parsed = JSON.parse(data) as { choices?: { delta?: { content?: string | null; reasoning_content?: string | null } }[] };
+        const delta = parsed.choices?.[0]?.delta;
+        if (delta?.reasoning_content) sawReasoning = true;
+        if (delta?.content) {
+          content += delta.content;
+          onDelta(delta.content);
+        }
+      } catch { /* keep-alive lines and partial frames are ignored */ }
+    }
+  }
+  // Some models inline chain-of-thought; strip it before returning.
+  content = content.replace(/<think(?:ing)?>[\s\S]*?<\/think(?:ing)?>/gi, "").trim();
+  if (!content) {
+    throw new Error(sawReasoning ? "Model memulangkan jawapan kosong. Sila cuba lagi." : "Model memulangkan jawapan kosong.");
+  }
+  return content;
+}
+
 export async function generateImage(
   prompt: string,
   { model = imageModel() }: { model?: string } = {},
