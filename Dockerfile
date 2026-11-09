@@ -18,8 +18,8 @@ COPY . .
 RUN npm run build
 
 # ---------- runner ----------
-# Full node_modules are kept so `npm run db:migrate` / `db:seed` (tsx +
-# drizzle) work inside the container for deployment tooling.
+# Production dependencies only (tsx is a prod dependency so `npm run
+# db:migrate` / `db:seed` work inside the container for deployment tooling).
 FROM node:24-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
@@ -28,8 +28,9 @@ ENV PORT=3000
 # yt-dlp powers the YouTube STT fallback (transcript-less videos → whisper)
 RUN apk add --no-cache yt-dlp
 RUN addgroup -S nodejs && adduser -S nextjs -G nodejs
-COPY --from=build /app/package.json /app/package-lock.json /app/tsconfig.json /app/next.config.ts /app/drizzle.config.ts ./
-COPY --from=build /app/node_modules ./node_modules
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev && npm cache clean --force
+COPY --from=build /app/tsconfig.json /app/next.config.ts /app/drizzle.config.ts ./
 COPY --from=build /app/.next ./.next
 COPY --from=build /app/public ./public
 COPY --from=build /app/src ./src
