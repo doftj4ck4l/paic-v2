@@ -22,7 +22,6 @@ import type { DemoStudyGuide } from "@/lib/demo-data";
 import type { AudioData } from "@/lib/generation/schemas";
 import type { DeckData, MindmapNode } from "@/lib/generation/schemas";
 import { useWorkbookSources } from "@/lib/workbook/use-sources";
-import { SourceScope } from "./source-scope";
 import { SlidesView } from "./viewers/slides-view";
 import { NotesView, type NotesData } from "./viewers/notes-view";
 import { AudioView } from "./viewers/audio-view";
@@ -170,7 +169,7 @@ const THEME_OPTIONS = [
   { value: "warm", label: "Mesra" },
 ] as const;
 
-export function ArtifactTab({ workbookId, kind, onManageSources }: { workbookId: string; kind: ArtifactKind; onManageSources?: () => void }) {
+export function ArtifactTab({ workbookId, kind }: { workbookId: string; kind: ArtifactKind }) {
   const ui = KIND_UI[kind];
   const Icon = ui.icon;
 
@@ -274,7 +273,7 @@ export function ArtifactTab({ workbookId, kind, onManageSources }: { workbookId:
         <span className={styles.generateIcon} aria-hidden="true"><Icon /></span>
         <h3>Jana {ui.noun} AI</h3>
         <p>{ui.description}</p>
-        <SourceScope state={sourceState} onManageSources={onManageSources} />
+        {!sourceCount && <p className={styles.generateNotice}>Pilih sumber di tab Sumber untuk menjana dengan AI.</p>}
         {!available && <p className={styles.generateNotice}>Penjanaan AI belum dikonfigurasi pada pelayan ini.</p>}
         {(ui.countOptions.length > 0 || ui.showTheme) && (
           <div className={styles.generateOptions}>
@@ -359,7 +358,6 @@ export function ArtifactTab({ workbookId, kind, onManageSources }: { workbookId:
 
   return (
     <div className={styles.deckWrap}>
-      <SourceScope state={sourceState} onManageSources={onManageSources} />
       {error && <p className={styles.generateError} role="alert">{error}</p>}
       <div className={styles.deckToolbar}>
         <div className={styles.deckMeta}>

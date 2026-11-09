@@ -4,14 +4,6 @@
 .header h2 { margin-top: 5px; font-size: 24px; font-weight: 800; letter-spacing: -.8px; }
 .header p { margin-top: 6px; color: #717790; font-size: 12px; line-height: 1.7; }
 .pixel { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 16px; background: #f0eaff; color: #8660cc; flex-shrink: 0; }
-.scope { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px; width: 100%; padding: 12px 15px; border: 1px solid #d9eee7; border-radius: 14px; background: #f5fcf9; color: #60847b; font-size: 11px; line-height: 1.6; margin-bottom: 8px; }
-.scope > span { display: inline-flex; align-items: center; gap: 7px; }
-.scope button, .scopePicker summary { color: #008d7c; font-size: 11px; font-weight: 700; cursor: pointer; }
-.scopePicker { position: relative; text-align: left; }
-.scopePicker > div { position: absolute; z-index: 12; right: 0; top: calc(100% + 10px); min-width: 270px; max-width: min(420px, 80vw); max-height: 260px; overflow: auto; padding: 10px; background: #fff; border: 1px solid #dce9e3; border-radius: 13px; box-shadow: 0 12px 35px #2c496124; }
-.scopePicker label { display: flex; align-items: flex-start; gap: 8px; padding: 9px 7px; font-size: 11px; color: #56637d; line-height: 1.6; cursor: pointer; }
-.scopePicker input { width: 15px; height: 15px; accent-color: #009f88; margin-top: 2px; flex-shrink: 0; }
-.scopePicker button { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 10px; border-top: 1px solid #e5eee9; }
 .conversation { overflow-y: auto; overscroll-behavior: contain; max-height: 600px; min-height: 300px; padding: 16px 6px; scrollbar-width: thin; }
 .empty { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px 16px 28px; min-height: 300px; }
 .empty img { object-fit: contain; margin-bottom: 16px; }
@@ -48,5 +40,5 @@
 .error button { display: flex; align-items: center; gap: 5px; cursor: pointer; }
 .spin { animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-.panel :focus-visible, .scope :focus-visible { outline: 3px solid #83dfcd; outline-offset: 3px; }
-@media (max-width: 620px) { .panel { padding: 20px 15px; border-radius: 21px; } .header h2 { font-size: 21px; } .header p { font-size: 11px; } .header { gap: 12px; } .scope { font-size: 10px; padding: 11px; gap: 8px; } .scopePicker > div { right: -65px; min-width: 240px; } .empty { padding-inline: 0; } .empty h3 { font-size: 19px; } .suggestions { flex-direction: column; width: 100%; } .suggestions button { text-align: left; } .answer { max-width: 100%; padding: 13px; } .answerText, .question p { font-size: 12px; } .composerHint { flex-direction: column; gap: 3px; } .conversation { max-height: 500px; } }
+.panel :focus-visible { outline: 3px solid #83dfcd; outline-offset: 3px; }
+@media (max-width: 620px) { .panel { padding: 20px 15px; border-radius: 21px; } .header h2 { font-size: 21px; } .header p { font-size: 11px; } .header { gap: 12px; } .empty { padding-inline: 0; } .empty h3 { font-size: 19px; } .suggestions { flex-direction: column; width: 100%; } .suggestions button { text-align: left; } .answer { max-width: 100%; padding: 13px; } .answerText, .question p { font-size: 12px; } .composerHint { flex-direction: column; gap: 3px; } .conversation { max-height: 500px; } }

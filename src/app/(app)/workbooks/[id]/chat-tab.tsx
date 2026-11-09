@@ -3,11 +3,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowUp, BookOpen, CircleAlert, ExternalLink, LoaderCircle, MessageSquareText, RefreshCw, Sparkles } from "lucide-react";
 import { useWorkbookSources } from "@/lib/workbook/use-sources";
 import type { ChatTurn } from "@/lib/workbook/chat";
-import { SourceScope } from "./source-scope";
 import styles from "./chat.module.css";
 
 const SUGGESTIONS = ["Ringkaskan sumber ini dengan mudah", "Terangkan konsep yang paling penting", "Beri contoh untuk membantu saya faham"];
-export function ChatTab({ workbookId, onManageSources }: { workbookId: string; onManageSources: () => void }) {
+export function ChatTab({ workbookId }: { workbookId: string }) {
   const sourceState = useWorkbookSources(workbookId);
   const [turns, setTurns] = useState<ChatTurn[]>([]);
   const [input, setInput] = useState("");
@@ -45,10 +44,9 @@ export function ChatTab({ workbookId, onManageSources }: { workbookId: string; o
   const canSend = sourceState.selectedIds.length > 0 && available && !loading;
   return <section className={styles.panel} aria-labelledby="chat-heading">
     <div className={styles.header}><div><span className={styles.eyebrow}>BELAJAR BERSAMA PIXEL</span><h2 id="chat-heading">Sembang AI</h2><p>Tanya soalan, fahami konsep, dan semak rujukan daripada sumber anda.</p></div><span className={styles.pixel}><Sparkles size={22} /></span></div>
-    <SourceScope state={sourceState} onManageSources={onManageSources} />
     {!available && <p className={styles.error} role="alert">Perkhidmatan AI belum dikonfigurasi pada pelayan.</p>}
     <div className={styles.conversation} aria-label="Perbualan dengan Pixel AI" aria-busy={Boolean(pending)}>
-      {loading ? <div className={styles.empty}><LoaderCircle className={styles.spin} /><p>Memuatkan sembang…</p></div> : !turns.length && !pending ? <div className={styles.empty}><img src="/assets/thiings/mission-chat.png" width={88} height={88} alt="" /><h3>Apa yang ingin anda fahami?</h3><p>{sourceState.selectedIds.length ? "Sumber anda sudah sedia. Mulakan dengan soalan atau pilih cadangan di bawah." : sourceState.processing.length ? "Sumber sedang disediakan. Anda boleh mula bertanya sebaik sahaja embedding siap." : "Pilih sumber yang siap di atas untuk mula berbual dengan Pixel."}</p><div className={styles.suggestions}>{SUGGESTIONS.map(question => <button type="button" key={question} disabled={!canSend} onClick={() => void send(question)}><MessageSquareText size={14} />{question}</button>)}</div></div> : <>
+      {loading ? <div className={styles.empty}><LoaderCircle className={styles.spin} /><p>Memuatkan sembang…</p></div> : !turns.length && !pending ? <div className={styles.empty}><img src="/assets/thiings/mission-chat.png" width={88} height={88} alt="" /><h3>Apa yang ingin anda fahami?</h3><p>{sourceState.selectedIds.length ? "Sumber anda sudah sedia. Mulakan dengan soalan atau pilih cadangan di bawah." : sourceState.processing.length ? "Sumber sedang disediakan. Anda boleh mula bertanya sebaik sahaja embedding siap." : "Pilih sumber di tab Sumber dahulu untuk mula berbual dengan Pixel."}</p><div className={styles.suggestions}>{SUGGESTIONS.map(question => <button type="button" key={question} disabled={!canSend} onClick={() => void send(question)}><MessageSquareText size={14} />{question}</button>)}</div></div> : <>
         {turns.map(turn => <div className={styles.turn} key={turn.id}><div className={styles.question}><span>Anda</span><p>{turn.question}</p></div><article className={styles.answer}><div className={styles.answerLabel}><Sparkles size={16} />Pixel AI</div><div className={styles.answerText}>{turn.answer}</div>{turn.citations.length > 0 && <details className={styles.citations}><summary><BookOpen size={13} />Rujukan jawapan · {turn.citations.length}</summary><div>{turn.citations.map(citation => <div key={citation.index}><strong>[{citation.index}] {citation.title}</strong><p>{citation.excerpt}</p>{citation.url && <a href={citation.url} target="_blank" rel="noopener noreferrer">Buka sumber asal<ExternalLink size={11} /></a>}</div>)}</div></details>}</article></div>)}
         {pending && <div className={styles.turn}><div className={styles.question}><span>Anda</span><p>{pending}</p></div><div className={styles.thinking} role="status"><LoaderCircle size={16} className={styles.spin} />Pixel sedang membaca sumber dan menyediakan jawapan…</div></div>}
       </>}

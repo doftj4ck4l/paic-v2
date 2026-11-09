@@ -1,15 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth-session";
-import { accessibleWorkbook, sourceView } from "@/lib/ingestion/access";
-import { embeddingConfigured } from "@/lib/ingestion/embeddings";
+import { accessibleWorkbook, sourcePayload, sourceView } from "@/lib/ingestion/access";
 import { kickSourceWorker } from "@/lib/ingestion/worker";
 import {
   createFileSource,
   createTextSource,
   createUrlSource,
   createYoutubeSource,
-  listSources,
   updateSource,
   mergeSourceMeta,
 } from "@/lib/sources";
@@ -23,16 +21,15 @@ const jsonSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("textbook"), bookId: z.coerce.number().int().positive() }),
 ]);
 
-export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Tidak dibenarkan." }, { status: 401 });
   const { id } = await params;
   if (!await accessibleWorkbook(id, user.id)) return NextResponse.json({ error: "Buku kerja tidak dijumpai." }, { status: 404 });
-  const rows = await listSources(id, user.id);
-  const pending = (row: typeof rows[number]) => row.status === "draft" || (row.meta as Record<string, unknown> | null)?.review === "pending";
-  const drafts = _request.nextUrl.searchParams.get("drafts") === "1";
+  const payload = await sourcePayload(id, user.id);
+  const drafts = request.nextUrl.searchParams.get("drafts") === "1";
   void kickSourceWorker();
-  return NextResponse.json({ sources: rows.filter(row => drafts ? pending(row) : !pending(row)).map(row => sourceView(row, user.id)), draftCount: rows.filter(pending).length, embeddingAvailable: embeddingConfigured() });
+  return NextResponse.json({ sources: drafts ? payload.drafts : payload.sources, draftCount: payload.draftCount, embeddingAvailable: payload.embeddingAvailable });
 }
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {

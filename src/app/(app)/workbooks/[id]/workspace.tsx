@@ -37,6 +37,7 @@ import {
 } from "@/lib/demo-data";
 import { SourcesTab } from "./sources-tab";
 import type { AppWorkbook } from "@/lib/workbooks";
+import type { SourceSnapshot } from "@/lib/workbook/use-sources";
 import styles from "./workbook.module.css";
 
 type TabId = "sumber" | "sembang" | DemoCreation["kind"];
@@ -59,9 +60,9 @@ const MODULE_TABS: { kind: DemoCreation["kind"]; label: string }[] = [
   { kind: "study-guides", label: "Panduan Ulang Kaji" },
 ];
 
-type WorkspaceProps = { workbook: AppWorkbook; viewerId: string | null; initialTab?: TabId };
+type WorkspaceProps = { workbook: AppWorkbook; viewerId: string | null; initialTab?: TabId; initialSources?: SourceSnapshot | null };
 export function WorkbookWorkspace(props: WorkspaceProps) {
-  return <WorkbookSourcesProvider key={props.workbook.id} workbookId={props.workbook.id}><WorkbookWorkspaceInner {...props} /></WorkbookSourcesProvider>;
+  return <WorkbookSourcesProvider key={props.workbook.id} workbookId={props.workbook.id} initial={props.initialSources}><WorkbookWorkspaceInner {...props} /></WorkbookSourcesProvider>;
 }
 function WorkbookWorkspaceInner({ workbook, viewerId, initialTab = "sumber" }: WorkspaceProps) {
   const sourceState = useWorkbookSources(workbook.id);
@@ -169,7 +170,7 @@ function WorkbookWorkspaceInner({ workbook, viewerId, initialTab = "sumber" }: W
           </div>
         </div>
 
-        <section className={styles.detailHero} data-reference={tab === "sumber"} data-subject={subject.id} aria-labelledby="workbook-title">
+        <section className={styles.detailHero} aria-labelledby="workbook-title">
           <span className={styles.detailArt}>
             <Image src={COVER_ART[subject.id] ?? subject.asset} alt="" width={1024} height={1024} />
           </span>
@@ -182,7 +183,7 @@ function WorkbookWorkspaceInner({ workbook, viewerId, initialTab = "sumber" }: W
               </span>
               <span className={styles.detailChip}>
                 <Users size={13} aria-hidden="true" />
-                {tab === "sumber" ? workbook.yearLabel : workbook.teacherName}
+                {workbook.yearLabel}
               </span>
               <span className={styles.detailChip}>
                 <TrendingUp size={13} aria-hidden="true" />
@@ -191,7 +192,7 @@ function WorkbookWorkspaceInner({ workbook, viewerId, initialTab = "sumber" }: W
             </div>
             <p>{workbook.topic}</p>
           </div>
-          {tab === "sumber" && <span className={styles.heroIllustration} aria-hidden="true"><Image src={workbook.subjectId === "geography" ? "/assets/thiings/workbook-globe.png" : COVER_ART[subject.id] ?? subject.asset} alt="" width={260} height={260} /><Sparkles size={25} /><Sparkles size={17} /></span>}
+          <span className={styles.heroIllustration} aria-hidden="true"><Image src={workbook.subjectId === "geography" ? "/assets/thiings/workbook-globe.png" : COVER_ART[subject.id] ?? subject.asset} alt="" width={260} height={260} /><Sparkles size={25} /><Sparkles size={17} /></span>
           <div className={styles.detailStats}>
             <span className={styles.detailStat}>
               <Layers size={15} aria-hidden="true" />
@@ -221,12 +222,12 @@ function WorkbookWorkspaceInner({ workbook, viewerId, initialTab = "sumber" }: W
         <div className={styles.content}>
           {tab === "sumber" && <SourcesTab workbookId={workbook.id} workbook={{ ...workbook, visibility }} />}
 
-          {visited.includes("sembang") && <div hidden={tab !== "sembang"}><ChatTab workbookId={workbook.id} onManageSources={() => setTab("sumber")} /></div>}
+          {visited.includes("sembang") && <div hidden={tab !== "sembang"}><ChatTab workbookId={workbook.id} /></div>}
 
           {modules.map((m) =>
             visited.includes(m.kind) ? (
               <div key={m.kind} hidden={tab !== m.kind} className={styles.module}>
-                {m.kind === "quizzes" ? <QuizzesTab workbook={workbook} onManageSources={() => setTab("sumber")} /> : <ModulesTab workbook={workbook} kind={m.kind} active={tab === m.kind} onManageSources={() => setTab("sumber")} />}
+                {m.kind === "quizzes" ? <QuizzesTab workbook={workbook} /> : <ModulesTab workbook={workbook} kind={m.kind} active={tab === m.kind} />}
               </div>
             ) : null,
           )}

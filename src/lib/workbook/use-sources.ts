@@ -3,16 +3,26 @@ import { createContext, createElement, useCallback, useContext, useEffect, useRe
 import { readSourceSelection, syncSourceSelection, writeSourceSelection } from "./source-selection";
 export type WorkbookSource = {
   id: string; title: string; kind: string; status: string; chars: number; preview: string; excerpt: string;
-  sizeLabel?: string | null; error?: string | null; fullText?: string; canDelete: boolean;
+  sizeLabel?: string | null; error?: string | null; fullText?: string | null; canDelete: boolean;
   meta: { videoId?: string; url?: string; stage?: string; progress?: number; completedChunks?: number; totalChunks?: number; review?: string; embeddingModel?: string; relevanceReason?: string; relevanceScore?: number };
 };
-function useSourceController(workbookId: string) {
-  const [sources, setSources] = useState<WorkbookSource[]>([]);
+export type SourceSnapshot = { sources: WorkbookSource[]; draftCount: number; available: boolean };
+
+/**
+ * Session-lifetime snapshot cache: revisiting a workbook within the same tab
+ * renders sources instantly (stale-while-revalidate) instead of refetching
+ * from scratch every time the workspace mounts.
+ */
+const snapshotCache = new Map<string, SourceSnapshot>();
+
+function useSourceController(workbookId: string, initial?: SourceSnapshot | null) {
+  const seeded = initial ?? snapshotCache.get(workbookId) ?? null;
+  const [sources, setSources] = useState<WorkbookSource[]>(seeded?.sources ?? []);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [draftCount, setDraftCount] = useState(0);
-  const [available, setAvailable] = useState(true);
+  const [draftCount, setDraftCount] = useState(seeded?.draftCount ?? 0);
+  const [available, setAvailable] = useState(seeded?.available ?? true);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!seeded);
   const alive = useRef(false);
   const refresh = useCallback(async () => {
     try {
@@ -20,6 +30,7 @@ function useSourceController(workbookId: string) {
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || "Sumber gagal dimuatkan. Sila cuba lagi.");
       if (!alive.current) return;
+      snapshotCache.set(workbookId, { sources: payload.sources, draftCount: payload.draftCount, available: payload.embeddingAvailable });
       setSources(payload.sources); setDraftCount(payload.draftCount); setAvailable(payload.embeddingAvailable);
       setSelectedIds(syncSourceSelection(workbookId, payload.sources)); setError("");
     } catch (err) { if (alive.current) setError((err as Error).message); }
@@ -28,11 +39,17 @@ function useSourceController(workbookId: string) {
   useEffect(() => {
     alive.current = true;
     const kick = setTimeout(() => void refresh(), 0);
-    const timer = setInterval(() => void refresh(), 2500);
     const selectionChanged = () => setSelectedIds(readSourceSelection(workbookId) ?? []);
     window.addEventListener("paicv3:source-selection", selectionChanged); window.addEventListener("storage", selectionChanged);
-    return () => { alive.current = false; clearTimeout(kick); clearInterval(timer); window.removeEventListener("paicv3:source-selection", selectionChanged); window.removeEventListener("storage", selectionChanged); };
+    return () => { alive.current = false; clearTimeout(kick); window.removeEventListener("paicv3:source-selection", selectionChanged); window.removeEventListener("storage", selectionChanged); };
   }, [workbookId, refresh]);
+  // Poll only while something is actually processing — idle pages stay quiet.
+  const processingCount = sources.filter((row) => row.status === "processing").length;
+  useEffect(() => {
+    if (!processingCount) return;
+    const timer = setInterval(() => void refresh(), 2500);
+    return () => clearInterval(timer);
+  }, [processingCount, refresh]);
   function select(ids: string[]) { const next = ids.filter(id => sources.some(row => row.id === id && row.status === "ready")); writeSourceSelection(workbookId, next); setSelectedIds(next); }
   const ready = sources.filter(row => row.status === "ready");
   const selected = ready.filter(row => selectedIds.includes(row.id));
@@ -40,8 +57,8 @@ function useSourceController(workbookId: string) {
 }
 
 const SourcesContext = createContext<(ReturnType<typeof useSourceController> & { workbookId: string }) | null>(null);
-export function WorkbookSourcesProvider({ workbookId, children }: { workbookId: string; children: ReactNode }) {
-  const state = useSourceController(workbookId);
+export function WorkbookSourcesProvider({ workbookId, initial, children }: { workbookId: string; initial?: SourceSnapshot | null; children: ReactNode }) {
+  const state = useSourceController(workbookId, initial);
   return createElement(SourcesContext.Provider, { value: { ...state, workbookId } }, children);
 }
 export function useWorkbookSources(workbookId: string) {

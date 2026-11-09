@@ -78,14 +78,14 @@ export function SourcesTab({ workbookId, workbook, onCount }: { workbookId: stri
       </article>; })}{!filtered.length && <p className={styles.noResults}>Tiada sumber sepadan dengan “{query}”.</p>}
     </div>}
     <p className={styles.footnote}><Sparkles size={14} />{processing.length ? "Embedding diteruskan walaupun anda menutup popup atau menukar tab." : "Hanya sumber yang siap dan ditandakan akan digunakan untuk penjanaan AI."}</p>
-    {open && <AddSourceDialog workbookId={workbookId} available={available} onClose={() => { setOpen(false); void refresh(); }} onEmbedded={(ids, queued) => { setSources(previous => [...queued.map(row => ({ ...row, status: "processing", meta: { ...row.meta, stage: "queued", progress: 0, review: "accepted" } })), ...previous.filter(row => !ids.includes(row.id))]); markSourcesPending(workbookId, ids); setOpen(false); setNotice(`${ids.length} sumber dihantar untuk embedding. Kemajuannya dipaparkan di bawah.`); void refresh(); }} />}
+    {open && <AddSourceDialog workbookId={workbookId} available={available} hasPendingDrafts={draftCount > 0} onClose={() => { setOpen(false); void refresh(); }} onEmbedded={(ids, queued) => { setSources(previous => [...queued.map(row => ({ ...row, status: "processing", meta: { ...row.meta, stage: "queued", progress: 0, review: "accepted" } })), ...previous.filter(row => !ids.includes(row.id))]); markSourcesPending(workbookId, ids); setOpen(false); setNotice(`${ids.length} sumber dihantar untuk embedding. Kemajuannya dipaparkan di bawah.`); void refresh(); }} />}
     {preview && <Modal title="Pratonton sumber" onClose={() => setPreview(null)}><div className={styles.modalHead}><div><span className={styles.eyebrow}>PRATONTON SUMBER</span><h2>{preview.title}</h2><p>{words(preview)}</p></div><button className={styles.iconButton} aria-label="Tutup pratonton" onClick={() => setPreview(null)}><X size={20} /></button></div><div className={styles.fullPreview}>{preview.fullText || preview.preview || "Teks belum tersedia."}</div><div className={styles.modalFooter}><span>{preview.status === "ready" ? "Sumber sedia digunakan untuk AI" : "Teks yang berjaya diekstrak"}</span><button className={styles.secondary} onClick={() => setPreview(null)}>Tutup</button></div></Modal>}
     {deleting && <Modal title="Padam sumber" onClose={() => setDeleting(null)}><div className={styles.modalHead}><div><h2>Padam sumber ini?</h2><p>{deleting.title}</p></div></div><p className={styles.confirmText}>Teks dan indeks sumber ini akan dipadam daripada buku kerja. Bahan pembelajaran yang telah dijana akan dikekalkan.</p><div className={styles.modalFooter}><button className={styles.secondary} disabled={busy} onClick={() => setDeleting(null)}>Batal</button><button className={styles.danger} disabled={busy} onClick={() => void remove()}>{busy ? "Memadam…" : "Padam sumber"}</button></div></Modal>}
   </section><WorkbookInfo workbook={workbook} /><RelatedWorkbooks workbookId={workbookId} /></div>;
 }
 
 type Book = { id: number; title: string; subject?: string; year?: string };
-function AddSourceDialog({ workbookId, available, onClose, onEmbedded }: { workbookId: string; available: boolean; onClose: () => void; onEmbedded: (ids: string[], queued: Source[]) => void }) {
+function AddSourceDialog({ workbookId, available, hasPendingDrafts, onClose, onEmbedded }: { workbookId: string; available: boolean; hasPendingDrafts: boolean; onClose: () => void; onEmbedded: (ids: string[], queued: Source[]) => void }) {
   const [mode, setMode] = useState<Mode>("web");
   const [drafts, setDrafts] = useState<Source[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
@@ -110,7 +110,12 @@ function AddSourceDialog({ workbookId, available, onClose, onEmbedded }: { workb
   const refreshDrafts = useCallback(async () => {
     try { const payload = await api<{ sources: Source[] }>(`/api/workbooks/${workbookId}/sources?drafts=1`); if (alive.current) { setDrafts(payload.sources); if (!loadedDrafts.current) { setReviewOnly(payload.sources.length > 0); loadedDrafts.current = true; } } } catch (err) { if (alive.current) setError((err as Error).message); }
   }, [workbookId]);
-  useEffect(() => { const kick = setTimeout(() => void refreshDrafts(), 0); const timer = setInterval(() => void refreshDrafts(), 3500); return () => { clearTimeout(kick); clearInterval(timer); }; }, [refreshDrafts]);
+  useEffect(() => {
+    if (!hasPendingDrafts && !drafts.length) return;
+    const kick = setTimeout(() => void refreshDrafts(), 0);
+    const timer = setInterval(() => void refreshDrafts(), 3500);
+    return () => { clearTimeout(kick); clearInterval(timer); };
+  }, [hasPendingDrafts, drafts.length, refreshDrafts]);
   useEffect(() => {
     if (mode !== "textbook") return;
     const controller = new AbortController();
