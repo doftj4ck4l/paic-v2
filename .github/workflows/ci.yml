@@ -16,7 +16,9 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
-      - run: npx tsc --noEmit
+      # Build first: `next build` type-checks and generates .next/types that
+      # next-env.d.ts references (missing in a fresh checkout).
       - run: npm run build
         env:
           BETTER_AUTH_SECRET: ci-placeholder-secret
+      - run: npx tsc --noEmit
