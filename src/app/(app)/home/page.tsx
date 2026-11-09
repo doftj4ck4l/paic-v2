@@ -6,6 +6,7 @@ import { requireUser } from "@/lib/auth-session";
 import { ACHIEVEMENTS, QUIZZES, SUBJECTS, WORKBOOKS, subjectById } from "@/lib/demo-data";
 import styles from "./home.module.css";
 import content from "@/components/studio/content-width.module.css";
+import { SubjectRollGrid } from "./subject-roll-grid";
 
 export const metadata: Metadata = { title: "Utama" };
 
@@ -76,14 +77,7 @@ export default async function HomePage() {
             <div><h2 id="subjects-title">Jelajah subjek</h2><p>Pilih subjek untuk melihat buku kerja, aktiviti dan bahan AI.</p></div>
             <Link href="/explore" className={styles.textLink}>Semua subjek <ArrowRight size={17} /></Link>
           </div>
-          <div className={styles.subjectGrid}>
-            {SUBJECTS.map((item) => (
-              <Link key={item.id} href={`/explore/subjects/${item.id}`} className={styles.subjectCard} data-subject={item.id}>
-                <Image src={item.asset} alt="" width={95} height={95} className={styles.subjectIcon} />
-                <h3>{item.name}</h3><p>{item.workbookCount} buku kerja</p>
-              </Link>
-            ))}
-          </div>
+          <SubjectRollGrid subjects={SUBJECTS} />
         </section>
 
         <section className={styles.summaryRow} aria-label="Kuiz dan kemajuan">

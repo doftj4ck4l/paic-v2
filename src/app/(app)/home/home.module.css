@@ -66,13 +66,39 @@
 .textLink { display: inline-flex; align-items: center; gap: 7px; flex-shrink: 0; color: #00786a; font-size: 12px; font-weight: 750; }
 .textLink:hover { text-decoration: underline; text-underline-offset: 4px; }
 .subjectGrid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; padding-inline: 10px 0; }
-.subjectCard { display: flex; flex-direction: column; align-items: center; min-width: 0; padding: 6px 8px 14px; border: 1px solid #d8c7ff; border-radius: 25px; background: linear-gradient(150deg, #fbf8ff, #f1eaff); box-shadow: inset 0 0 0 2px #ffffffc0; transition: transform 150ms, box-shadow 150ms; text-align: center; }
+.subjectCard { position: relative; overflow: hidden; perspective: 900px; display: flex; flex-direction: column; align-items: center; min-width: 0; padding: 0; border: 1px solid #d8c7ff; border-radius: 25px; background: linear-gradient(150deg, #fbf8ff, #f1eaff); box-shadow: inset 0 0 0 2px #ffffffc0; transition: transform 150ms, box-shadow 150ms, border-color 400ms; text-align: center; }
 .subjectCard:hover { transform: translateY(-4px); box-shadow: 0 7px 16px #5e4e9714, inset 0 0 0 2px #ffffffc0; }
 .subjectCard[data-subject="science"] { border-color: #00bfa7; background: linear-gradient(145deg, #edfbfa, #dff6f0); box-shadow: 0 3px 8px #00b6980e, inset 0 0 0 2px #ffffffd0; }
 .subjectCard[data-subject="language"] { border-color: #f6d5b2; background: linear-gradient(145deg, #fffcfa, #fff1e1); }
 .subjectCard[data-subject="english"] { border-color: #c6e1ff; background: linear-gradient(145deg, #fbfdff, #e8f3ff); }
 .subjectCard[data-subject="history"] { border-color: #f5cfc5; background: linear-gradient(145deg, #fffafa, #ffebe5); }
 .subjectCard[data-subject="geography"] { border-color: #dbedb8; background: linear-gradient(145deg, #fcfff8, #efffda); }
+.subjectCard[data-subject="islamic"] { border-color: #8ed8ab; background: linear-gradient(145deg, #f2fdf6, #ddf5e7); }
+.subjectCard[data-subject="moral"] { border-color: #f4b8cf; background: linear-gradient(145deg, #fff7fa, #ffe9f1); }
+.subjectCard[data-subject="art"] { border-color: #c9a8f5; background: linear-gradient(145deg, #faf6ff, #efe4ff); }
+.subjectCard[data-subject="music"] { border-color: #f0a8d8; background: linear-gradient(145deg, #fff6fb, #ffe6f4); }
+.subjectCard[data-subject="pj"] { border-color: #b5e07a; background: linear-gradient(145deg, #f8fff2, #e9f9d9); }
+.subjectCard[data-subject="rbt"] { border-color: #9fb6cf; background: linear-gradient(145deg, #f7fafc, #e8eef5); }
+
+/* Dice faces: the front face sits in flow (holds the card height) and the
+   incoming face drops in from the top edge when a tile rolls. */
+.subjectFace { display: flex; flex-direction: column; align-items: center; min-width: 0; padding: 6px 8px 14px; text-align: center; transform: rotateX(0deg); backface-visibility: hidden; }
+.subjectFace[data-roll="prep"], .subjectFace[data-roll="in"] { position: absolute; inset: 0; }
+.subjectFace[data-roll="prep"] { transform-origin: 50% 0%; transform: rotateX(-90deg); }
+.subjectFace[data-roll="in"] { transform-origin: 50% 0%; transform: rotateX(0deg); transition: transform 680ms cubic-bezier(.22,.75,.3,1); }
+.subjectFace[data-roll="out"] { transform-origin: 50% 100%; transform: rotateX(90deg); transition: transform 680ms cubic-bezier(.22,.75,.3,1); }
+.subjectFace[data-subject="math"] { background: linear-gradient(150deg, #fbf8ff, #f1eaff); }
+.subjectFace[data-subject="science"] { background: linear-gradient(145deg, #edfbfa, #dff6f0); }
+.subjectFace[data-subject="language"] { background: linear-gradient(145deg, #fffcfa, #fff1e1); }
+.subjectFace[data-subject="english"] { background: linear-gradient(145deg, #fbfdff, #e8f3ff); }
+.subjectFace[data-subject="history"] { background: linear-gradient(145deg, #fffafa, #ffebe5); }
+.subjectFace[data-subject="geography"] { background: linear-gradient(145deg, #fcfff8, #efffda); }
+.subjectFace[data-subject="islamic"] { background: linear-gradient(145deg, #f2fdf6, #ddf5e7); }
+.subjectFace[data-subject="moral"] { background: linear-gradient(145deg, #fff7fa, #ffe9f1); }
+.subjectFace[data-subject="art"] { background: linear-gradient(145deg, #faf6ff, #efe4ff); }
+.subjectFace[data-subject="music"] { background: linear-gradient(145deg, #fff6fb, #ffe6f4); }
+.subjectFace[data-subject="pj"] { background: linear-gradient(145deg, #f8fff2, #e9f9d9); }
+.subjectFace[data-subject="rbt"] { background: linear-gradient(145deg, #f7fafc, #e8eef5); }
 .subjectIcon { display: block; flex-shrink: 0; width: 95px; height: 95px; object-fit: contain; filter: drop-shadow(0 10px 12px rgba(16, 17, 47, 0.16)); }
 .subjectCard h3 { font-size: 15px; font-weight: 750; letter-spacing: -.6px; line-height: 1.5; }
 .subjectCard p { margin-top: 1px; font-size: 13px; color: #606b91; }

@@ -18,6 +18,12 @@ const SUBJECT_TINT: Record<SubjectId, string> = {
   english: "bg-[#EFF6FF]",
   history: "bg-[#EEF2FF]",
   geography: "bg-[#F7FEE7]",
+  islamic: "bg-[#E9F9EF]",
+  moral: "bg-[#FFF0F5]",
+  art: "bg-[#F6F0FF]",
+  music: "bg-[#FFF0F9]",
+  pj: "bg-[#F1FBEA]",
+  rbt: "bg-[#F1F5F9]",
 };
 
 const STATUS_TONE = {

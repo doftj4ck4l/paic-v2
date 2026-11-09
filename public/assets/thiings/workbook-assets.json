@@ -1,6 +1,6 @@
 {
   "collection": "https://www.thiings.co/things",
-  "downloaded": "2026-11-09",
+  "downloaded": "2026-11-10",
   "terms": "https://www.thiings.co/terms",
   "assets": [
     {
@@ -58,6 +58,48 @@
       "original": "https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-wlth4GLe1Ud0AZvRjsPb0DfbfaQOEq.png",
       "sha256": "3022cef94ec34d46b6fa9b24559fd6483cb5c40a4b6ab40038c8d811ecf6b262",
       "modified": false
+    },
+    {
+      "file": "subject-islamic.png",
+      "page": "https://www.thiings.co/things/mosque",
+      "original": "https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-nDKPNnlCh1zQAV577JyWeXxLByEjwc.png",
+      "sha256": "f80f73bf7a9a1c9a438eca70e7e86bfcf4c15fc20f7797ed623f72791d544f96",
+      "modified": true
+    },
+    {
+      "file": "subject-moral.png",
+      "page": "https://www.thiings.co/things/handshake",
+      "original": "https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-g0jWpKzDefUBkVrz5WRvIkWjsUYOer.png",
+      "sha256": "d77122c5ffee602444dbae96f67270ff2f179f4c837e5920f03c19964b38899e",
+      "modified": true
+    },
+    {
+      "file": "subject-art.png",
+      "page": "https://www.thiings.co/things/artist",
+      "original": "https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-FaLCirr7hxlQFcNqgxFsCjPJmgFryp.png",
+      "sha256": "d1792b88b5f05c0ff9ecef173a01ae101a08adeab5cd4f3b28cf64c455f7d4c0",
+      "modified": true
+    },
+    {
+      "file": "subject-music.png",
+      "page": "https://www.thiings.co/things/guitar",
+      "original": "https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-rBBGU9Xk6VcySyHSUq85qBW2ZiOqD0.png",
+      "sha256": "ebbcdf4445cf94fc355636a72ac3c939b71cc8029433f7e978a1f1c203e4cbaf",
+      "modified": true
+    },
+    {
+      "file": "subject-pj.png",
+      "page": "https://www.thiings.co/things/basketball",
+      "original": "https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-wtyoroPu9pUAx5xLx8Cnko454idKhb.png",
+      "sha256": "a9a0b1b6f30ad18fab86f7f352602d0676f615672e6a8d03af7a49592d51228a",
+      "modified": true
+    },
+    {
+      "file": "subject-rbt.png",
+      "page": "https://www.thiings.co/things/robot",
+      "original": "https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-JLGCwuVRfvOMwVMpimP9wXFiu6Nw4x.png",
+      "sha256": "dd1164176ada4c076d649fb24f8fc029ba11f015c635cdec710af5e7d3924566",
+      "modified": true
     }
   ]
 }

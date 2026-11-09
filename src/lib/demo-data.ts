@@ -9,14 +9,20 @@ export type SubjectId =
   | "language"
   | "english"
   | "history"
-  | "geography";
+  | "geography"
+  | "islamic"
+  | "moral"
+  | "art"
+  | "music"
+  | "pj"
+  | "rbt";
 
-export type TintColor = "teal" | "amber" | "orange" | "blue" | "white" | "cream";
+export type TintColor = "teal" | "amber" | "orange" | "blue" | "white" | "cream" | "green" | "rose" | "violet" | "pink" | "lime" | "slate";
 
 export type DemoSubject = {
   id: SubjectId;
   name: string;
-  icon: "calculator" | "flask" | "book" | "chat" | "crown" | "globe";
+  icon: "calculator" | "flask" | "book" | "chat" | "crown" | "globe" | "mosque" | "handshake" | "artist" | "guitar" | "basketball" | "robot";
   asset: string;
   color: TintColor;
   blurb: string;
@@ -77,6 +83,60 @@ export const SUBJECTS: DemoSubject[] = [
     color: "cream",
     blurb: "Peta, cuaca dan tempat",
     workbookCount: 1,
+  },
+  {
+    id: "islamic",
+    name: "Pendidikan Islam",
+    icon: "mosque",
+    asset: "/assets/thiings/subject-islamic.png",
+    color: "green",
+    blurb: "Al-Quran, akhlak dan ibadah",
+    workbookCount: 0,
+  },
+  {
+    id: "moral",
+    name: "Pendidikan Moral",
+    icon: "handshake",
+    asset: "/assets/thiings/subject-moral.png",
+    color: "rose",
+    blurb: "Nilai murni dan keperibadian",
+    workbookCount: 0,
+  },
+  {
+    id: "art",
+    name: "Pendidikan Seni Visual",
+    icon: "artist",
+    asset: "/assets/thiings/subject-art.png",
+    color: "violet",
+    blurb: "Lukisan, warna dan kreativiti",
+    workbookCount: 0,
+  },
+  {
+    id: "music",
+    name: "Pendidikan Muzik",
+    icon: "guitar",
+    asset: "/assets/thiings/subject-music.png",
+    color: "pink",
+    blurb: "Irama, nyanyian dan alat muzik",
+    workbookCount: 0,
+  },
+  {
+    id: "pj",
+    name: "Pendidikan Jasmani",
+    icon: "basketball",
+    asset: "/assets/thiings/subject-pj.png",
+    color: "lime",
+    blurb: "Sukan, kesihatan dan kecergasan",
+    workbookCount: 0,
+  },
+  {
+    id: "rbt",
+    name: "Reka Bentuk & Teknologi",
+    icon: "robot",
+    asset: "/assets/thiings/subject-rbt.png",
+    color: "slate",
+    blurb: "Reka cipta, bahan dan teknologi",
+    workbookCount: 0,
   },
 ];
 

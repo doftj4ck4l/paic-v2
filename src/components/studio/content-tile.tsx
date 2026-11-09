@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { BookOpen, Calculator, Crown, FlaskConical, Globe, MessageCircle } from "lucide-react";
+import { BookOpen, Calculator, Crown, Dumbbell, FlaskConical, Globe, Guitar, Handshake, MessageCircle, MoonStar, Palette, Wrench } from "lucide-react";
 import type { SubjectId } from "@/lib/demo-data";
 import styles from "./content-tile.module.css";
 
@@ -12,6 +12,12 @@ export const SUBJECT_ICONS = {
   english: MessageCircle,
   history: Crown,
   geography: Globe,
+  islamic: MoonStar,
+  moral: Handshake,
+  art: Palette,
+  music: Guitar,
+  pj: Dumbbell,
+  rbt: Wrench,
 } satisfies Record<SubjectId, typeof Calculator>;
 
 type ContentTileProps = {
