@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
+  ArrowLeft,
   ArrowRight,
+  AudioLines,
   BookOpenText,
   Check,
   FileText,
@@ -12,29 +15,59 @@ import {
   Layers,
   Loader2,
   MessageSquareText,
+  Play,
   Settings2,
   Share2,
   Sparkles,
   StickyNote,
+  TrendingUp,
+  Users,
   X,
   XCircle,
 } from "lucide-react";
-import { PageHeader } from "@/components/studio/page-header";
 import { Chip } from "@/components/studio/ui";
+import { QuizPlayer } from "@/components/studio/quiz-player";
+import { FlashcardPlayer } from "@/components/studio/flashcard-player";
+import { SlideViewer } from "@/components/studio/slide-viewer";
+import { MindMapViewer } from "@/components/studio/mindmap-viewer";
+import { StudyGuideView } from "@/components/studio/study-guide-view";
+import { SUBJECT_ICONS } from "@/components/studio/content-tile";
+import content from "@/components/studio/content-width.module.css";
+import { shareWorkbook, useSocial } from "@/lib/demo-social";
 import {
-  STUDIO_TOOLS,
+  AUDIO_TRANSCRIPT,
+  CREATIONS,
+  NOTE_SECTIONS,
   SUGGESTED_QUESTIONS,
   WORKBOOK_CHAT,
   WORKBOOK_SOURCES,
   subjectById,
+  type DemoCreation,
   type DemoSource,
   type DemoWorkbook,
+  type SubjectId,
 } from "@/lib/demo-data";
-import { cn } from "@/lib/utils";
+import styles from "./workbook.module.css";
 
-type Panel = "sources" | "chat" | "studio";
+type TabId = "sumber" | "sembang" | DemoCreation["kind"];
+
+const COVER_ART: Partial<Record<SubjectId, string>> = {
+  science: "/assets/thiings/workbook-flask.png",
+  math: "/assets/thiings/workbook-calculator.png",
+  language: "/assets/thiings/workbook-pencil.png",
+};
 
 const SOURCE_ICONS = { pdf: FileText, doc: FileText, note: StickyNote, web: Globe } as const;
+
+const MODULE_TABS: { kind: DemoCreation["kind"]; label: string }[] = [
+  { kind: "notes", label: "Nota" },
+  { kind: "quizzes", label: "Kuiz" },
+  { kind: "flashcards", label: "Kad Imbas" },
+  { kind: "slides", label: "Slaid" },
+  { kind: "mindmaps", label: "Peta Minda" },
+  { kind: "audio", label: "Audio" },
+  { kind: "study-guides", label: "Panduan Ulang Kaji" },
+];
 
 function SourceStatus({ source }: { source: DemoSource }) {
   if (source.status === "ready") return <Chip tone="teal">Sedia</Chip>;
@@ -53,300 +86,395 @@ function SourceStatus({ source }: { source: DemoSource }) {
 
 export function WorkbookWorkspace({
   workbook,
-  initialPanel = "chat",
+  initialTab = "sumber",
 }: {
   workbook: DemoWorkbook;
-  initialPanel?: Panel;
+  initialTab?: TabId;
 }) {
   const subject = subjectById(workbook.subjectId);
-  const [panel, setPanel] = useState<Panel>(initialPanel);
+  const SubjectIcon = SUBJECT_ICONS[subject.id];
+  const creations = CREATIONS.filter((c) => c.workbookId === workbook.id);
+  const modules = MODULE_TABS.map((m) => ({ ...m, creation: creations.find((c) => c.kind === m.kind) })).filter(
+    (m): m is (typeof MODULE_TABS)[number] & { creation: DemoCreation } => !!m.creation,
+  );
+  const readyModules = modules.filter((m) => m.creation.status === "ready").length;
+
+  const [tab, setTab] = useState<TabId>(() => {
+    if (initialTab === "sumber" || initialTab === "sembang") return initialTab;
+    return modules.some((m) => m.kind === initialTab) ? initialTab : "sumber";
+  });
   const [selected, setSelected] = useState<string[]>(
     WORKBOOK_SOURCES.filter((s) => s.status === "ready").map((s) => s.id),
   );
   const [activeSource, setActiveSource] = useState<DemoSource | null>(null);
+  const { shared } = useSocial();
+  const isShared = shared.includes(workbook.id);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareVisibility, setShareVisibility] = useState<"class" | "community">("class");
+
+  useEffect(() => {
+    if (!shareOpen) return;
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") setShareOpen(false);
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [shareOpen]);
+
+  function confirmShare() {
+    shareWorkbook(workbook.id);
+    setShareOpen(false);
+  }
 
   function toggleSource(id: string) {
     setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   }
 
-  function openSourceById(id: string) {
-    setActiveSource(WORKBOOK_SOURCES.find((s) => s.id === id) ?? null);
-  }
-
-  const readyCount = WORKBOOK_SOURCES.filter((s) => s.status === "ready").length;
-
-  const sourcesPanel = (
-    <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
-        <h2 className="text-sm font-bold">Sumber</h2>
-        <Chip tone="neutral">{WORKBOOK_SOURCES.length}</Chip>
-      </div>
-      <p className="border-b border-border px-4 py-2 text-[11px] leading-relaxed text-muted-foreground">
-        Pilih sumber untuk dijadikan asas jawapan AI.
-      </p>
-      <ul className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto p-3">
-        {WORKBOOK_SOURCES.map((source) => {
-          const Icon = SOURCE_ICONS[source.kind];
-          const checked = selected.includes(source.id);
-          return (
-            <li
-              key={source.id}
-              className={cn(
-                "flex items-start gap-2.5 rounded-2xl border p-3 transition-colors",
-                checked && source.status === "ready"
-                  ? "border-[#bfe9e2] bg-[#f4fbfa]"
-                  : "border-border bg-card",
-              )}
-            >
-              <input
-                type="checkbox"
-                checked={checked}
-                disabled={source.status !== "ready"}
-                onChange={() => toggleSource(source.id)}
-                aria-label={`Guna ${source.title} sebagai asas jawapan`}
-                className="mt-0.5 size-4 shrink-0 accent-[#00b6a2]"
-              />
-              <button type="button" onClick={() => setActiveSource(source)} className="min-w-0 flex-1 text-left">
-                <span className="flex items-center gap-1.5">
-                  <Icon className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
-                  <span className="truncate text-[13px] font-semibold leading-tight">{source.title}</span>
-                </span>
-                <span className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                  <SourceStatus source={source} />
-                  <span className="text-[11px] text-muted-foreground">
-                    {source.sizeLabel}
-                    {source.detail ? ` · ${source.detail}` : ""}
+  function renderModule(creation: DemoCreation) {
+    switch (creation.kind) {
+      case "notes":
+        return (
+          <article className="flex flex-col gap-4">
+            {NOTE_SECTIONS.map((section, i) => (
+              <section key={section.id} className="rounded-[22px] border border-border bg-card p-5 shadow-soft">
+                <div className="flex items-start gap-3">
+                  <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-[#E7F6F4] text-xs font-extrabold text-[#00786a]">
+                    {i + 1}
                   </span>
-                </span>
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-      <div className="border-t border-border p-3">
-        <p className="flex items-start gap-1.5 text-[11px] leading-relaxed text-muted-foreground">
-          <Info className="mt-0.5 size-3 shrink-0" aria-hidden="true" />
-          Muat naik fail sebenar disambung dalam Fasa 3 (storan objek + saluran pemprosesan).
-        </p>
-      </div>
-    </div>
-  );
-
-  const chatPanel = (
-    <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
-        <h2 className="text-sm font-bold">Sembang Pembelajaran AI</h2>
-        <Chip tone="amber">Mod demo</Chip>
-      </div>
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 p-4">
-          {WORKBOOK_CHAT.map((m) =>
-            m.role === "student" ? (
-              <div key={m.id} className="flex justify-end">
-                <p className="max-w-[85%] rounded-2xl rounded-br-md bg-gradient-to-r from-[#007a66] to-[#00856f] px-4 py-2.5 text-sm font-medium text-white">
-                  {m.text}
-                </p>
-              </div>
-            ) : (
-              <div key={m.id} className="flex items-start gap-3">
-                <span className="grid size-9 shrink-0 place-items-center rounded-full bg-accent">
-                  <Sparkles className="size-4 text-accent-foreground" aria-hidden="true" />
-                </span>
-                <div className="max-w-[92%] rounded-2xl rounded-tl-md border border-border bg-card p-4 shadow-soft">
-                  {m.grounded && <Chip tone="teal" className="mb-2.5">Berdasarkan sumber anda</Chip>}
-                  <p className="text-sm leading-relaxed">{m.text}</p>
-                  {m.citations && m.citations.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-1.5 border-t border-border pt-3">
-                      {m.citations.map((c) => (
-                        <button
-                          key={c.index}
-                          type="button"
-                          onClick={() => openSourceById(c.sourceId)}
-                          className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-2.5 py-1 text-[11px] font-semibold text-muted-foreground transition-colors hover:border-[#00b6a2] hover:text-[#00786a]"
-                        >
-                          <span className="grid size-4 place-items-center rounded-full bg-[#E7F6F4] text-[9px] font-bold text-[#00786a]">
-                            {c.index}
-                          </span>
-                          {c.label}
-                        </button>
+                  <div className="min-w-0">
+                    <h2 className="text-[15px] font-extrabold tracking-tight">{section.heading}</h2>
+                    <ul className="mt-2.5 flex flex-col gap-1.5">
+                      {section.bullets.map((b) => (
+                        <li key={b} className="flex items-start gap-2 text-sm leading-relaxed">
+                          <span className="mt-2 size-1.5 shrink-0 rounded-full bg-[#00b6a2]" aria-hidden="true" />
+                          {b}
+                        </li>
                       ))}
-                    </div>
-                  )}
+                    </ul>
+                    {section.citation && (
+                      <p className="mt-3 flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
+                        <FileText className="size-3" aria-hidden="true" />
+                        Sumber: {section.citation.label}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </section>
+            ))}
+          </article>
+        );
+      case "quizzes":
+        return <QuizPlayer aiExplain sourceWorkbookId={workbook.id} onFinishHref={`/quizzes/${creation.id}/hasil`} />;
+      case "flashcards":
+        return <FlashcardPlayer />;
+      case "slides":
+        return <SlideViewer />;
+      case "mindmaps":
+        return <MindMapViewer />;
+      case "audio":
+        return (
+          <div className="flex flex-col gap-5">
+            <div className="flex items-start gap-3 rounded-2xl bg-[#FFE9E9] px-4 py-3.5">
+              <Info className="mt-0.5 size-4 shrink-0 text-[#b3383e]" aria-hidden="true" />
+              <p className="text-xs leading-relaxed text-[#7d2a30]">
+                Penjanaan audio gagal dalam binaan demo ini kerana perkhidmatan TTS belum disambung
+                (Fasa 4). Transkrip di bawah menunjukkan kandungan yang akan dijana.
+              </p>
+            </div>
+            <div className="flex items-center gap-4 rounded-[24px] border border-border bg-card p-5 shadow-soft">
+              <span className="grid size-12 shrink-0 place-items-center rounded-full bg-secondary text-muted-foreground">
+                <Play className="size-5" aria-hidden="true" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="h-2.5 w-full overflow-hidden rounded-full bg-[#e5eaf6]">
+                  <span className="block h-full w-0 rounded-full bg-[#c8cede]" />
+                </div>
+                <div className="mt-2 flex items-center justify-between text-[11px] font-semibold text-muted-foreground">
+                  <span>0:00</span>
+                  <span>0:58</span>
                 </div>
               </div>
-            ),
-          )}
-        </div>
-      </div>
-      <div className="border-t border-border bg-card/60 p-3">
-        <div className="mx-auto w-full max-w-2xl">
-          <div className="mb-2 flex flex-wrap gap-1.5">
-            {SUGGESTED_QUESTIONS.map((s) => (
-              <button
-                key={s}
-                type="button"
-                disabled
-                title="Sembang AI aktif dalam Fasa 3"
-                className="rounded-full border border-border bg-background px-3 py-1 text-[11px] font-medium text-muted-foreground"
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-          <div className="flex items-center gap-2 rounded-2xl border border-border bg-background py-2 pl-4 pr-2">
-            <MessageSquareText className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-            <input
-              disabled
-              placeholder="Tulis soalan anda tentang sumber ini… (aktif dalam Fasa 3)"
-              aria-label="Mesej kepada AI"
-              className="h-8 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-            />
-            <span className="grid size-8 shrink-0 place-items-center rounded-full bg-secondary text-muted-foreground">
-              <ArrowRight className="size-4" aria-hidden="true" />
-            </span>
-          </div>
-          <p className="mt-2 flex items-center gap-1.5 text-[11px] text-muted-foreground">
-            <Info className="size-3 shrink-0" aria-hidden="true" />
-            Jawapan AI sebenar, sitasi dan penstriman disambung dalam Fasa 3.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-
-  const studioPanel = (
-    <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
-        <h2 className="text-sm font-bold">Studio Pembelajaran</h2>
-        <Chip tone="neutral">
-          {STUDIO_TOOLS.filter((t) => t.status === "completed").length}/{STUDIO_TOOLS.length} siap
-        </Chip>
-      </div>
-      <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-3">
-        {STUDIO_TOOLS.map((tool) => {
-          const completed = tool.status === "completed" && tool.artifactId;
-          const inner = (
-            <>
-              <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-secondary">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={tool.asset} alt="" width={30} height={30} className="drop-shadow-[0_5px_6px_rgba(16,17,47,0.16)]" />
-              </span>
-              <span className="min-w-0 flex-1 leading-tight">
-                <span className="flex items-center gap-2">
-                  <span className="text-[13px] font-bold">{tool.name}</span>
-                  {tool.status === "completed" && <Chip tone="teal">Selesai</Chip>}
-                  {tool.status === "pending" && <Chip tone="neutral">Menunggu AI</Chip>}
-                  {tool.status === "failed" && <Chip tone="red">Gagal</Chip>}
-                </span>
-                <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-                  {tool.meta ?? tool.description}
-                </span>
-              </span>
-            </>
-          );
-          return completed ? (
-            <Link
-              key={tool.id}
-              href={`/creations/${tool.artifactKind}/${tool.artifactId}`}
-              className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 transition-colors hover:border-[#00b6a2]"
-            >
-              {inner}
-            </Link>
-          ) : (
-            <div key={tool.id} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 opacity-90">
-              {inner}
+              <AudioLines className="size-5 shrink-0 text-muted-foreground/50" aria-hidden="true" />
             </div>
-          );
-        })}
-      </div>
-      <div className="border-t border-border p-3">
-        <p className="flex items-start gap-1.5 text-[11px] leading-relaxed text-muted-foreground">
-          <Info className="mt-0.5 size-3 shrink-0" aria-hidden="true" />
-          Penjanaan artifak AI baharu disambung dalam Fasa 4.
-        </p>
-      </div>
-    </div>
-  );
+            <div className="rounded-[22px] border border-border bg-card p-5 shadow-soft">
+              <h2 className="text-sm font-bold">Transkrip</h2>
+              <ul className="mt-3 flex flex-col gap-2.5">
+                {AUDIO_TRANSCRIPT.map((line) => (
+                  <li key={line.id} className="flex items-start gap-3 text-sm leading-relaxed">
+                    <span className="w-10 shrink-0 pt-0.5 text-right font-mono text-[11px] text-muted-foreground">
+                      {line.time}
+                    </span>
+                    {line.text}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        );
+      case "study-guides":
+        return <StudyGuideView />;
+    }
+  }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col bg-background text-foreground">
-      {/* Page header — identical structure to every other page */}
-      <div className="px-4 pt-6 lg:px-6">
-        <div className="mx-auto w-full max-w-[1240px]">
-          <PageHeader
-            title={workbook.title}
-            description={`${subject.name} · ${workbook.teacherName} · ${readyCount} sumber sedia`}
-            backHref="/workbooks"
-            backLabel="Buku Kerja"
-            actions={
-              <>
-                <button
-                  type="button"
-                  onClick={() => setPanel("sources")}
-                  className="focus-ring inline-flex h-10 items-center gap-1.5 rounded-xl border border-border bg-card px-3.5 text-xs font-semibold shadow-soft transition-colors hover:border-[#00b6a2] xl:hidden"
-                >
-                  <Layers className="size-3.5" aria-hidden="true" /> Sumber
-                </button>
-                <button
-                  type="button"
-                  disabled
-                  title="Perkongsian buku kerja akan datang (Fasa 5)"
-                  className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-border bg-card px-3.5 text-xs font-semibold text-muted-foreground opacity-60"
-                >
-                  <Share2 className="size-3.5" aria-hidden="true" /> Kongsi
-                </button>
-                <Link
-                  href={`/workbooks/${workbook.id}/settings`}
-                  aria-label="Tetapan buku kerja"
-                  className="focus-ring grid size-10 place-items-center rounded-xl border border-border bg-card text-muted-foreground shadow-soft transition-colors hover:text-foreground"
-                >
-                  <Settings2 className="size-4" aria-hidden="true" />
-                </Link>
-              </>
-            }
-          />
-        </div>
-      </div>
-
-      {/* Tabs below xl */}
-      <div className="px-4 pb-2 xl:hidden">
-        <div className="mx-auto flex w-full max-w-[1240px] gap-1.5 rounded-full border border-border bg-card p-1">
-          {(
-            [
-              { id: "sources", label: `Sumber (${WORKBOOK_SOURCES.length})` },
-              { id: "chat", label: "Sembang" },
-              { id: "studio", label: "Studio" },
-            ] as const
-          ).map((t) => (
+    <div className={styles.page}>
+      <main id="main" className={`${content.container} ${styles.main}`}>
+        <div className={styles.topRow}>
+          <Link href="/workbooks" className={styles.back}>
+            <ArrowLeft size={15} aria-hidden="true" /> Buku Kerja saya
+          </Link>
+          <div className={styles.topActions}>
             <button
-              key={t.id}
               type="button"
-              onClick={() => setPanel(t.id)}
-              aria-pressed={panel === t.id}
-              className={cn(
-                "flex-1 rounded-full px-3 py-2 text-xs font-semibold transition-colors",
-                panel === t.id
-                  ? "bg-gradient-to-r from-[#007a66] to-[#00856f] text-white"
-                  : "text-muted-foreground",
-              )}
+              onClick={() => setShareOpen(true)}
+              data-shared={isShared}
+              className={styles.shareButton}
             >
-              {t.label}
+              {isShared ? <Check size={14} aria-hidden="true" /> : <Share2 size={14} aria-hidden="true" />}
+              {isShared ? "Dikongsi" : "Kongsi"}
+            </button>
+            <Link href={`/workbooks/${workbook.id}/settings`} className={styles.settingsButton}>
+              <Settings2 size={14} aria-hidden="true" /> Tetapan
+            </Link>
+          </div>
+        </div>
+
+        <section className={styles.detailHero} data-subject={subject.id} aria-labelledby="workbook-title">
+          <span className={styles.detailArt}>
+            <Image src={COVER_ART[subject.id] ?? subject.asset} alt="" width={1024} height={1024} />
+          </span>
+          <div className={styles.detailCopy}>
+            <h1 id="workbook-title">{workbook.title}</h1>
+            <div className={styles.detailChips}>
+              <span className={styles.detailChip}>
+                <SubjectIcon size={13} aria-hidden="true" />
+                {subject.name}
+              </span>
+              <span className={styles.detailChip}>
+                <Users size={13} aria-hidden="true" />
+                {workbook.teacherName}
+              </span>
+              <span className={styles.detailChip}>
+                <TrendingUp size={13} aria-hidden="true" />
+                {workbook.progress}% siap
+              </span>
+            </div>
+            <p>{workbook.topic}</p>
+          </div>
+          <div className={styles.detailStats}>
+            <span className={styles.detailStat}>
+              <Layers size={15} aria-hidden="true" />
+              <strong>{WORKBOOK_SOURCES.length}</strong> sumber
+            </span>
+            <span className={styles.detailStat}>
+              <Sparkles size={15} aria-hidden="true" />
+              <strong>{readyModules}</strong> modul siap
+            </span>
+          </div>
+        </section>
+
+        <div className={styles.tabs} role="group" aria-label="Bahagian buku kerja">
+          <button type="button" className={styles.tab} aria-pressed={tab === "sumber"} onClick={() => setTab("sumber")}>
+            Sumber
+          </button>
+          <button type="button" className={styles.tab} aria-pressed={tab === "sembang"} onClick={() => setTab("sembang")}>
+            Sembang AI
+          </button>
+          {modules.map((m) => (
+            <button key={m.kind} type="button" className={styles.tab} aria-pressed={tab === m.kind} onClick={() => setTab(m.kind)}>
+              {m.label}
             </button>
           ))}
         </div>
-      </div>
 
-      {/* Panels */}
-      <div id="main" className="mx-auto flex w-full max-w-[1240px] flex-1">
-        <div className="hidden w-[300px] shrink-0 border-r border-border xl:block">{sourcesPanel}</div>
-        <div className="hidden min-w-0 flex-1 xl:block">{chatPanel}</div>
-        <div className="hidden w-[320px] shrink-0 border-l border-border xl:block">{studioPanel}</div>
-        <div className="min-w-0 flex-1 xl:hidden">
-          {panel === "sources" && sourcesPanel}
-          {panel === "chat" && chatPanel}
-          {panel === "studio" && studioPanel}
+        <div className={styles.content}>
+          {tab === "sumber" && (
+            <div className={styles.sourcesWrap}>
+              <p className={styles.panelNote}>Pilih sumber untuk dijadikan asas jawapan AI.</p>
+              <div className={styles.sourceGrid}>
+                {WORKBOOK_SOURCES.map((source) => {
+                  const Icon = SOURCE_ICONS[source.kind];
+                  const checked = selected.includes(source.id);
+                  return (
+                    <div key={source.id} className={styles.sourceCard} data-checked={checked && source.status === "ready"}>
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        disabled={source.status !== "ready"}
+                        onChange={() => toggleSource(source.id)}
+                        aria-label={`Guna ${source.title} sebagai asas jawapan`}
+                      />
+                      <button type="button" onClick={() => setActiveSource(source)} className={styles.sourceBody}>
+                        <span className={styles.sourceTitle}>
+                          <Icon size={14} aria-hidden="true" />
+                          <span>{source.title}</span>
+                        </span>
+                        <span className={styles.sourceMeta}>
+                          <SourceStatus source={source} />
+                          <span>
+                            {source.sizeLabel}
+                            {source.detail ? ` · ${source.detail}` : ""}
+                          </span>
+                        </span>
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className={styles.panelInfo}>
+                <Info size={12} aria-hidden="true" />
+                <span>
+                  Muat naik fail sebenar disambung dalam Fasa 3 (storan objek + saluran pemprosesan).
+                  {modules.length === 0 && " Modul AI (Nota, Kuiz, Slaid…) akan muncul sebagai tab selepas dijana."}
+                </span>
+              </p>
+            </div>
+          )}
+
+          {tab === "sembang" && (
+            <div className={styles.chatWrap}>
+              <div className="flex flex-col gap-4">
+                {WORKBOOK_CHAT.map((m) =>
+                  m.role === "student" ? (
+                    <div key={m.id} className="flex justify-end">
+                      <p className="max-w-[85%] rounded-2xl rounded-br-md bg-gradient-to-r from-[#007a66] to-[#00856f] px-4 py-2.5 text-sm font-medium text-white">
+                        {m.text}
+                      </p>
+                    </div>
+                  ) : (
+                    <div key={m.id} className="flex items-start gap-3">
+                      <span className="grid size-9 shrink-0 place-items-center rounded-full bg-accent">
+                        <Sparkles className="size-4 text-accent-foreground" aria-hidden="true" />
+                      </span>
+                      <div className="max-w-[92%] rounded-2xl rounded-tl-md border border-border bg-card p-4 shadow-soft">
+                        {m.grounded && (
+                          <Chip tone="teal" className="mb-2.5">
+                            Berdasarkan sumber anda
+                          </Chip>
+                        )}
+                        <p className="text-sm leading-relaxed">{m.text}</p>
+                        {m.citations && m.citations.length > 0 && (
+                          <div className="mt-3 flex flex-wrap gap-1.5 border-t border-border pt-3">
+                            {m.citations.map((c) => (
+                              <button
+                                key={c.index}
+                                type="button"
+                                onClick={() => setActiveSource(WORKBOOK_SOURCES.find((s) => s.id === c.sourceId) ?? null)}
+                                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-2.5 py-1 text-[11px] font-semibold text-muted-foreground transition-colors hover:border-[#00b6a2] hover:text-[#00786a]"
+                              >
+                                <span className="grid size-4 place-items-center rounded-full bg-[#E7F6F4] text-[9px] font-bold text-[#00786a]">
+                                  {c.index}
+                                </span>
+                                {c.label}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ),
+                )}
+              </div>
+
+              <div className="mt-5 flex flex-wrap gap-1.5">
+                {SUGGESTED_QUESTIONS.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    disabled
+                    title="Sembang AI aktif dalam Fasa 3"
+                    className="rounded-full border border-border bg-background px-3 py-1 text-[11px] font-medium text-muted-foreground"
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+              <div className="mt-2 flex items-center gap-2 rounded-2xl border border-border bg-background py-2 pl-4 pr-2">
+                <MessageSquareText className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                <input
+                  disabled
+                  placeholder="Tulis soalan anda tentang sumber ini… (aktif dalam Fasa 3)"
+                  aria-label="Mesej kepada AI"
+                  className="h-8 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                />
+                <span className="grid size-8 shrink-0 place-items-center rounded-full bg-secondary text-muted-foreground">
+                  <ArrowRight className="size-4" aria-hidden="true" />
+                </span>
+              </div>
+              <p className="mt-2 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                <Info className="size-3 shrink-0" aria-hidden="true" />
+                Jawapan AI sebenar, sitasi dan penstriman disambung dalam Fasa 3.
+              </p>
+            </div>
+          )}
+
+          {modules.map((m) =>
+            tab === m.kind ? (
+              <div key={m.kind} className={styles.module}>
+                {renderModule(m.creation)}
+              </div>
+            ) : null,
+          )}
         </div>
-      </div>
+
+        <p className={styles.attribution}>
+          3D icons by{" "}
+          <a href="https://www.thiings.co/things" target="_blank" rel="noreferrer">
+            Thiings
+          </a>
+        </p>
+      </main>
+
+      {/* Share dialog */}
+      {shareOpen && (
+        <div className={styles.dialogBackdrop} role="dialog" aria-modal="true" aria-labelledby="share-title">
+          <button type="button" aria-label="Tutup" className={styles.dialogDismiss} onClick={() => setShareOpen(false)} />
+          <div className={styles.dialog}>
+            <div className={styles.dialogHead}>
+              <div>
+                <h2 id="share-title">Kongsi buku kerja</h2>
+                <p className={styles.dialogDesc}>
+                  Kongsi &quot;{workbook.title}&quot; dengan rakan sekelas atau seluruh komuniti Pixelspace.
+                </p>
+              </div>
+              <button type="button" aria-label="Tutup dialog" className={styles.dialogClose} onClick={() => setShareOpen(false)}>
+                <X size={16} aria-hidden="true" />
+              </button>
+            </div>
+            <fieldset className={styles.radioGroup}>
+              <legend>Pilih siapa boleh melihat</legend>
+              <label className={styles.radioRow} data-checked={shareVisibility === "class"}>
+                <input type="radio" name="share-visibility" checked={shareVisibility === "class"} onChange={() => setShareVisibility("class")} />
+                <span>
+                  <strong>Sekolah sahaja</strong>
+                  <span>Hanya pelajar di sekolah anda (demo)</span>
+                </span>
+              </label>
+              <label className={styles.radioRow} data-checked={shareVisibility === "community"}>
+                <input type="radio" name="share-visibility" checked={shareVisibility === "community"} onChange={() => setShareVisibility("community")} />
+                <span>
+                  <strong>Komuniti Pixelspace</strong>
+                  <span>Semua pelajar demo di halaman Komuniti</span>
+                </span>
+              </label>
+            </fieldset>
+            <div className={styles.dialogField}>
+              <label htmlFor="share-note">Penerangan (pilihan)</label>
+              <textarea id="share-note" rows={3} placeholder="cth. Nota ringkas untuk ulang kaji bab 8…" />
+            </div>
+            <p className={styles.dialogNote}>
+              <Info size={12} aria-hidden="true" />
+              Mod demo — perkongsian disimpan dalam sesi ini sahaja (Fasa 5).
+            </p>
+            <div className={styles.dialogActions}>
+              <button type="button" className={styles.ghostButton} onClick={() => setShareOpen(false)}>Batal</button>
+              <button type="button" className={styles.confirmButton} onClick={confirmShare}>
+                <Share2 size={15} aria-hidden="true" /> Kongsi sekarang
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Source preview overlay */}
       {activeSource && (
@@ -356,9 +484,7 @@ export function WorkbookWorkspace({
             <div className="flex items-start justify-between gap-3 border-b border-border p-4">
               <div>
                 <h2 className="text-sm font-bold leading-snug">{activeSource.title}</h2>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Paparan penuh dokumen disambung dalam Fasa 3.
-                </p>
+                <p className="mt-1 text-xs text-muted-foreground">Paparan penuh dokumen disambung dalam Fasa 3.</p>
               </div>
               <button
                 type="button"
@@ -383,8 +509,8 @@ export function WorkbookWorkspace({
                 </div>
               </div>
               <div className="rounded-2xl border border-dashed border-border bg-secondary/50 p-4 text-sm leading-relaxed text-muted-foreground">
-                Dalam binaan penuh, panel ini memaparkan dokumen sebenar dengan penyerlahan petikan
-                yang digunakan oleh jawapan AI — supaya setiap sitasi boleh disemak.
+                Dalam binaan penuh, panel ini memaparkan dokumen sebenar dengan penyerlahan petikan yang
+                digunakan oleh jawapan AI — supaya setiap sitasi boleh disemak.
               </div>
               <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Check className="size-3.5 text-[#00786a]" aria-hidden="true" />

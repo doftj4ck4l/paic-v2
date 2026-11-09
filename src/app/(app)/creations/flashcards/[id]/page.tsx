@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { PageHeader, PageShell } from "@/components/studio/shell";
 import { Chip } from "@/components/studio/ui";
 import { CREATIONS } from "@/lib/demo-data";
-import { FlashcardPlayer } from "./flashcard-player";
+import { FlashcardPlayer } from "@/components/studio/flashcard-player";
 
 export const metadata: Metadata = { title: "Kad Imbas AI" };
 

@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { PageHeader, PageShell } from "@/components/studio/shell";
 import { Chip } from "@/components/studio/ui";
 import { CREATIONS } from "@/lib/demo-data";
-import { MindMapViewer } from "./mindmap-viewer";
+import { MindMapViewer } from "@/components/studio/mindmap-viewer";
 
 export const metadata: Metadata = { title: "Peta Minda AI" };
 

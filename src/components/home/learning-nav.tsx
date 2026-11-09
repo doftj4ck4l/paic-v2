@@ -16,6 +16,7 @@ import {
   Palette,
   Settings,
   UserRound,
+  UsersRound,
 } from "lucide-react";
 import { clearDemoLevelCookie } from "@/lib/demo-session";
 import type { DemoStudent } from "@/lib/demo-profile";
@@ -26,6 +27,7 @@ const NAV_LINKS = [
   { href: "/workbooks", label: "Buku Kerja", icon: BookOpen },
   { href: "/subjects", label: "Subjek", icon: GraduationCap },
   { href: "/explore", label: "Jelajah", icon: Compass },
+  { href: "/community", label: "Komuniti", icon: UsersRound },
   { href: "/creations", label: "Hasil Karya", icon: Palette },
 ];
 
@@ -73,7 +75,7 @@ export function LearningNav({ student }: { student: DemoStudent }) {
           ))}
         </nav>
         <div className={styles.utilities}>
-          <span className={styles.streak} title={`Rentetan ${student.streakDays} hari`}><Flame aria-hidden="true" />{student.streakDays} hari</span>
+          <Link href="/community" className={styles.streak} title={`Rentetan ${student.streakDays} hari — buka Komuniti`}><Flame aria-hidden="true" />{student.streakDays} hari</Link>
           <Link href="/notifications" className={styles.notifications} aria-label="Pemberitahuan"><Bell aria-hidden="true" /><i aria-hidden="true" /></Link>
           <div className={styles.account}>
             <button ref={accountButton} type="button" onClick={() => setMenuOpen((value) => !value)} aria-expanded={menuOpen} aria-controls="account-menu" aria-label="Menu akaun" className={styles.avatar}>{student.preferredName.slice(0, 1)}</button>

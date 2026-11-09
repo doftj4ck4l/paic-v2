@@ -56,7 +56,7 @@
   .notifications { width: 23px; }
   .avatar { width: 31px; height: 31px; font-size: 13px; }
   .nav { gap: 3px; padding-top: 0; }
-  .navLink { flex-direction: column; gap: 5px; height: 55px; font-size: 10px; padding-inline: 6px; border-radius: 15px; }
+  .navLink { flex-direction: column; gap: 4px; height: auto; min-height: 52px; font-size: 9.5px; padding: 7px 4px; border-radius: 15px; }
   .navIcon > svg { width: 18px; height: 18px; }
   .navIcon > i { width: 7px; height: 7px; top: -2px; }
 }

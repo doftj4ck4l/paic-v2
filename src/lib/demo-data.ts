@@ -685,3 +685,94 @@ export const NOTIFICATIONS: DemoNotification[] = [
   { id: "n3", title: "Pengumuman kelas", body: "Kuiz Sains Mingguan dibuka sehingga Khamis.", time: "Semalam", kind: "class", read: true },
   { id: "n4", title: "Pencapaian baharu", body: "Anda memperoleh 'Pembaca Hebat' — Baca 10 cerita.", time: "3 hari lalu", kind: "account", read: true },
 ];
+
+/* ================= Komuniti ================= */
+
+export type DemoCommunityStudent = {
+  id: string;
+  name: string;
+  className: string;
+  yearLabel: string;
+  bio: string;
+  xp: number;
+  streakDays: number;
+  subscribers: number;
+  badges: string[];
+  followed: boolean;
+};
+
+export const COMMUNITY_STUDENTS: DemoCommunityStudent[] = [
+  { id: "mei-lin", name: "Mei Lin", className: "4 Bestari", yearLabel: "Tahun 4", bio: "Suka sains dan eksperimen air. Selalu ulang kaji bersama kawan sekelas.", xp: 520, streakDays: 12, subscribers: 18, badges: ["Bintang Sains", "Pembaca Hebat", "Rentetan 7 Hari"], followed: true },
+  { id: "danial", name: "Danial", className: "4 Bestari", yearLabel: "Tahun 4", bio: "Koleksi nota tatabahasa dan cerita pendek untuk ulang kaji cepat.", xp: 380, streakDays: 7, subscribers: 11, badges: ["Juara Bahasa", "Rentetan 7 Hari"], followed: true },
+  { id: "priya", name: "Priya", className: "4 Dinamik", yearLabel: "Tahun 4", bio: "Trik matematik pantas — pecahan, ruang dan bentuk.", xp: 610, streakDays: 21, subscribers: 24, badges: ["Juara Pecahan", "Bintang Sains", "Rentetan 14 Hari"], followed: false },
+  { id: "hafiz", name: "Hafiz", className: "4 Amanah", yearLabel: "Tahun 4", bio: "Eksperimen sains mudah yang boleh dibuat di rumah.", xp: 290, streakDays: 4, subscribers: 9, badges: ["Detektif Sains"], followed: false },
+  { id: "sofia", name: "Sofia", className: "4 Amanah", yearLabel: "Tahun 4", bio: "Menulis cerita kreatif dan puisi untuk projek kelas.", xp: 445, streakDays: 9, subscribers: 14, badges: ["Pembaca Hebat", "Penulis Muda"], followed: false },
+];
+
+export function communityStudentById(id: string): DemoCommunityStudent {
+  return COMMUNITY_STUDENTS.find((s) => s.id === id) ?? COMMUNITY_STUDENTS[0];
+}
+
+export function communityLevel(xp: number): number {
+  return Math.floor(xp / 100) + 1;
+}
+
+export type DemoSharedWorkbook = {
+  id: string;
+  title: string;
+  subjectId: SubjectId;
+  topic: string;
+  authorId: string;
+  sharedAt: string;
+  subscribers: number;
+  modules: DemoCreation["kind"][];
+  asset: string;
+  defaultSubscribed?: boolean;
+  yourStreak?: number;
+};
+
+export const SHARED_WORKBOOKS: DemoSharedWorkbook[] = [
+  { id: "peta-kitaran-air", title: "Peta Kitaran Air", subjectId: "science", topic: "Nota ringkas, kad imbas dan kuiz kitaran air", authorId: "mei-lin", sharedAt: "2 jam lalu", subscribers: 18, modules: ["notes", "flashcards", "quizzes"], asset: "/assets/thiings/workbook-flask.png", defaultSubscribed: true, yourStreak: 3 },
+  { id: "tatabahasa-mudah", title: "Tatabahasa Mudah", subjectId: "language", topic: "Kata nama, kata kerja dan ayat mudah", authorId: "danial", sharedAt: "Semalam", subscribers: 11, modules: ["notes", "slides", "study-guides"], asset: "/assets/thiings/workbook-pencil.png" },
+  { id: "trik-pecahan-pantas", title: "Trik Pecahan Pantas", subjectId: "math", topic: "Cara cepat banding dan tambah pecahan", authorId: "priya", sharedAt: "2 hari lalu", subscribers: 24, modules: ["notes", "slides", "quizzes", "mindmaps"], asset: "/assets/thiings/workbook-calculator.png" },
+  { id: "cerita-pendek-kreatif", title: "Cerita Pendek Kreatif", subjectId: "language", topic: "Contoh cerita dan struktur watak untuk projek kelas", authorId: "sofia", sharedAt: "3 hari lalu", subscribers: 14, modules: ["notes", "study-guides"], asset: "/assets/thiings/subject-language.png" },
+  { id: "eksperimen-rumah", title: "Eksperimen Sains Rumah", subjectId: "science", topic: "5 eksperimen mudah dengan bahan dapur", authorId: "hafiz", sharedAt: "4 hari lalu", subscribers: 9, modules: ["notes", "flashcards"], asset: "/assets/thiings/subject-science.png" },
+];
+
+export function sharedWorkbookById(id: string): DemoSharedWorkbook {
+  return SHARED_WORKBOOKS.find((w) => w.id === id) ?? SHARED_WORKBOOKS[0];
+}
+
+export function sharedWorkbooksByAuthor(authorId: string): DemoSharedWorkbook[] {
+  return SHARED_WORKBOOKS.filter((w) => w.authorId === authorId);
+}
+
+export type DemoFeedItem = {
+  id: string;
+  kind: "shared" | "streak" | "achievement" | "update";
+  studentId: string;
+  workbookId?: string;
+  action: string;
+  time: string;
+  likes: number;
+};
+
+export const COMMUNITY_FEED: DemoFeedItem[] = [
+  { id: "cf1", kind: "shared", studentId: "mei-lin", workbookId: "peta-kitaran-air", action: "berkongsi buku kerja baharu", time: "2 jam lalu", likes: 12 },
+  { id: "cf2", kind: "streak", studentId: "danial", action: "mencapai rentetan 7 hari", time: "4 jam lalu", likes: 8 },
+  { id: "cf3", kind: "update", studentId: "priya", workbookId: "trik-pecahan-pantas", action: "menambah slaid baharu pada", time: "Semalam", likes: 5 },
+  { id: "cf4", kind: "shared", studentId: "sofia", workbookId: "cerita-pendek-kreatif", action: "berkongsi buku kerja baharu", time: "Semalam", likes: 9 },
+  { id: "cf5", kind: "achievement", studentId: "hafiz", action: "memperoleh pencapaian \"Detektif Sains\"", time: "2 hari lalu", likes: 14 },
+  { id: "cf6", kind: "streak", studentId: "mei-lin", action: "mencapai rentetan 10 hari", time: "3 hari lalu", likes: 6 },
+  { id: "cf7", kind: "shared", studentId: "hafiz", workbookId: "eksperimen-rumah", action: "berkongsi buku kerja baharu", time: "4 hari lalu", likes: 4 },
+];
+
+export const WEEK_STREAK: { day: string; active: boolean }[] = [
+  { day: "Isn", active: false },
+  { day: "Sel", active: false },
+  { day: "Rab", active: false },
+  { day: "Kha", active: false },
+  { day: "Jum", active: true },
+  { day: "Sab", active: true },
+  { day: "Ahd", active: true },
+];

@@ -14,6 +14,6 @@ export default async function WorkbookSourcesPage({
   const workbook = WORKBOOKS.find((w) => w.id === id);
   if (!workbook) notFound();
   return (
-    <WorkbookWorkspace workbook={workbook} initialPanel="sources" />
+    <WorkbookWorkspace workbook={workbook} initialTab="sumber" />
   );
 }

@@ -14,6 +14,6 @@ export default async function WorkbookStudioPage({
   const workbook = WORKBOOKS.find((w) => w.id === id);
   if (!workbook) notFound();
   return (
-    <WorkbookWorkspace workbook={workbook} initialPanel="studio" />
+    <WorkbookWorkspace workbook={workbook} initialTab="notes" />
   );
 }

@@ -14,6 +14,6 @@ export default async function WorkbookChatPage({
   const workbook = WORKBOOKS.find((w) => w.id === id);
   if (!workbook) notFound();
   return (
-    <WorkbookWorkspace workbook={workbook} initialPanel="chat" />
+    <WorkbookWorkspace workbook={workbook} initialTab="sembang" />
   );
 }

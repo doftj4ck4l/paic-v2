@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { PageHeader, PageShell } from "@/components/studio/shell";
 import { Chip } from "@/components/studio/ui";
 import { CREATIONS } from "@/lib/demo-data";
-import { SlideViewer } from "./slide-viewer";
+import { SlideViewer } from "@/components/studio/slide-viewer";
 
 export const metadata: Metadata = { title: "Slaid AI" };
 

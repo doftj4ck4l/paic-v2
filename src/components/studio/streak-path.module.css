@@ -1,0 +1,11 @@
+.wrap { display: flex; flex-direction: column; gap: 9px; padding: 13px 15px; border: 1px solid #ffffff; border-radius: 16px; background: #fffffff0; box-shadow: 0 6px 16px #3f40600f; }
+.caption { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 750; letter-spacing: -.2px; color: #10112f; }
+.caption svg { width: 14px; height: 14px; color: #ff9f16; fill: #ffd12b; stroke-width: 2; }
+.days { display: flex; gap: 7px; list-style: none; }
+.day { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.dot { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: #e8edf6; color: #fff; }
+.dot svg { width: 12px; height: 12px; }
+.day[data-active="true"] .dot { background: linear-gradient(140deg, #00b6a2, #007a66); box-shadow: 0 3px 6px #009f9526; }
+.label { font-size: 8.5px; font-weight: 650; color: #7c819c; }
+.day[data-active="true"] .label { color: #00786a; }
+.srOnly { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }

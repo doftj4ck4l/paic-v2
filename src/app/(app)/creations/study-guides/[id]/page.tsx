@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { PageHeader, PageShell } from "@/components/studio/shell";
 import { Chip } from "@/components/studio/ui";
 import { CREATIONS } from "@/lib/demo-data";
-import { StudyGuideView } from "./study-guide-view";
+import { StudyGuideView } from "@/components/studio/study-guide-view";
 
 export const metadata: Metadata = { title: "Panduan Ulang Kaji AI" };
 
