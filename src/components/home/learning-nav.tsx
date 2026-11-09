@@ -23,7 +23,7 @@ import type { SessionUser } from "@/lib/auth-session";
 import styles from "./learning-nav.module.css";
 
 const NAV_LINKS = [
-  { href: "/", label: "Utama", icon: House },
+  { href: "/home", label: "Utama", icon: House },
   { href: "/workbooks", label: "Buku Kerja", icon: BookOpen },
   { href: "/subjects", label: "Subjek", icon: GraduationCap },
   { href: "/explore", label: "Jelajah", icon: Compass },
@@ -54,7 +54,6 @@ export function LearningNav({ student }: { student: SessionUser }) {
   }
 
   function isActive(href: string) {
-    if (href === "/") return pathname === "/";
     return pathname === href || pathname.startsWith(`${href}/`);
   }
 

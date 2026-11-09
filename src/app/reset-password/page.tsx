@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "Tetapkan semula kata laluan" };
 export default async function ResetPasswordPage() {
   const user = await getCurrentUser();
   if (user) {
-    redirect("/");
+    redirect("/home");
   }
 
   return (

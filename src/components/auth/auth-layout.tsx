@@ -27,15 +27,18 @@ function PaperPlane() {
 
 /**
  * Shared auth layout — the exact login-page design used by every auth page
- * (login, register, forgot password, reset password).
+ * (login, register, forgot password, reset password). Pass `header` to render
+ * a custom (e.g. interactive) heading instead of the default title/subtitle.
  */
 export function AuthLayout({
   title,
   subtitle,
+  header,
   children,
 }: {
-  title: React.ReactNode;
-  subtitle: string;
+  title?: React.ReactNode;
+  subtitle?: string;
+  header?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
@@ -64,8 +67,12 @@ export function AuthLayout({
           <div className={styles.mobileBrand}><Brand /></div>
           <div className={styles.formContent}>
             <span className={styles.cardRays} aria-hidden="true"><i /><i /><i /></span>
-            <h1>{title}</h1>
-            <p className={styles.formSubtitle}>{subtitle}</p>
+            {header ?? (
+              <>
+                <h1>{title}</h1>
+                <p className={styles.formSubtitle}>{subtitle}</p>
+              </>
+            )}
             {children}
           </div>
         </main>

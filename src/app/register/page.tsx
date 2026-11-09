@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "Daftar" };
 export default async function RegisterPage() {
   const user = await getCurrentUser();
   if (user) {
-    redirect("/");
+    redirect("/home");
   }
 
   return (

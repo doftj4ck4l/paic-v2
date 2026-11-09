@@ -2,7 +2,7 @@ import { getSessionCookie } from "better-auth/cookies";
 import { NextResponse, type NextRequest } from "next/server";
 
 const PROTECTED = [
-  "/",
+  "/home",
   "/workbooks",
   "/subjects",
   "/quizzes",
@@ -35,7 +35,7 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/",
+    "/home",
     "/workbooks/:path*",
     "/subjects/:path*",
     "/quizzes/:path*",

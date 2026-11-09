@@ -58,13 +58,13 @@ export function LoginForm() {
     // Hard navigation: the client router may hold a prefetched redirect for "/"
     // (cached while signed out). A full load guarantees fresh server state.
     // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- full reload required so the client router cannot replay the signed-out redirect cache
-    window.location.assign("/");
+    window.location.assign("/home");
   }
 
   async function resendVerification() {
     if (!unverifiedEmail) return;
     setResendState("sending");
-    await authClient.sendVerificationEmail({ email: unverifiedEmail, callbackURL: "/" });
+    await authClient.sendVerificationEmail({ email: unverifiedEmail, callbackURL: "/home" });
     setResendState("sent");
   }
 

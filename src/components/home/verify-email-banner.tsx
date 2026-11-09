@@ -12,7 +12,7 @@ export function VerifyEmailBanner({ email }: { email: string }) {
 
   async function resend() {
     setStatus("sending");
-    await authClient.sendVerificationEmail({ email, callbackURL: "/" });
+    await authClient.sendVerificationEmail({ email, callbackURL: "/home" });
     setStatus("sent");
   }
 

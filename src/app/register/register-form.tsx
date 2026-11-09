@@ -156,7 +156,7 @@ export function RegisterForm() {
   async function resendVerification() {
     if (!sentEmail) return;
     setResendState("sending");
-    await authClient.sendVerificationEmail({ email: sentEmail, callbackURL: "/" });
+    await authClient.sendVerificationEmail({ email: sentEmail, callbackURL: "/home" });
     setResendState("sent");
   }
 
