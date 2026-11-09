@@ -15,7 +15,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV BETTER_AUTH_SECRET=build-time-placeholder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN npm run build
+RUN npm run build && rm -rf .next/cache
 
 # ---------- runner ----------
 # Production dependencies only (tsx is a prod dependency so `npm run
