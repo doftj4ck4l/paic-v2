@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# keep the example env file tracked
+!.env.example
+
+# local embedded postgres (dev)
+.pglite/

@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
-import { DEMO_LEVEL_COOKIE } from "@/lib/demo-constants";
+import { getCurrentUser } from "@/lib/auth-session";
 import { LoginForm } from "./login-form";
 import { LoginShell } from "./login-shell";
 
 export const metadata: Metadata = { title: "Log masuk" };
 
 export default async function LoginPage() {
-  const store = await cookies();
-  if (store.get(DEMO_LEVEL_COOKIE)) {
+  const user = await getCurrentUser();
+  if (user) {
     redirect("/");
   }
 

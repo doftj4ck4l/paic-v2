@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { PageHeader, PageShell } from "@/components/studio/shell";
-import { getDemoStudent } from "@/lib/demo-profile";
+import { requireUser } from "@/lib/auth-session";
 import { EditProfileForm } from "./edit-profile-form";
 
 export const metadata: Metadata = { title: "Sunting Profil" };
 
 export default async function EditProfilePage() {
-  const student = await getDemoStudent();
+  const student = await requireUser();
   return (
     <PageShell className="max-w-[640px]">
       <PageHeader

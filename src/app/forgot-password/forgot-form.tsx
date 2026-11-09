@@ -10,9 +10,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Object3D } from "@/components/learning/object3d";
+import { authClient } from "@/lib/auth-client";
 
 const schema = z.object({
-  email: z.string().email("Masukkan emel yang sah."),
+  email: z.string().trim().email("Masukkan emel yang sah."),
 });
 
 type ForgotValues = z.infer<typeof schema>;
@@ -30,10 +31,11 @@ export function ForgotForm() {
   });
 
   async function onSubmit(values: ForgotValues) {
-    // Demo build: no mail service yet (Phase 1). The confirmation state is
-    // real; nothing is actually sent in this environment.
-    await new Promise((r) => setTimeout(r, 600));
-    setSentTo(values.email);
+    // Always show the same confirmation — never reveal whether an account exists.
+    await authClient
+      .requestPasswordReset({ email: values.email.trim(), redirectTo: "/reset-password" })
+      .catch(() => null);
+    setSentTo(values.email.trim());
   }
 
   if (sentTo) {
@@ -51,7 +53,8 @@ export function ForgotForm() {
         <div className="mt-4 flex w-full items-center gap-2.5 rounded-xl bg-[#E7F6F4] px-4 py-3 text-left">
           <MailCheck className="size-4 shrink-0 text-teal" aria-hidden="true" />
           <p className="text-xs text-slate-600">
-            Mod demo — tiada emel sebenar dihantar dalam binaan ini.
+            Mod pembangunan: jika SMTP belum dikonfigurasi, pautan boleh dilihat dalam konsol
+            pelayan.
           </p>
         </div>
         <Button asChild variant="dark" className="mt-5 w-full">
@@ -63,15 +66,7 @@ export function ForgotForm() {
 
   return (
     <div>
-      <div className="rounded-xl bg-[#E7F6F4] px-4 py-3">
-        <p className="text-xs font-bold text-teal">Mod demo</p>
-        <p className="mt-0.5 text-xs leading-relaxed text-slate-600">
-          Tiada emel sebenar dihantar dalam binaan ini — pemulihan akaun penuh disambung
-          dalam Fasa 1.
-        </p>
-      </div>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-4 flex flex-col gap-4" noValidate>
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate aria-busy={isSubmitting}>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="email">Emel</Label>
           <div className="relative">
@@ -86,6 +81,7 @@ export function ForgotForm() {
               placeholder="nama@sekolah.edu.my"
               aria-invalid={!!errors.email}
               className="pl-10"
+              disabled={isSubmitting}
               {...register("email")}
             />
           </div>

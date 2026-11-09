@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import content from "@/components/studio/content-width.module.css";
-import { getDemoStudent } from "@/lib/demo-profile";
+import { requireUser } from "@/lib/auth-session";
 import { CommunityHub } from "./community-hub";
 import styles from "./community.module.css";
 
 export const metadata: Metadata = { title: "Komuniti" };
 
 export default async function CommunityPage() {
-  const student = await getDemoStudent();
+  const student = await requireUser();
   return (
     <div className={styles.page}>
       <main id="main" className={`${content.container} ${styles.main}`}>

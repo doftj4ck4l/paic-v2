@@ -1,27 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowRight, Eye, EyeOff, Info, Loader2, LockKeyhole, UserRound } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, Loader2, LockKeyhole, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { setDemoLevelCookie } from "@/lib/demo-session";
+import { authClient } from "@/lib/auth-client";
 import styles from "./login.module.css";
 
 const schema = z.object({
-  identifier: z.string().trim().min(4, "Masukkan emel atau ID pelajar yang sah."),
+  identifier: z.string().trim().min(3, "Masukkan emel atau ID pelajar anda."),
   password: z.string().min(8, "Kata laluan mesti sekurang-kurangnya 8 aksara."),
 });
 
 type LoginValues = z.infer<typeof schema>;
 
 export function LoginForm() {
-  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(true);
   const [formError, setFormError] = useState<string | null>(null);
@@ -37,26 +35,23 @@ export function LoginForm() {
 
   async function onSubmit(values: LoginValues) {
     setFormError(null);
-    // Demo only: preserve the existing simulated success and failure flows.
-    await new Promise((r) => setTimeout(r, 600));
-    if (values.password === "password123") {
-      setFormError("Emel atau kata laluan tidak sah. Sila cuba lagi.");
+    const identifier = values.identifier.trim();
+    const result = identifier.includes("@")
+      ? await authClient.signIn.email({ email: identifier, password: values.password, rememberMe: remember })
+      : await authClient.signIn.username({ username: identifier, password: values.password, rememberMe: remember });
+
+    if (result.error) {
+      setFormError("Emel/ID pelajar atau kata laluan tidak sah. Sila cuba lagi.");
       return;
     }
-    setDemoLevelCookie("primary", remember);
-    router.push("/");
+    // Hard navigation: the client router may hold a prefetched redirect for "/"
+    // (cached while signed out). A full load guarantees fresh server state.
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- full reload required so the client router cannot replay the signed-out redirect cache
+    window.location.assign("/");
   }
 
   return (
     <div>
-      <div className={styles.demo}>
-        <Info aria-hidden="true" />
-        <div>
-          <span className={styles.demoTitle}>Mod demo</span>
-          <p>Log masuk dengan sebarang emel atau ID pelajar dan kata laluan (8+ aksara) untuk membuka profil demo.</p>
-        </div>
-      </div>
-
       <form onSubmit={handleSubmit(onSubmit)} className={styles.form} noValidate aria-busy={isSubmitting}>
         <div className={styles.field}>
           <Label htmlFor="identifier">Emel atau ID pelajar</Label>
@@ -67,7 +62,7 @@ export function LoginForm() {
               autoComplete="username"
               autoCapitalize="none"
               spellCheck={false}
-              placeholder="nama@sekolah.edu.my"
+              placeholder="nama@sekolah.edu.my atau aiman.hakim"
               disabled={isSubmitting}
               aria-invalid={!!errors.identifier}
               aria-describedby={errors.identifier ? "identifier-error" : undefined}

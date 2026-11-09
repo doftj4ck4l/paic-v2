@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   Bell,
   BookOpen,
@@ -18,8 +18,8 @@ import {
   UserRound,
   UsersRound,
 } from "lucide-react";
-import { clearDemoLevelCookie } from "@/lib/demo-session";
-import type { DemoStudent } from "@/lib/demo-profile";
+import { authClient } from "@/lib/auth-client";
+import type { SessionUser } from "@/lib/auth-session";
 import styles from "./learning-nav.module.css";
 
 const NAV_LINKS = [
@@ -31,8 +31,7 @@ const NAV_LINKS = [
   { href: "/creations", label: "Hasil Karya", icon: Palette },
 ];
 
-export function LearningNav({ student }: { student: DemoStudent }) {
-  const router = useRouter();
+export function LearningNav({ student }: { student: SessionUser }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const accountButton = useRef<HTMLButtonElement>(null);
@@ -48,10 +47,10 @@ export function LearningNav({ student }: { student: DemoStudent }) {
     return () => document.removeEventListener("keydown", onEscape);
   }, [menuOpen]);
 
-  function signOut() {
-    clearDemoLevelCookie();
-    router.push("/login");
-    router.refresh();
+  async function signOut() {
+    await authClient.signOut();
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- full reload required so the client router cannot replay the signed-out redirect cache
+    window.location.assign("/login");
   }
 
   function isActive(href: string) {

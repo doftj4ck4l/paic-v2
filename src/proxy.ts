@@ -1,5 +1,5 @@
+import { getSessionCookie } from "better-auth/cookies";
 import { NextResponse, type NextRequest } from "next/server";
-import { DEMO_LEVEL_COOKIE } from "@/lib/demo-constants";
 
 const PROTECTED = [
   "/",
@@ -8,13 +8,13 @@ const PROTECTED = [
   "/quizzes",
   "/explore",
   "/creations",
+  "/community",
   "/progress",
   "/profile",
   "/settings",
   "/notifications",
   "/help",
   "/search",
-  "/pending",
 ];
 
 export function proxy(request: NextRequest) {
@@ -23,7 +23,7 @@ export function proxy(request: NextRequest) {
     (p) => pathname === p || pathname.startsWith(`${p}/`),
   );
 
-  if (isProtected && !request.cookies.has(DEMO_LEVEL_COOKIE)) {
+  if (isProtected && !getSessionCookie(request)) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.search = "";
@@ -41,12 +41,12 @@ export const config = {
     "/quizzes/:path*",
     "/explore/:path*",
     "/creations/:path*",
+    "/community/:path*",
     "/progress/:path*",
     "/profile/:path*",
     "/settings/:path*",
     "/notifications/:path*",
     "/help/:path*",
     "/search/:path*",
-    "/pending/:path*",
   ],
 };

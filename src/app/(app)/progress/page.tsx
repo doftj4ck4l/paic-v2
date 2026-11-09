@@ -4,7 +4,7 @@ import { ArrowRight, Flame, TrendingDown, TrendingUp, Minus, Zap } from "lucide-
 import { PageHeader, PageShell, Section } from "@/components/studio/shell";
 import { Chip, ProgressBar } from "@/components/studio/ui";
 import { ACHIEVEMENTS, SUBJECT_MASTERY, subjectById } from "@/lib/demo-data";
-import { getDemoStudent } from "@/lib/demo-profile";
+import { requireUser } from "@/lib/auth-session";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Kemajuan" };
@@ -23,7 +23,7 @@ const TREND_ICON = { up: TrendingUp, flat: Minus, down: TrendingDown } as const;
 const TREND_CLASS = { up: "text-[#00786a]", flat: "text-muted-foreground", down: "text-[#b3383e]" } as const;
 
 export default async function ProgressPage() {
-  const student = await getDemoStudent();
+  const student = await requireUser();
   const level = Math.floor(student.xp / student.xpPerLevel) + 1;
   const into = student.xp % student.xpPerLevel;
   const earned = ACHIEVEMENTS.filter((a) => a.earned).length;

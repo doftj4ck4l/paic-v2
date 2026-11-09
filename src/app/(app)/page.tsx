@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ChartNoAxesColumnIncreasing, Check, ListChecks, Play, Search, Sparkles, Zap } from "lucide-react";
-import { getDemoStudent } from "@/lib/demo-profile";
+import { requireUser } from "@/lib/auth-session";
 import { ACHIEVEMENTS, QUIZZES, SUBJECTS, WORKBOOKS, subjectById } from "@/lib/demo-data";
 import styles from "./home.module.css";
 import content from "@/components/studio/content-width.module.css";
@@ -18,7 +18,7 @@ const ACHIEVEMENT_ASSETS = {
 };
 
 export default async function HomePage() {
-  const student = await getDemoStudent();
+  const student = await requireUser();
   const workbook = WORKBOOKS[0];
   const subject = subjectById(workbook.subjectId);
   const level = Math.floor(student.xp / student.xpPerLevel) + 1;

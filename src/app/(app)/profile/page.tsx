@@ -3,12 +3,12 @@ import Link from "next/link";
 import { ArrowRight, Bell, Settings, UserRound } from "lucide-react";
 import { PageHeader, PageShell } from "@/components/studio/shell";
 import { Chip } from "@/components/studio/ui";
-import { getDemoStudent } from "@/lib/demo-profile";
+import { requireUser } from "@/lib/auth-session";
 
 export const metadata: Metadata = { title: "Profil" };
 
 export default async function ProfilePage() {
-  const student = await getDemoStudent();
+  const student = await requireUser();
 
   return (
     <PageShell className="max-w-[680px]">

@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
 import { AuthShell } from "@/components/auth-shell";
-import { DEMO_LEVEL_COOKIE } from "@/lib/demo-constants";
+import { getCurrentUser } from "@/lib/auth-session";
 import { ForgotForm } from "./forgot-form";
 
 export const metadata: Metadata = { title: "Lupa kata laluan" };
 
 export default async function ForgotPasswordPage() {
-  const store = await cookies();
-  if (store.get(DEMO_LEVEL_COOKIE)) {
+  const user = await getCurrentUser();
+  if (user) {
     redirect("/");
   }
 

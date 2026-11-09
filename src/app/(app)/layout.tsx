@@ -1,14 +1,16 @@
 import { LearningNav } from "@/components/home/learning-nav";
-import { getDemoStudent } from "@/lib/demo-profile";
+import { VerifyEmailBanner } from "@/components/home/verify-email-banner";
+import { requireUser } from "@/lib/auth-session";
 
 /**
  * Shared app layout — the single navbar is mounted ONCE here and persists
  * across all client-side navigation. Only the page content below it swaps.
  */
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const student = await getDemoStudent();
+  const student = await requireUser();
   return (
     <div className="flex min-h-dvh flex-col bg-background text-foreground">
+      {!student.emailVerified && <VerifyEmailBanner email={student.email} />}
       <LearningNav student={student} />
       {children}
     </div>

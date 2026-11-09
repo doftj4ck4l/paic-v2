@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
 import { AuthShell } from "@/components/auth-shell";
-import { DEMO_LEVEL_COOKIE } from "@/lib/demo-constants";
+import { getCurrentUser } from "@/lib/auth-session";
 import { RegisterForm } from "./register-form";
 
 export const metadata: Metadata = { title: "Daftar" };
 
 export default async function RegisterPage() {
-  const store = await cookies();
-  if (store.get(DEMO_LEVEL_COOKIE)) {
+  const user = await getCurrentUser();
+  if (user) {
     redirect("/");
   }
 
