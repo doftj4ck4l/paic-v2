@@ -119,6 +119,8 @@ function WorkbookWorkspaceInner({ workbook, viewerId, initialTab = "sumber" }: W
   });
   const sourceCount = sourceState.loading ? null : sourceState.ready.length;
   function setTab(next: TabId) { updateTab(next); setVisited(current => current.includes(next) ? current : [...current, next]); }
+  const [chatRequest, setChatRequest] = useState<string | null>(null);
+  function askChat(query: string) { setChatRequest(query); setTab("sembang"); }
   const savedWorkbooks = useSavedWorkbooks();
   const isSaved = savedWorkbooks.includes(workbook.id);
   // Real published workbooks and demo student-shared ones can be saved to Disimpan.
@@ -221,12 +223,12 @@ function WorkbookWorkspaceInner({ workbook, viewerId, initialTab = "sumber" }: W
         <div className={styles.content}>
           {tab === "sumber" && <SourcesTab workbookId={workbook.id} workbook={{ ...workbook, visibility }} readOnly={readOnly} />}
 
-          {visited.includes("sembang") && <div hidden={tab !== "sembang"}><ChatTab workbookId={workbook.id} /></div>}
+          {visited.includes("sembang") && <div hidden={tab !== "sembang"}><ChatTab workbookId={workbook.id} pendingQuery={chatRequest} onQueryConsumed={() => setChatRequest(null)} /></div>}
 
           {modules.map((m) =>
             visited.includes(m.kind) ? (
               <div key={m.kind} hidden={tab !== m.kind} className={styles.module}>
-                {m.kind === "quizzes" ? <QuizzesTab workbook={workbook} readOnly={readOnly} /> : <ModulesTab workbook={workbook} kind={m.kind} active={tab === m.kind} readOnly={readOnly} />}
+                {m.kind === "quizzes" ? <QuizzesTab workbook={workbook} readOnly={readOnly} onAskAI={askChat} /> : <ModulesTab workbook={workbook} kind={m.kind} active={tab === m.kind} readOnly={readOnly} />}
               </div>
             ) : null,
           )}

@@ -25,6 +25,7 @@ export function QuizPlayer({
   artifactId,
   generated = false,
   onExit,
+  onAskAI,
 }: {
   questions?: QuizQuestion[];
   onFinishHref?: string;
@@ -34,6 +35,8 @@ export function QuizPlayer({
   artifactId?: string;
   generated?: boolean;
   onExit?: () => void;
+  /** When provided, "Tanya Pixel AI" hands the question over to the workbook chat instead of the static drawer. */
+  onAskAI?: (message: string) => void;
 }) {
   const [index, setIndex] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
@@ -81,6 +84,22 @@ export function QuizPlayer({
     setDone(false);
     setAiOpen(false);
     recorded.current = false;
+  }
+
+  function askAi() {
+    if (picked === null) return;
+    if (!onAskAI) {
+      setAiOpen(true);
+      return;
+    }
+    const letter = (position: number) => String.fromCharCode(65 + position);
+    const optionList = question.options.map((option, position) => `${letter(position)}. ${option}`).join("\n");
+    const header = `Saya sedang menjawab kuiz. Soalan: “${question.question}”\n\nPilihan:\n${optionList}\n\nSaya pilih ${letter(picked)}: “${question.options[picked]}”\n\n`;
+    const message =
+      picked === question.answer
+        ? `${header}Jawapan saya betul. Terangkan dengan lebih mendalam mengapa ia betul dan mengapa setiap pilihan lain salah. Berdasarkan sumber sahaja.`
+        : `${header}Jawapan saya salah. Jawapan betul ialah ${letter(question.answer)}: “${question.options[question.answer]}”\n\nBantu saya faham mengapa jawapan saya salah dan mengapa jawapan betul itu betul. Berdasarkan sumber sahaja.`;
+    onAskAI(message);
   }
 
   if (done) {
@@ -216,7 +235,7 @@ export function QuizPlayer({
             {aiExplain && (
               <button
                 type="button"
-                onClick={() => setAiOpen(true)}
+                onClick={askAi}
                 className="focus-ring inline-flex h-11 items-center gap-2 rounded-xl border border-[#bfe9e2] bg-[#f2fbf9] px-5 text-sm font-semibold text-[#00786a] shadow-soft"
               >
                 <Sparkles className="size-4" aria-hidden="true" /> Tak faham? Tanya Pixel AI

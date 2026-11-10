@@ -19,7 +19,7 @@ function timeAgo(value: string) {
   return `${days} hari lalu`;
 }
 
-export function ChatTab({ workbookId }: { workbookId: string }) {
+export function ChatTab({ workbookId, pendingQuery = null, onQueryConsumed }: { workbookId: string; pendingQuery?: string | null; onQueryConsumed?: () => void }) {
   const sourceState = useWorkbookSources(workbookId);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -133,6 +133,17 @@ export function ChatTab({ workbookId }: { workbookId: string }) {
   }
 
   function stop() { abortRef.current?.abort(); }
+
+  const consumedQuery = useRef<string | null>(null);
+  useEffect(() => {
+    if (!pendingQuery || consumedQuery.current === pendingQuery) return;
+    if (loading || !available || sourceState.loading || phase !== "idle" || !sourceState.selectedIds.length) return;
+    consumedQuery.current = pendingQuery;
+    onQueryConsumed?.();
+    const timer = window.setTimeout(() => { void send(pendingQuery); }, 0);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingQuery, loading, available, sourceState.loading, sourceState.selectedIds, phase]);
 
   async function openSession(id: string) {
     setMenuOpen(false); setSessionId(id); setDismissedBanner(null); setLoading(true);
