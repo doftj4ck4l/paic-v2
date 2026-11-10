@@ -129,8 +129,9 @@ async function main() {
         classId: bestari.id,
         workbookId: "kitaran-air",
         createdBy: bestari.teacherId,
-        title: "Kitaran Air — nota & kuiz",
-        instructions: "Tonton slaid, baca nota dan jawab kuiz. Tandakan selesai apabila sudah siap.",
+        title: "Kitaran Air — kuiz & slaid",
+        instructions: "Tonton slaid dan jawab kuiz. Tandakan selesai apabila sudah siap.",
+        moduleKinds: ["quizzes", "slides"],
         dueAt: new Date(Date.now() + 5 * 86_400_000),
       });
       await db.insert(workbookClassShares).values({ workbookId: "kitaran-air", classId: bestari.id }).onConflictDoNothing();
@@ -176,8 +177,8 @@ async function main() {
           id: "ntf_demo_aiman_assignment",
           userId: aiman.id,
           type: "assignment",
-          title: "Tugasan baharu: Kitaran Air — nota & kuiz",
-          body: "4 Bestari · Kitaran Air",
+          title: "Buku kerja ditugaskan: Kitaran Air — kuiz & slaid",
+          body: "4 Bestari · 2 modul",
           href: "/classes/cls_demo_bestari?tab=assignments",
         },
       ]);

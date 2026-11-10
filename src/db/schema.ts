@@ -300,6 +300,8 @@ export const assignments = pgTable(
     title: text("title").notNull(),
     instructions: text("instructions").notNull().default(""),
     targetKind: text("target_kind"),
+    /** Mapped module kinds (e.g. ["quizzes","notes"]); null means every module. */
+    moduleKinds: jsonb("module_kinds").$type<string[]>(),
     dueAt: timestamp("due_at"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },

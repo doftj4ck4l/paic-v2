@@ -7,25 +7,59 @@ import { ArrowLeft, BookOpen, CalendarDays, Check, Plus, RefreshCw, Trash2, User
 import { Button } from "@/components/ui/button";
 import type { SessionUser } from "@/lib/auth-session";
 import type { ClassDetail } from "@/lib/classes";
-import type { AssignmentView, ClassMaterial, OwnedWorkbookOption } from "@/lib/assignments";
+import type { AssignmentView, ClassMaterial, ClassSourceGroup, OwnedWorkbookOption } from "@/lib/assignments";
 import type { ClassProgress } from "@/lib/class-progress";
 import { dueLabel, dueState, formatDue, formatRelativeTime } from "@/lib/assignment-status";
+import { moduleKindLabel } from "@/lib/module-kinds";
 import { CopyCodeButton } from "../copy-code-button";
 import { AssignmentDialog } from "./assignment-dialog";
-import type { ClassTabId } from "./class-tabs";
 import styles from "../classes.module.css";
 import content from "@/components/studio/content-width.module.css";
 
-const TABS: { key: ClassTabId; label: string }[] = [
+const SOURCE_KIND_LABELS: Record<string, string> = {
+  web: "Web",
+  youtube: "YouTube",
+  pdf: "PDF",
+  textbook: "Buku teks",
+  doc: "Dokumen",
+  text: "Nota",
+};
+
+const TABS = [
   { key: "overview", label: "Gambaran" },
-  { key: "assignments", label: "Tugasan" },
-  { key: "materials", label: "Bahan" },
+  { key: "assignments", label: "Buku Kerja" },
+  { key: "materials", label: "Sumber" },
   { key: "students", label: "Pelajar" },
   { key: "progress", label: "Kemajuan" },
-];
+] as const;
+
+type TabKey = (typeof TABS)[number]["key"];
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("ms-MY", { day: "numeric", month: "long", year: "numeric" });
+}
+
+function ModuleChips({ assignment, linkable = false }: { assignment: AssignmentView; linkable?: boolean }) {
+  if (assignment.moduleKinds === null) {
+    return (
+      <span className={styles.moduleChips}>
+        <em className={styles.moduleChip}>Semua modul</em>
+      </span>
+    );
+  }
+  return (
+    <span className={styles.moduleChips}>
+      {assignment.moduleKinds.map((kind) =>
+        linkable ? (
+          <Link key={kind} href={`/workbooks/${assignment.workbookId}?tab=${kind}`} className={styles.moduleChipLink}>
+            {moduleKindLabel(kind)}
+          </Link>
+        ) : (
+          <em key={kind} className={styles.moduleChip}>{moduleKindLabel(kind)}</em>
+        ),
+      )}
+    </span>
+  );
 }
 
 export function ClassDetailView({
@@ -33,6 +67,7 @@ export function ClassDetailView({
   detail,
   assignments,
   materials,
+  sources,
   ownedWorkbooks,
   progress,
   initialTab,
@@ -41,13 +76,14 @@ export function ClassDetailView({
   detail: ClassDetail;
   assignments: AssignmentView[];
   materials: ClassMaterial[];
+  sources: ClassSourceGroup[];
   ownedWorkbooks: OwnedWorkbookOption[];
   progress: ClassProgress | null;
-  initialTab?: ClassTabId;
+  initialTab?: TabKey;
 }) {
   const router = useRouter();
   const isTeacher = user.role === "teacher";
-  const [tab, setTab] = useState<ClassTabId>(initialTab ?? "overview");
+  const [tab, setTab] = useState<TabKey>(initialTab ?? "overview");
   const [code, setCode] = useState(detail.joinCode);
   const [rotating, setRotating] = useState(false);
   const [removing, setRemoving] = useState<string | null>(null);
@@ -63,7 +99,10 @@ export function ClassDetailView({
   const [materialPending, setMaterialPending] = useState<string | null>(null);
 
   const members = detail.members;
+  const assignedIds = new Set(assignments.map((assignment) => assignment.workbookId));
+  const sharedOnly = materials.filter((material) => !assignedIds.has(material.workbookId));
   const sharedIds = new Set(materials.map((material) => material.workbookId));
+  const shareable = ownedWorkbooks.filter((workbook) => !assignedIds.has(workbook.id) && !sharedIds.has(workbook.id));
 
   const visibleTabs = TABS.filter((item) => {
     if (item.key === "students" || item.key === "progress") return isTeacher;
@@ -155,7 +194,7 @@ export function ClassDetailView({
     setError(null);
     const response = await fetch(`/api/assignments/${assignmentId}`, { method: "DELETE" }).catch(() => null);
     if (!response?.ok) {
-      setError("Tugasan tidak dapat dipadamkan. Cuba lagi.");
+      setError("Buku kerja tidak dapat ditarik balik. Cuba lagi.");
       setDeletingAssignment(null);
       setConfirmDeleteAssignment(null);
       return;
@@ -222,6 +261,7 @@ export function ClassDetailView({
                 <div><dt>Guru kelas</dt><dd>{detail.teacherName}</dd></div>
                 {detail.formLevel && <div><dt>Tahun / Tingkatan</dt><dd>{detail.formLevel}</dd></div>}
                 <div><dt>Bilangan pelajar</dt><dd>{members.length}</dd></div>
+                <div><dt>Buku kerja kelas</dt><dd>{assignedIds.size + sharedOnly.length}</dd></div>
                 <div><dt>Dicipta pada</dt><dd>{formatDate(detail.createdAt)}</dd></div>
                 {!isTeacher && detail.joinedAt && <div><dt>Anda menyertai</dt><dd>{formatDate(detail.joinedAt)}</dd></div>}
               </dl>
@@ -246,7 +286,7 @@ export function ClassDetailView({
             ) : (
               <section className={styles.panel}>
                 <h2>Keluar kelas</h2>
-                <p>Anda akan berhenti melihat tugasan dan bahan daripada kelas ini sehingga menyertai semula.</p>
+                <p>Anda akan berhenti melihat buku kerja dan bahan daripada kelas ini sehingga menyertai semula.</p>
                 <div>
                   <Button type="button" variant="white" size="sm" onClick={leaveClass} disabled={leaving}>
                     {leaving ? "Keluar…" : "Keluar kelas"}
@@ -258,27 +298,27 @@ export function ClassDetailView({
         )}
 
         {tab === "assignments" && (
-          <section className={styles.tabPanel} aria-label="Tugasan kelas">
+          <section className={styles.tabPanel} aria-label="Buku kerja kelas">
             <div className={styles.panelHead}>
               <div>
-                <h2>Tugasan</h2>
-                <p>{isTeacher ? "Tugasan yang anda berikan kepada kelas ini." : "Tugasan daripada cikgu anda."}</p>
+                <h2>Buku kerja</h2>
+                <p>{isTeacher ? "Buku kerja yang ditugaskan atau dikongsi dengan kelas ini." : "Buku kerja daripada cikgu anda."}</p>
               </div>
               {isTeacher && (
                 <Button size="sm" onClick={() => setAssignmentOpen(true)} disabled={ownedWorkbooks.length === 0}>
-                  <Plus size={15} aria-hidden="true" />Beri tugasan
+                  <Plus size={15} aria-hidden="true" />Tugaskan buku kerja
                 </Button>
               )}
             </div>
-            {assignments.length === 0 ? (
+            {assignments.length === 0 && sharedOnly.length === 0 ? (
               <div className={styles.placeholder}>
-                <h3>Belum ada tugasan</h3>
+                <h3>Belum ada buku kerja</h3>
                 <p>
                   {isTeacher
                     ? ownedWorkbooks.length === 0
-                      ? "Cipta buku kerja dahulu, kemudian beri tugasan kepada kelas ini."
-                      : "Klik “Beri tugasan” untuk memberikan buku kerja pertama kepada kelas ini."
-                    : "Tugasan daripada cikgu anda akan muncul di sini."}
+                      ? "Cipta buku kerja dahulu, kemudian tugaskannya kepada kelas ini."
+                      : "Klik “Tugaskan buku kerja” untuk memberikan buku kerja pertama kepada kelas ini."
+                    : "Buku kerja daripada cikgu anda akan muncul di sini."}
                 </p>
               </div>
             ) : (
@@ -300,6 +340,7 @@ export function ClassDetailView({
                           {assignment.workbookTitle}
                           {assignment.dueAt ? ` · Tarikh akhir ${formatDue(assignment.dueAt)}` : ""}
                         </span>
+                        <ModuleChips assignment={assignment} linkable={!isTeacher} />
                         {!isTeacher && assignment.instructions && <span className={styles.assignmentNote}>{assignment.instructions}</span>}
                       </div>
                       <div className={styles.assignmentSide}>
@@ -318,90 +359,42 @@ export function ClassDetailView({
                             </span>
                           )
                         )}
-                        <Link href={`/workbooks/${assignment.workbookId}`} className={styles.rowLink}>Buka</Link>
                         {isTeacher ? (
-                          confirmDeleteAssignment === assignment.id ? (
+                          <>
+                            <Link href={`/classes/${detail.id}/workbooks/${assignment.workbookId}`} className={styles.analyticsLink}>Analitik</Link>
+                            {confirmDeleteAssignment === assignment.id ? (
+                              <button
+                                type="button"
+                                className={styles.removeButton}
+                                disabled={deletingAssignment === assignment.id}
+                                onClick={() => deleteAssignmentRow(assignment.id)}
+                              >
+                                {deletingAssignment === assignment.id ? "Menarik balik…" : "Pasti? Tarik balik"}
+                              </button>
+                            ) : (
+                              <button type="button" className={styles.removeButton} onClick={() => setConfirmDeleteAssignment(assignment.id)}>
+                                <Trash2 size={12} aria-hidden="true" /> Tarik balik
+                              </button>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <Link href={`/workbooks/${assignment.workbookId}`} className={styles.rowLink}>Buka</Link>
                             <button
                               type="button"
-                              className={styles.removeButton}
-                              disabled={deletingAssignment === assignment.id}
-                              onClick={() => deleteAssignmentRow(assignment.id)}
+                              className={`${styles.toggleButton} ${assignment.completed ? styles.toggleButtonDone : ""}`}
+                              disabled={pendingCompletion === assignment.id}
+                              onClick={() => toggleCompletion(assignment)}
                             >
-                              {deletingAssignment === assignment.id ? "Memadam…" : "Pasti? Padam"}
+                              {pendingCompletion === assignment.id ? "Menyimpan…" : assignment.completed ? "Batal selesai" : "Tandakan selesai"}
                             </button>
-                          ) : (
-                            <button type="button" className={styles.removeButton} onClick={() => setConfirmDeleteAssignment(assignment.id)}>
-                              <Trash2 size={12} aria-hidden="true" /> Padam
-                            </button>
-                          )
-                        ) : (
-                          <button
-                            type="button"
-                            className={`${styles.toggleButton} ${assignment.completed ? styles.toggleButtonDone : ""}`}
-                            disabled={pendingCompletion === assignment.id}
-                            onClick={() => toggleCompletion(assignment)}
-                          >
-                            {pendingCompletion === assignment.id ? "Menyimpan…" : assignment.completed ? "Batal selesai" : "Tandakan selesai"}
-                          </button>
+                          </>
                         )}
                       </div>
                     </div>
                   );
                 })}
-              </div>
-            )}
-          </section>
-        )}
-
-        {tab === "materials" && (
-          <section className={styles.tabPanel} aria-label="Bahan kelas">
-            <div className={styles.panelHead}>
-              <div>
-                <h2>Bahan</h2>
-                <p>{isTeacher ? "Buku kerja yang dikongsi boleh dibaca oleh semua pelajar kelas ini." : "Bahan pembelajaran yang dikongsi cikgu anda."}</p>
-              </div>
-            </div>
-            {isTeacher ? (
-              ownedWorkbooks.length === 0 ? (
-                <div className={styles.placeholder}>
-                  <h3>Belum ada buku kerja</h3>
-                  <p>Cipta buku kerja dahulu, kemudian kongsinya dengan kelas ini.</p>
-                </div>
-              ) : (
-                <div className={styles.assignmentList}>
-                  {ownedWorkbooks.map((workbook) => {
-                    const shared = sharedIds.has(workbook.id);
-                    return (
-                      <div key={workbook.id} className={styles.assignmentRow}>
-                        <span className={styles.assignmentTile} aria-hidden="true"><BookOpen size={16} /></span>
-                        <div className={styles.assignmentMain}>
-                          <strong>{workbook.title}</strong>
-                          <span>{shared ? "Dikongsi dengan kelas ini" : "Belum dikongsi"}</span>
-                        </div>
-                        <div className={styles.assignmentSide}>
-                          <Link href={`/workbooks/${workbook.id}`} className={styles.rowLink}>Buka</Link>
-                          <button
-                            type="button"
-                            className={`${styles.toggleButton} ${shared ? styles.toggleButtonDone : ""}`}
-                            disabled={materialPending === workbook.id}
-                            onClick={() => toggleMaterial(workbook.id, !shared)}
-                          >
-                            {materialPending === workbook.id ? "Menyimpan…" : shared ? "Nyahkongsi" : "Kongsi"}
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )
-            ) : materials.length === 0 ? (
-              <div className={styles.placeholder}>
-                <h3>Belum ada bahan dikongsi</h3>
-                <p>Bahan pembelajaran yang dikongsi cikgu anda akan muncul di sini.</p>
-              </div>
-            ) : (
-              <div className={styles.assignmentList}>
-                {materials.map((material) => (
+                {sharedOnly.map((material) => (
                   <div key={material.workbookId} className={styles.assignmentRow}>
                     <span className={styles.assignmentTile} aria-hidden="true"><BookOpen size={16} /></span>
                     <div className={styles.assignmentMain}>
@@ -409,11 +402,94 @@ export function ClassDetailView({
                       <span>Dikongsi {formatDate(material.sharedAt)}</span>
                     </div>
                     <div className={styles.assignmentSide}>
-                      <Link href={`/workbooks/${material.workbookId}`} className={styles.rowLink}>Buka</Link>
+                      <span className={`${styles.badge} ${styles.badgeMuted}`}>Dikongsi</span>
+                      {isTeacher ? (
+                        <>
+                          <Link href={`/classes/${detail.id}/workbooks/${material.workbookId}`} className={styles.analyticsLink}>Analitik</Link>
+                          <button
+                            type="button"
+                            className={`${styles.toggleButton} ${styles.toggleButtonDone}`}
+                            disabled={materialPending === material.workbookId}
+                            onClick={() => toggleMaterial(material.workbookId, false)}
+                          >
+                            {materialPending === material.workbookId ? "Menyimpan…" : "Nyahkongsi"}
+                          </button>
+                        </>
+                      ) : (
+                        <Link href={`/workbooks/${material.workbookId}`} className={styles.rowLink}>Buka</Link>
+                      )}
                     </div>
                   </div>
                 ))}
               </div>
+            )}
+            {isTeacher && shareable.length > 0 && (
+              <div className={styles.sharePicker}>
+                <h3>Kongsi tanpa tugasan</h3>
+                <p>Berikan akses baca sahaja tanpa tarikh akhir atau modul khusus.</p>
+                <div className={styles.assignmentList}>
+                  {shareable.map((workbook) => (
+                    <div key={workbook.id} className={styles.assignmentRow}>
+                      <span className={styles.assignmentTile} aria-hidden="true"><BookOpen size={16} /></span>
+                      <div className={styles.assignmentMain}>
+                        <strong>{workbook.title}</strong>
+                        <span>Belum dikongsi dengan kelas ini</span>
+                      </div>
+                      <div className={styles.assignmentSide}>
+                        <button
+                          type="button"
+                          className={styles.toggleButton}
+                          disabled={materialPending === workbook.id}
+                          onClick={() => toggleMaterial(workbook.id, true)}
+                        >
+                          {materialPending === workbook.id ? "Menyimpan…" : "Kongsi"}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
+        )}
+
+        {tab === "materials" && (
+          <section className={styles.tabPanel} aria-label="Sumber kelas">
+            <div className={styles.panelHead}>
+              <div>
+                <h2>Sumber</h2>
+                <p>{isTeacher ? "Sumber daripada buku kerja kelas ini — asas semua bahan dan kuiz." : "Sumber pembelajaran daripada cikgu anda."}</p>
+              </div>
+            </div>
+            {sources.length === 0 ? (
+              <div className={styles.placeholder}>
+                <h3>Belum ada sumber</h3>
+                <p>{isTeacher ? "Tugaskan atau kongsi buku kerja untuk melihat sumbernya di sini." : "Sumber pembelajaran cikgu anda akan muncul di sini."}</p>
+              </div>
+            ) : (
+              sources.map((group) => (
+                <div key={group.workbookId} className={styles.sourceGroup}>
+                  <div className={styles.sourceGroupHead}>
+                    <h3>{group.workbookTitle}</h3>
+                    <span>{group.sources.length} sumber</span>
+                    {isTeacher && (
+                      <Link href={`/workbooks/${group.workbookId}?tab=sumber`} className={styles.rowLink}>Urus dalam buku kerja</Link>
+                    )}
+                  </div>
+                  <div className={styles.sourceRows}>
+                    {group.sources.map((source) => (
+                      <div key={source.id} className={styles.sourceRow}>
+                        <span className={styles.sourceKind}>{SOURCE_KIND_LABELS[source.kind] ?? source.kind}</span>
+                        <span className={styles.sourceTitle}>
+                          <strong>{source.title}</strong>
+                          {source.excerpt && <small>{source.excerpt.replace(/[#*_`>]/g, "")}</small>}
+                        </span>
+                        <span className={styles.sourceMeta}>{source.sizeLabel ?? ""}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))
             )}
           </section>
         )}
@@ -460,7 +536,7 @@ export function ClassDetailView({
               <div className={styles.panelHead}>
                 <div>
                   <h2>Kemajuan</h2>
-                  <p>{progress.students.length} pelajar · {progress.assignments.length} tugasan · {progress.attemptTotal} percubaan kuiz</p>
+                  <p>{progress.students.length} pelajar · {progress.assignments.length} buku kerja ditugaskan · {progress.attemptTotal} percubaan kuiz</p>
                 </div>
               </div>
               <section className={styles.roster} aria-label="Jadual kemajuan">
@@ -507,6 +583,7 @@ export function ClassDetailView({
                         <span className={`${styles.badge} ${assignment.memberCount > 0 && assignment.completedCount >= assignment.memberCount ? styles.badgeDone : styles.badgeMuted}`}>
                           {assignment.completedCount}/{assignment.memberCount} selesai
                         </span>
+                        <Link href={`/classes/${detail.id}/workbooks/${assignment.workbookId}`} className={styles.analyticsLink}>Analitik</Link>
                       </div>
                     </div>
                   ))}

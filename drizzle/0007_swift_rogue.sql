@@ -1,0 +1,1 @@
+ALTER TABLE "assignments" ADD COLUMN "module_kinds" jsonb;

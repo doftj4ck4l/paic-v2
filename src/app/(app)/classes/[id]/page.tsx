@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth-session";
 import { getClassForUser } from "@/lib/classes";
-import { listAssignmentsForClass, listClassMaterials } from "@/lib/assignments";
+import { listAssignmentsForClass, listClassMaterials, listClassSources } from "@/lib/assignments";
 import { getClassProgress } from "@/lib/class-progress";
 import { listOwnedWorkbooks } from "@/lib/workbooks";
 import { CLASS_TAB_IDS, type ClassTabId } from "./class-tabs";
@@ -26,11 +26,12 @@ export default async function ClassPage({
   if (!detail) notFound();
 
   const isTeacher = user.role === "teacher" && detail.teacherId === user.id;
-  const [assignments, materials, owned, progress] = await Promise.all([
+  const [assignments, materials, owned, progress, sources] = await Promise.all([
     listAssignmentsForClass(user, id),
     listClassMaterials(id),
     isTeacher ? listOwnedWorkbooks(user.id) : Promise.resolve([]),
     isTeacher ? getClassProgress(id) : Promise.resolve(null),
+    listClassSources(id),
   ]);
 
   const initialTab = CLASS_TAB_IDS.includes(tab as ClassTabId) ? (tab as ClassTabId) : undefined;
@@ -41,6 +42,7 @@ export default async function ClassPage({
       detail={detail}
       assignments={assignments}
       materials={materials}
+      sources={sources}
       ownedWorkbooks={owned.map((workbook) => ({ id: workbook.id, title: workbook.title }))}
       progress={progress}
       initialTab={initialTab}

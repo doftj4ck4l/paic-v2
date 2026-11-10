@@ -7,6 +7,7 @@ const bodySchema = z.object({
   workbookId: z.string().trim().min(1, "Pilih buku kerja."),
   title: z.string().trim().min(2, "Tajuk tugasan terlalu pendek.").max(160),
   instructions: z.string().trim().max(2000).optional().default(""),
+  moduleKinds: z.array(z.string()).max(7).optional().default([]),
   dueAt: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, "Tarikh akhir tidak sah.")

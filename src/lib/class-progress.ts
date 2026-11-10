@@ -16,6 +16,7 @@ export type StudentProgressRow = {
 export type AssignmentProgressRow = {
   id: string;
   title: string;
+  workbookId: string;
   completedCount: number;
   memberCount: number;
   attemptCount: number;
@@ -102,6 +103,7 @@ export async function getClassProgress(classId: string): Promise<ClassProgress> 
     return {
       id: assignment.id,
       title: assignment.title,
+      workbookId: assignment.workbookId,
       completedCount: forThis.length,
       memberCount: memberRows.length,
       attemptCount: relatedAttempts.length,

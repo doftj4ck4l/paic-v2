@@ -6,6 +6,9 @@ import type { SessionUser } from "@/lib/auth-session";
 import { createNotification, createNotificationsForUsers } from "@/lib/notifications";
 import { SHARED_WORKBOOKS, WORKBOOKS } from "@/lib/demo-data";
 import { isClassTeacher } from "@/lib/classes";
+import { sanitizeModuleKinds } from "@/lib/module-kinds";
+import { listSources } from "@/lib/sources";
+import { getAppWorkbook } from "@/lib/workbooks";
 import { awardXp, XP_PER_ASSIGNMENT } from "@/lib/xp";
 
 export type AssignmentView = {
@@ -16,6 +19,8 @@ export type AssignmentView = {
   workbookTitle: string;
   title: string;
   instructions: string;
+  /** Mapped module kinds; null means every module. */
+  moduleKinds: string[] | null;
   dueAt: string | null;
   createdAt: string;
   completed: boolean;
@@ -53,6 +58,7 @@ type AssignmentRow = {
   workbookId: string;
   title: string;
   instructions: string;
+  moduleKinds: string[] | null;
   dueAt: Date | null;
   createdAt: Date;
 };
@@ -88,6 +94,7 @@ async function enrich(rows: AssignmentRow[], viewerId: string): Promise<Assignme
       workbookTitle: titles.get(row.workbookId) ?? "Buku kerja",
       title: row.title,
       instructions: row.instructions,
+      moduleKinds: row.moduleKinds,
       dueAt: row.dueAt?.toISOString() ?? null,
       createdAt: row.createdAt.toISOString(),
       completed: forThis.some((completion) => completion.studentId === viewerId),
@@ -104,6 +111,7 @@ const assignmentColumns = {
   workbookId: assignments.workbookId,
   title: assignments.title,
   instructions: assignments.instructions,
+  moduleKinds: assignments.moduleKinds,
   dueAt: assignments.dueAt,
   createdAt: assignments.createdAt,
 };
@@ -143,7 +151,7 @@ export async function listAssignmentsForUser(user: SessionUser): Promise<Assignm
 export async function createAssignment(
   user: SessionUser,
   classId: string,
-  input: { workbookId: string; title: string; instructions: string; dueAt: string | null },
+  input: { workbookId: string; title: string; instructions: string; moduleKinds: string[]; dueAt: string | null },
 ) {
   if (!(await isClassTeacher(user, classId))) return { error: "Kelas tidak ditemui." as const };
 
@@ -152,6 +160,9 @@ export async function createAssignment(
     .from(workbooks)
     .where(and(eq(workbooks.id, input.workbookId), eq(workbooks.ownerId, user.id)));
   if (!workbook) return { error: "Buku kerja tidak ditemui dalam pustaka anda." as const };
+
+  const moduleKinds = sanitizeModuleKinds(input.moduleKinds);
+  if (moduleKinds.length === 0) return { error: "Pilih sekurang-kurangnya satu modul." as const };
 
   const id = `asg_${randomBytes(8).toString("hex")}`;
   const dueAt = input.dueAt ? new Date(`${input.dueAt}T23:59:59`) : null;
@@ -162,6 +173,7 @@ export async function createAssignment(
     createdBy: user.id,
     title: input.title,
     instructions: input.instructions,
+    moduleKinds,
     dueAt,
   });
 
@@ -174,12 +186,56 @@ export async function createAssignment(
     memberRows.map((row) => row.studentId),
     {
       type: "assignment",
-      title: `Tugasan baharu: ${input.title}`,
-      body: `${classRow?.name ?? "Kelas"} · ${workbook.title}`,
+      title: `Buku kerja ditugaskan: ${input.title}`,
+      body: `${classRow?.name ?? "Kelas"} · ${moduleKinds.length} modul`,
       href: `/classes/${classId}?tab=assignments`,
     },
   );
   return { id };
+}
+
+/** Workbook ids the class can access — assigned or shared. */
+export async function classWorkbookIds(classId: string): Promise<string[]> {
+  const [assigned, shared] = await Promise.all([
+    db.select({ workbookId: assignments.workbookId }).from(assignments).where(eq(assignments.classId, classId)),
+    db.select({ workbookId: workbookClassShares.workbookId }).from(workbookClassShares).where(eq(workbookClassShares.classId, classId)),
+  ]);
+  return [...new Set([...assigned, ...shared].map((row) => row.workbookId))];
+}
+
+export type ClassSourceGroup = {
+  workbookId: string;
+  workbookTitle: string;
+  sources: { id: string; title: string; kind: string; status: string; sizeLabel: string | null; excerpt: string }[];
+};
+
+/** Ready sources of every workbook the class can access, grouped by workbook. */
+export async function listClassSources(classId: string): Promise<ClassSourceGroup[]> {
+  const workbookIds = await classWorkbookIds(classId);
+  if (!workbookIds.length) return [];
+
+  const groups = await Promise.all(
+    workbookIds.map(async (workbookId) => {
+      const workbook = await getAppWorkbook(workbookId);
+      if (!workbook) return null;
+      const rows = (await listSources(workbookId, workbook.isDb ? workbook.ownerId ?? undefined : undefined)).filter(
+        (row) => row.status === "ready",
+      );
+      return {
+        workbookId,
+        workbookTitle: workbook.title,
+        sources: rows.map((row) => ({
+          id: row.id,
+          title: row.title,
+          kind: row.kind,
+          status: row.status,
+          sizeLabel: row.sizeLabel,
+          excerpt: (row.fullText ?? "").slice(0, 160),
+        })),
+      } satisfies ClassSourceGroup;
+    }),
+  );
+  return groups.filter((group): group is ClassSourceGroup => Boolean(group));
 }
 
 export async function deleteAssignment(user: SessionUser, assignmentId: string) {

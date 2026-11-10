@@ -1,12 +1,32 @@
 import { randomBytes } from "node:crypto";
-import { and, eq } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { artifacts } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth-session";
-import { editableWorkbook } from "@/lib/ingestion/access";
+import { editableWorkbook, viewableWorkbook } from "@/lib/ingestion/access";
+import { MODULE_KINDS } from "@/lib/module-kinds";
 import { validateModuleForSave } from "@/lib/workbook/modules";
 import { prepareModuleMedia } from "@/lib/workbook/module-media";
+
+/** Ready artifact counts per module kind — used by the class assignment mapper. */
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const user = await getCurrentUser();
+  if (!user) return NextResponse.json({ error: "Tidak dibenarkan." }, { status: 401 });
+  const { id } = await params;
+  if (!(await viewableWorkbook(id, user.id))) return NextResponse.json({ error: "Buku kerja tidak dijumpai." }, { status: 404 });
+
+  const rows = await db
+    .select({ kind: artifacts.kind, total: count() })
+    .from(artifacts)
+    .where(and(eq(artifacts.workbookId, id), eq(artifacts.status, "ready")))
+    .groupBy(artifacts.kind);
+  const counts = new Map(rows.map((row) => [row.kind, Number(row.total)]));
+
+  return NextResponse.json({
+    modules: MODULE_KINDS.map(({ kind, label }) => ({ kind, label, count: counts.get(kind) ?? 0 })),
+  });
+}
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = await getCurrentUser(); if (!user) return NextResponse.json({ error: "Tidak dibenarkan." }, { status: 401 });
   const { id } = await params; if (!await editableWorkbook(id, user.id)) return NextResponse.json({ error: "Buku kerja tidak dijumpai." }, { status: 404 });
