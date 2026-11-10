@@ -1,0 +1,24 @@
+.page { display: flex; flex-direction: column; min-height: 100vh; background: #fafbff; color: #23264a; }
+.header { display: flex; align-items: center; justify-content: space-between; gap: 18px; flex-wrap: wrap; padding: 18px clamp(20px, 6vw, 72px); border-bottom: 1px solid #e9eef7; background: #fff; }
+.brand { display: inline-flex; align-items: center; gap: 11px; text-decoration: none; color: #10112f; }
+.logo { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 12px; background: linear-gradient(120deg, #007a66, #00856f); color: #fff; font-size: 13px; font-weight: 800; letter-spacing: -.5px; }
+.brand strong { display: block; font-size: 15px; font-weight: 800; letter-spacing: -.4px; }
+.brand small { display: block; font-size: 11px; font-weight: 600; color: #6d7292; }
+.nav { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.nav a { color: #4a5670; font-size: 12.5px; font-weight: 700; text-decoration: none; }
+.nav a:hover { color: #00786a; text-decoration: underline; text-underline-offset: 4px; }
+.main { flex: 1; display: grid; justify-items: center; padding: 44px 20px 60px; }
+.article { width: min(100%, 780px); }
+.eyebrow { display: inline-block; padding: 7px 13px; border-radius: 999px; background: #e6f6f1; color: #00786a; font-size: 11px; font-weight: 750; letter-spacing: .6px; }
+.article h1 { margin-top: 16px; font-size: clamp(28px, 4vw, 40px); font-weight: 800; letter-spacing: -1.4px; line-height: 1.15; }
+.updated { margin-top: 10px; color: #8b90aa; font-size: 12px; font-weight: 650; }
+.intro { margin-top: 18px; padding: 18px 20px; border: 1px solid #d9eee7; border-radius: 18px; background: #f5fcf9; color: #3f5f57; font-size: 14px; line-height: 1.8; }
+.section { margin-top: 30px; }
+.section h2 { font-size: 17px; font-weight: 800; letter-spacing: -.4px; }
+.section ul { margin-top: 10px; display: grid; gap: 8px; padding-left: 22px; }
+.section li { color: #4a5670; font-size: 13.5px; line-height: 1.8; }
+.section li::marker { color: #00a58d; }
+.footer { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; padding: 20px clamp(20px, 6vw, 72px); border-top: 1px solid #e9eef7; background: #fff; color: #6d7292; font-size: 12px; font-weight: 600; }
+.footer a { color: #00786a; font-weight: 700; text-decoration: none; }
+.footer a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.footerNote { color: #9aa1b8; }

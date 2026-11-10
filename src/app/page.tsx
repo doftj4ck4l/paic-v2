@@ -303,6 +303,8 @@ export default async function LandingPage() {
             <Link href="/login">Log masuk</Link>
             <Link href="/register">Daftar</Link>
             <Link href="/help">Bantuan</Link>
+            <Link href="/terms">Terma</Link>
+            <Link href="/privacy">Privasi</Link>
           </nav>
         </div>
         <p className={styles.footerMeta}>

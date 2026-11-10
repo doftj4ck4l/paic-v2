@@ -451,7 +451,7 @@ export function RegisterForm() {
               <label className={styles.remember}>
                 <Checkbox aria-invalid={!!errors.terms} {...register("terms")} />
                 <span className={styles.hint}>
-                  Saya bersetuju dengan <strong>terma penggunaan</strong> dan <strong>dasar privasi</strong>.
+                  Saya bersetuju dengan <Link href="/terms" target="_blank" onClick={(event) => event.stopPropagation()}><strong>terma penggunaan</strong></Link> dan <Link href="/privacy" target="_blank" onClick={(event) => event.stopPropagation()}><strong>dasar privasi</strong></Link>.
                 </span>
               </label>
               {errors.terms && (
