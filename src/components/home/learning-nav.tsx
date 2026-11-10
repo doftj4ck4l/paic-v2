@@ -77,7 +77,7 @@ export function LearningNav({ student }: { student: SessionUser }) {
               <>
                 <button type="button" aria-label="Tutup menu" className={styles.backdrop} onClick={() => setMenuOpen(false)} />
                 <div id="account-menu" className={styles.menu}>
-                  <div className={styles.menuProfile}><strong>{student.fullName}</strong><span>{student.yearLabel} · {student.className}</span></div>
+                  <div className={styles.menuProfile}><strong>{student.fullName}</strong><span>{student.role === "teacher" ? `Cikgu · ${student.school}` : `${student.yearLabel} · ${student.className}`}</span></div>
                   <Link href="/profile" onClick={() => setMenuOpen(false)}><UserRound size={17} />Profil</Link>
                   <Link href="/progress" onClick={() => setMenuOpen(false)} aria-current={isActive("/progress") ? "page" : undefined}><ChartNoAxesColumnIncreasing size={17} />Kemajuan</Link>
                   <Link href="/notifications" onClick={() => setMenuOpen(false)}><Bell size={17} />Pemberitahuan</Link>
