@@ -11,7 +11,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
 
   const { id, studentId } = await params;
   if (!(await isClassTeacher(user, id))) {
-    return NextResponse.json({ error: "Kelas tidak ditemui." }, { status: 404 });
+    return NextResponse.json({ error: "Subjek tidak ditemui." }, { status: 404 });
   }
 
   await db.delete(classMembers).where(and(eq(classMembers.classId, id), eq(classMembers.studentId, studentId)));

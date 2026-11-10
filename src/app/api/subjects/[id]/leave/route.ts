@@ -9,12 +9,12 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Tidak dibenarkan." }, { status: 401 });
   if (user.role !== "student") {
-    return NextResponse.json({ error: "Hanya akaun pelajar boleh keluar kelas." }, { status: 403 });
+    return NextResponse.json({ error: "Hanya akaun pelajar boleh keluar subjek." }, { status: 403 });
   }
 
   const { id } = await params;
   if (!(await isClassMember(user.id, id))) {
-    return NextResponse.json({ error: "Kelas tidak ditemui." }, { status: 404 });
+    return NextResponse.json({ error: "Subjek tidak ditemui." }, { status: 404 });
   }
 
   await db.delete(classMembers).where(and(eq(classMembers.classId, id), eq(classMembers.studentId, user.id)));

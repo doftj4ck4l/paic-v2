@@ -2,10 +2,12 @@ import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth-session";
 import { createClass, listClassesForUser } from "@/lib/classes";
+import { SUBJECTS } from "@/lib/demo-data";
 
 const bodySchema = z.object({
-  name: z.string().trim().min(2, "Nama kelas terlalu pendek.").max(60),
+  name: z.string().trim().min(2, "Nama subjek terlalu pendek.").max(60),
   formLevel: z.string().trim().max(40).optional().default(""),
+  subjectId: z.string().refine((value) => SUBJECTS.some((subject) => subject.id === value), "Subjek tidak sah."),
 });
 
 export async function GET() {
@@ -19,7 +21,7 @@ export async function POST(request: NextRequest) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Tidak dibenarkan." }, { status: 401 });
   if (user.role !== "teacher") {
-    return NextResponse.json({ error: "Hanya akaun guru boleh mencipta kelas." }, { status: 403 });
+    return NextResponse.json({ error: "Hanya akaun guru boleh mencipta subjek." }, { status: 403 });
   }
 
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));

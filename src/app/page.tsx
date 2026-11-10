@@ -239,12 +239,12 @@ export default async function LandingPage() {
             <span className={styles.kickerLight}>UNTUK SEKOLAH &amp; GURU</span>
             <h2 id="schools-title">Bawa Pixelspace ke sekolah anda.</h2>
             <p>
-              Urus kelas, kongsi bahan pembelajaran dan pantau kemajuan murid — dengan kawalan
+              Urus subjek, kongsi bahan pembelajaran dan pantau kemajuan murid — dengan kawalan
               penuh, laporan jelas dan sokongan program perintis bersama pasukan kami.
             </p>
             <ul className={styles.schoolsList}>
-              <li>Kelas dan keahlian murid yang teratur</li>
-              <li>Kongsi buku kerja kepada kelas dengan sekali klik</li>
+              <li>Subjek dan keahlian murid yang teratur</li>
+              <li>Kongsi buku kerja kepada subjek dengan sekali klik</li>
               <li>Pantau kemajuan dan penguasaan subjek</li>
             </ul>
             <Link href="/register" className={styles.schoolsCta}>

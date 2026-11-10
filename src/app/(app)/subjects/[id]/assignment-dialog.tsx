@@ -87,7 +87,7 @@ export function AssignmentDialog({
     if (busy || !canSubmit) return;
     setBusy(true);
     setError(null);
-    const response = await fetch(`/api/classes/${classId}/assignments`, {
+    const response = await fetch(`/api/subjects/${classId}/assignments`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ workbookId, title, instructions, moduleKinds: [...selected], dueAt: dueAt || null }),
@@ -113,7 +113,7 @@ export function AssignmentDialog({
         <button type="button" className={styles.closeDialog} aria-label="Tutup" onClick={onClose}><X size={17} /></button>
         <form className={styles.dialogBody} onSubmit={submit}>
           <h2>Tugaskan buku kerja</h2>
-          <p>Pilih buku kerja dan modul yang perlu disiapkan pelajar. Pelajar membukanya secara baca sahaja, dan kemajuan mereka muncul dalam Analitik kelas.</p>
+          <p>Pilih buku kerja dan modul yang perlu disiapkan pelajar. Pelajar membukanya secara baca sahaja, dan kemajuan mereka muncul dalam Analitik subjek.</p>
           <div className={styles.field}>
             <label htmlFor="assignment-workbook">Buku kerja</label>
             <Select

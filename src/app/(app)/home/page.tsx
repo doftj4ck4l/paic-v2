@@ -85,10 +85,10 @@ export default async function HomePage() {
 
         <section className={styles.summaryRow} aria-label="Tugasan dan kemajuan">
           <section className={styles.summaryCard} aria-labelledby="assignments-title">
-            <div className={styles.cardHeading}><h2 id="assignments-title"><ListChecks />Tugasan</h2><Link href="/classes" className={styles.textLink}>Kelas saya <ArrowRight size={16} /></Link></div>
+            <div className={styles.cardHeading}><h2 id="assignments-title"><ListChecks />Tugasan</h2><Link href="/subjects" className={styles.textLink}>Subjek saya <ArrowRight size={16} /></Link></div>
             {assignments.length === 0 ? (
               <p className={styles.assignmentEmpty}>
-                {student.role === "teacher" ? "Belum ada tugasan diberikan kepada kelas anda." : "Tiada tugasan buat masa ini. Bersedia untuk tugasan seterusnya!"}
+                {student.role === "teacher" ? "Belum ada tugasan diberikan kepada subjek anda." : "Tiada tugasan buat masa ini. Bersedia untuk tugasan seterusnya!"}
               </p>
             ) : (
               <div className={styles.assignments}>
@@ -101,7 +101,7 @@ export default async function HomePage() {
                     ? (assignment.memberCount > 0 && assignment.completedCount >= assignment.memberCount ? "done" : "soon")
                     : state === "done" ? "done" : state === "overdue" ? "today" : "soon";
                   return (
-                    <Link key={assignment.id} href={`/classes/${assignment.classId}?tab=assignments`} className={styles.assignment}>
+                    <Link key={assignment.id} href={`/subjects/${assignment.classId}?tab=assignments`} className={styles.assignment}>
                       <span className={styles.assignmentState} data-status={student.role === "teacher" ? "in-progress" : assignment.completed ? "done" : "in-progress"} aria-hidden="true">{student.role !== "teacher" && assignment.completed && <Check size={16} />}{!assignment.completed && <span />}</span>
                       <span className={styles.assignmentText}><strong>{assignment.title}</strong><span>{assignment.className} · {assignment.workbookTitle}</span></span>
                       <span className={styles.statusBadge} data-tone={tone}>{badge}</span>

@@ -252,6 +252,8 @@ export const classes = pgTable(
       .notNull()
       .references(() => schools.id),
     teacherId: text("teacher_id").notNull(),
+    /** Subject this group is for (e.g. "science") — the joinable unit. */
+    subjectId: text("subject_id"),
     name: text("name").notNull(),
     formLevel: text("form_level").notNull().default(""),
     joinCode: text("join_code").notNull().unique(),

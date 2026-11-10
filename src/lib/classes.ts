@@ -1,7 +1,7 @@
 import { randomInt } from "crypto";
 import { and, asc, count, desc, eq, inArray, isNull, ne } from "drizzle-orm";
 import { db } from "@/db";
-import { classMembers, classes, users } from "@/db/schema";
+import { assignments, classMembers, classes, users, workbookClassShares } from "@/db/schema";
 import type { SessionUser } from "@/lib/auth-session";
 import { createNotification } from "@/lib/notifications";
 
@@ -36,9 +36,11 @@ export async function uniqueJoinCodeFor(excludeClassId?: string) {
 export type ClassSummary = {
   id: string;
   name: string;
+  subjectId: string | null;
   formLevel: string;
   teacherName: string;
   memberCount: number;
+  workbookCount: number;
   joinCode: string | null;
   createdAt: string;
   joinedAt: string | null;
@@ -56,6 +58,7 @@ export type ClassMemberView = {
 export type ClassDetail = {
   id: string;
   name: string;
+  subjectId: string | null;
   formLevel: string;
   teacherId: string;
   teacherName: string;
@@ -70,18 +73,41 @@ function displayNameOf(row: { name: string; displayName: string | null }) {
   return row.displayName?.trim() || row.name.split(" ")[0];
 }
 
-export async function createClass(user: SessionUser, input: { name: string; formLevel: string }) {
+export async function createClass(user: SessionUser, input: { name: string; formLevel: string; subjectId: string }) {
   const id = `cls_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
   const joinCode = await uniqueJoinCodeFor();
   await db.insert(classes).values({
     id,
     schoolId: user.schoolId,
     teacherId: user.id,
+    subjectId: input.subjectId,
     name: input.name,
     formLevel: input.formLevel,
     joinCode,
   });
   return { id, joinCode };
+}
+
+/** Distinct workbooks (assigned or shared) per class. */
+async function workbookCountByClass(classIds: string[]): Promise<Map<string, number>> {
+  if (!classIds.length) return new Map();
+  const [assigned, shared] = await Promise.all([
+    db
+      .select({ classId: assignments.classId, workbookId: assignments.workbookId })
+      .from(assignments)
+      .where(inArray(assignments.classId, classIds)),
+    db
+      .select({ classId: workbookClassShares.classId, workbookId: workbookClassShares.workbookId })
+      .from(workbookClassShares)
+      .where(inArray(workbookClassShares.classId, classIds)),
+  ]);
+  const sets = new Map<string, Set<string>>();
+  for (const row of [...assigned, ...shared]) {
+    const set = sets.get(row.classId) ?? new Set<string>();
+    set.add(row.workbookId);
+    sets.set(row.classId, set);
+  }
+  return new Map([...sets.entries()].map(([classId, set]) => [classId, set.size]));
 }
 
 export async function listClassesForUser(user: SessionUser): Promise<ClassSummary[]> {
@@ -90,6 +116,7 @@ export async function listClassesForUser(user: SessionUser): Promise<ClassSummar
       .select({
         id: classes.id,
         name: classes.name,
+        subjectId: classes.subjectId,
         formLevel: classes.formLevel,
         joinCode: classes.joinCode,
         createdAt: classes.createdAt,
@@ -100,12 +127,15 @@ export async function listClassesForUser(user: SessionUser): Promise<ClassSummar
       .where(and(eq(classes.teacherId, user.id), isNull(classes.archivedAt)))
       .groupBy(classes.id)
       .orderBy(desc(classes.createdAt));
+    const workbookCounts = await workbookCountByClass(rows.map((row) => row.id));
     return rows.map((row) => ({
       id: row.id,
       name: row.name,
+      subjectId: row.subjectId,
       formLevel: row.formLevel,
       teacherName: user.preferredName,
       memberCount: Number(row.memberCount),
+      workbookCount: workbookCounts.get(row.id) ?? 0,
       joinCode: row.joinCode,
       createdAt: row.createdAt.toISOString(),
       joinedAt: null,
@@ -116,6 +146,7 @@ export async function listClassesForUser(user: SessionUser): Promise<ClassSummar
     .select({
       id: classes.id,
       name: classes.name,
+      subjectId: classes.subjectId,
       formLevel: classes.formLevel,
       createdAt: classes.createdAt,
       joinedAt: classMembers.joinedAt,
@@ -129,21 +160,26 @@ export async function listClassesForUser(user: SessionUser): Promise<ClassSummar
     .orderBy(desc(classMembers.joinedAt));
 
   const classIds = rows.map((row) => row.id);
-  const counts = classIds.length
-    ? await db
-        .select({ classId: classMembers.classId, memberCount: count(classMembers.studentId) })
-        .from(classMembers)
-        .where(inArray(classMembers.classId, classIds))
-        .groupBy(classMembers.classId)
-    : [];
+  const [counts, workbookCounts] = await Promise.all([
+    classIds.length
+      ? db
+          .select({ classId: classMembers.classId, memberCount: count(classMembers.studentId) })
+          .from(classMembers)
+          .where(inArray(classMembers.classId, classIds))
+          .groupBy(classMembers.classId)
+      : Promise.resolve([]),
+    workbookCountByClass(classIds),
+  ]);
   const countByClass = new Map(counts.map((row) => [row.classId, Number(row.memberCount)]));
 
   return rows.map((row) => ({
     id: row.id,
     name: row.name,
+    subjectId: row.subjectId,
     formLevel: row.formLevel,
     teacherName: displayNameOf({ name: row.teacherName, displayName: row.teacherDisplayName }),
     memberCount: countByClass.get(row.id) ?? 0,
+    workbookCount: workbookCounts.get(row.id) ?? 0,
     joinCode: null,
     createdAt: row.createdAt.toISOString(),
     joinedAt: row.joinedAt.toISOString(),
@@ -155,6 +191,7 @@ export async function getClassForUser(user: SessionUser, classId: string): Promi
     .select({
       id: classes.id,
       name: classes.name,
+      subjectId: classes.subjectId,
       formLevel: classes.formLevel,
       teacherId: classes.teacherId,
       joinCode: classes.joinCode,
@@ -192,6 +229,7 @@ export async function getClassForUser(user: SessionUser, classId: string): Promi
   return {
     id: row.id,
     name: row.name,
+    subjectId: row.subjectId,
     formLevel: row.formLevel,
     teacherId: row.teacherId,
     teacherName: displayNameOf({ name: row.teacherName, displayName: row.teacherDisplayName }),
@@ -214,15 +252,15 @@ export async function getClassForUser(user: SessionUser, classId: string): Promi
 
 export async function joinClassByCode(user: SessionUser, rawCode: string) {
   const code = sanitizeJoinCode(rawCode);
-  if (code.length < 4) return { error: "Kod kelas tidak sah." as const };
+  if (code.length < 4) return { error: "Kod subjek tidak sah." as const };
 
   const [row] = await db
     .select({ id: classes.id, name: classes.name, schoolId: classes.schoolId, teacherId: classes.teacherId })
     .from(classes)
     .where(and(eq(classes.joinCode, code), isNull(classes.archivedAt)));
-  if (!row) return { error: "Kelas tidak ditemui. Semak kod dengan cikgu anda." as const };
+  if (!row) return { error: "Subjek tidak ditemui. Semak kod dengan cikgu anda." as const };
   if (row.schoolId !== user.schoolId) {
-    return { error: "Kelas ini bukan untuk sekolah anda." as const };
+    return { error: "Subjek ini bukan untuk sekolah anda." as const };
   }
 
   const inserted = await db
@@ -235,7 +273,7 @@ export async function joinClassByCode(user: SessionUser, rawCode: string) {
       type: "join",
       title: `${user.preferredName} menyertai ${row.name}`,
       body: user.fullName,
-      href: `/classes/${row.id}?tab=students`,
+      href: `/subjects/${row.id}?tab=students`,
     });
   }
   return { id: row.id, name: row.name };

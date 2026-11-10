@@ -10,11 +10,13 @@ import { toggleSavedWorkbook, useSavedWorkbooks } from "@/lib/saved-workbooks";
 import { Select } from "@/components/ui/select";
 import styles from "./workbooks.module.css";
 
-const COVER_ART: Partial<Record<SubjectId, string>> = {
+export const WORKBOOK_COVER_ART: Partial<Record<SubjectId, string>> = {
   science: "/assets/thiings/workbook-flask.png",
   math: "/assets/thiings/workbook-calculator.png",
   language: "/assets/thiings/workbook-pencil.png",
 };
+
+const COVER_ART = WORKBOOK_COVER_ART;
 
 export function WorkbookTile({ workbook, owned = false, canSave = false }: { workbook: DemoWorkbook; owned?: boolean; canSave?: boolean }) {
   const subject = subjectById(workbook.subjectId);

@@ -26,7 +26,7 @@ export default async function ProgressPage() {
       <PageShell>
         <PageHeader
           title="Kemajuan"
-          description="Pantau kemajuan pelajar anda melalui halaman Kelas."
+          description="Pantau kemajuan pelajar anda melalui halaman Subjek."
         />
         <section className="rounded-[24px] border border-border bg-card p-6 shadow-soft">
           <div className="flex items-center gap-4">
@@ -36,14 +36,14 @@ export default async function ProgressPage() {
             <div className="min-w-0 flex-1">
               <h2 className="text-base font-extrabold">Kemajuan pelajar</h2>
               <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                Tugasan selesai, percubaan kuiz dan aktiviti terakhir setiap pelajar ada di halaman Kelas — pilih kelas anda.
+                Tugasan selesai, percubaan kuiz dan aktiviti terakhir setiap pelajar ada di halaman Subjek — pilih subjek anda.
               </p>
             </div>
             <Link
-              href="/classes"
+              href="/subjects"
               className="inline-flex h-11 shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-[#007a66] to-[#00856f] px-5 text-sm font-semibold text-white shadow-soft"
             >
-              Buka Kelas <ArrowRight className="size-4" aria-hidden="true" />
+              Buka Subjek <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
           </div>
         </section>

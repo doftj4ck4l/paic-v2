@@ -24,7 +24,7 @@ import styles from "./learning-nav.module.css";
 const NAV_LINKS = [
   { href: "/home", label: "Utama", icon: House },
   { href: "/workbooks", label: "Buku Kerja", icon: BookOpen },
-  { href: "/classes", label: "Kelas", icon: Users },
+  { href: "/subjects", label: "Subjek", icon: Users },
   { href: "/explore", label: "Jelajah", icon: Compass },
   { href: "/creations", label: "Hasil Karya", icon: Palette },
 ];

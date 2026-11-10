@@ -7,7 +7,7 @@ import { getCurrentUser } from "@/lib/auth-session";
 import { getClassForUser, isClassTeacher, uniqueJoinCodeFor } from "@/lib/classes";
 
 const patchSchema = z.object({
-  name: z.string().trim().min(2, "Nama kelas terlalu pendek.").max(60).optional(),
+  name: z.string().trim().min(2, "Nama subjek terlalu pendek.").max(60).optional(),
   formLevel: z.string().trim().max(40).optional(),
   rotateCode: z.boolean().optional(),
 });
@@ -18,7 +18,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 
   const { id } = await params;
   const detail = await getClassForUser(user, id);
-  if (!detail) return NextResponse.json({ error: "Kelas tidak ditemui." }, { status: 404 });
+  if (!detail) return NextResponse.json({ error: "Subjek tidak ditemui." }, { status: 404 });
   return NextResponse.json({ class: detail });
 }
 
@@ -28,7 +28,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
   const { id } = await params;
   if (!(await isClassTeacher(user, id))) {
-    return NextResponse.json({ error: "Kelas tidak ditemui." }, { status: 404 });
+    return NextResponse.json({ error: "Subjek tidak ditemui." }, { status: 404 });
   }
 
   const parsed = patchSchema.safeParse(await request.json().catch(() => null));
@@ -55,7 +55,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
 
   const { id } = await params;
   if (!(await isClassTeacher(user, id))) {
-    return NextResponse.json({ error: "Kelas tidak ditemui." }, { status: 404 });
+    return NextResponse.json({ error: "Subjek tidak ditemui." }, { status: 404 });
   }
 
   await db.delete(classes).where(and(eq(classes.id, id), eq(classes.teacherId, user.id)));

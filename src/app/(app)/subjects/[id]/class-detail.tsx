@@ -1,16 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, BookOpen, CalendarDays, Check, Plus, RefreshCw, Trash2, UserMinus } from "lucide-react";
+import { ArrowLeft, BookOpen, CalendarDays, Check, FileText, Globe, Plus, RefreshCw, Trash2, UserMinus, Users, Video, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ContentTile, SUBJECT_ICONS } from "@/components/studio/content-tile";
+import { WORKBOOK_COVER_ART } from "@/app/(app)/workbooks/workbook-list";
 import type { SessionUser } from "@/lib/auth-session";
 import type { ClassDetail } from "@/lib/classes";
 import type { AssignmentView, ClassMaterial, ClassSourceGroup, OwnedWorkbookOption } from "@/lib/assignments";
 import type { ClassProgress } from "@/lib/class-progress";
 import { dueLabel, dueState, formatDue, formatRelativeTime } from "@/lib/assignment-status";
 import { moduleKindLabel } from "@/lib/module-kinds";
+import { findSubject } from "@/lib/demo-data";
 import { CopyCodeButton } from "../copy-code-button";
 import { AssignmentDialog } from "./assignment-dialog";
 import styles from "../classes.module.css";
@@ -47,9 +51,11 @@ function ModuleChips({ assignment, linkable = false }: { assignment: AssignmentV
       </span>
     );
   }
+  const shown = assignment.moduleKinds.slice(0, 3);
+  const rest = assignment.moduleKinds.length - shown.length;
   return (
     <span className={styles.moduleChips}>
-      {assignment.moduleKinds.map((kind) =>
+      {shown.map((kind) =>
         linkable ? (
           <Link key={kind} href={`/workbooks/${assignment.workbookId}?tab=${kind}`} className={styles.moduleChipLink}>
             {moduleKindLabel(kind)}
@@ -58,8 +64,29 @@ function ModuleChips({ assignment, linkable = false }: { assignment: AssignmentV
           <em key={kind} className={styles.moduleChip}>{moduleKindLabel(kind)}</em>
         ),
       )}
+      {rest > 0 && <em className={styles.moduleChip}>+{rest}</em>}
     </span>
   );
+}
+
+function SubjectBadge({ subjectId }: { subjectId: string | null }) {
+  const subject = findSubject(subjectId);
+  const Icon = ((subjectId && (SUBJECT_ICONS as Record<string, LucideIcon>)[subjectId]) || Users) as LucideIcon;
+  return (
+    <>
+      <Icon size={14} aria-hidden="true" />{subject?.name ?? "Subjek"}
+    </>
+  );
+}
+
+function tileTint(subjectId: string | null) {
+  return findSubject(subjectId)?.id ?? "science";
+}
+
+function tileArt(subjectId: string | null) {
+  const subject = findSubject(subjectId);
+  if (!subject) return "/assets/thiings/graduation.png";
+  return WORKBOOK_COVER_ART[subject.id] ?? subject.asset;
 }
 
 export function ClassDetailView({
@@ -98,6 +125,8 @@ export function ClassDetailView({
   const [deletingAssignment, setDeletingAssignment] = useState<string | null>(null);
   const [materialPending, setMaterialPending] = useState<string | null>(null);
 
+  const subject = findSubject(detail.subjectId);
+  const sourceGroups = sources.filter((group) => group.sources.length > 0);
   const members = detail.members;
   const assignedIds = new Set(assignments.map((assignment) => assignment.workbookId));
   const sharedOnly = materials.filter((material) => !assignedIds.has(material.workbookId));
@@ -113,7 +142,7 @@ export function ClassDetailView({
     if (rotating) return;
     setRotating(true);
     setError(null);
-    const response = await fetch(`/api/classes/${detail.id}`, {
+    const response = await fetch(`/api/subjects/${detail.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ rotateCode: true }),
@@ -132,7 +161,7 @@ export function ClassDetailView({
     if (removing) return;
     setRemoving(studentId);
     setError(null);
-    const response = await fetch(`/api/classes/${detail.id}/members/${studentId}`, { method: "DELETE" }).catch(() => null);
+    const response = await fetch(`/api/subjects/${detail.id}/members/${studentId}`, { method: "DELETE" }).catch(() => null);
     if (!response?.ok) {
       setError("Pelajar tidak dapat dikeluarkan. Cuba lagi.");
       setRemoving(null);
@@ -148,26 +177,26 @@ export function ClassDetailView({
     if (deleting) return;
     setDeleting(true);
     setError(null);
-    const response = await fetch(`/api/classes/${detail.id}`, { method: "DELETE" }).catch(() => null);
+    const response = await fetch(`/api/subjects/${detail.id}`, { method: "DELETE" }).catch(() => null);
     if (!response?.ok) {
-      setError("Kelas tidak dapat dipadamkan. Cuba lagi.");
+      setError("Subjek tidak dapat dipadamkan. Cuba lagi.");
       setDeleting(false);
       return;
     }
-    router.push("/classes");
+    router.push("/subjects");
   }
 
   async function leaveClass() {
     if (leaving) return;
     setLeaving(true);
     setError(null);
-    const response = await fetch(`/api/classes/${detail.id}/leave`, { method: "POST" }).catch(() => null);
+    const response = await fetch(`/api/subjects/${detail.id}/leave`, { method: "POST" }).catch(() => null);
     if (!response?.ok) {
-      setError("Anda tidak dapat keluar kelas ini. Cuba lagi.");
+      setError("Anda tidak dapat keluar subjek ini. Cuba lagi.");
       setLeaving(false);
       return;
     }
-    router.push("/classes");
+    router.push("/subjects");
   }
 
   async function toggleCompletion(assignment: AssignmentView) {
@@ -208,7 +237,7 @@ export function ClassDetailView({
     if (materialPending) return;
     setMaterialPending(workbookId);
     setError(null);
-    const response = await fetch(`/api/classes/${detail.id}/materials`, {
+    const response = await fetch(`/api/subjects/${detail.id}/materials`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ workbookId, shared }),
@@ -225,18 +254,25 @@ export function ClassDetailView({
   return (
     <div className={styles.page}>
       <main id="main" className={`${content.container} ${styles.main}`}>
-        <div className={styles.detailHead}>
-          <Link href="/classes" className={styles.back}><ArrowLeft size={14} aria-hidden="true" />Semua kelas</Link>
-          <div className={styles.detailTitleRow}>
-            <h1>{detail.name}</h1>
-            {detail.formLevel && <span className={styles.chip}>{detail.formLevel}</span>}
+        <header className={styles.detailHero}>
+          <div className={styles.detailHeroCopy}>
+            <Link href="/subjects" className={styles.back}><ArrowLeft size={14} aria-hidden="true" />Semua subjek</Link>
+            <div className={styles.detailTitleRow}>
+              <h1>{detail.name}</h1>
+              {subject && <span className={styles.chip}>{subject.name}</span>}
+              {detail.formLevel && <span className={styles.chip}>{detail.formLevel}</span>}
+            </div>
+            <p className={styles.detailSub}>
+              Cikgu <strong>{detail.teacherName}</strong> · {members.length} pelajar · dicipta {formatDate(detail.createdAt)}
+            </p>
           </div>
-          <p className={styles.detailSub}>
-            Cikgu <strong>{detail.teacherName}</strong> · {members.length} pelajar · dicipta {formatDate(detail.createdAt)}
-          </p>
-        </div>
+          <div className={styles.detailHeroArt} aria-hidden="true">
+            <span className={styles.detailBlob} />
+            <Image src={subject?.asset ?? "/assets/thiings/graduation.png"} alt="" width={150} height={150} />
+          </div>
+        </header>
 
-        <div className={styles.tabBar} role="tablist" aria-label="Bahagian kelas">
+        <div className={styles.tabBar} role="tablist" aria-label="Bahagian subjek">
           {visibleTabs.map((item) => (
             <button
               key={item.key}
@@ -256,12 +292,12 @@ export function ClassDetailView({
         {tab === "overview" && (
           <div className={styles.panelGrid}>
             <section className={styles.panel}>
-              <h2>Maklumat kelas</h2>
+              <h2>Maklumat subjek</h2>
               <dl>
-                <div><dt>Guru kelas</dt><dd>{detail.teacherName}</dd></div>
+                <div><dt>Guru</dt><dd>{detail.teacherName}</dd></div>
                 {detail.formLevel && <div><dt>Tahun / Tingkatan</dt><dd>{detail.formLevel}</dd></div>}
                 <div><dt>Bilangan pelajar</dt><dd>{members.length}</dd></div>
-                <div><dt>Buku kerja kelas</dt><dd>{assignedIds.size + sharedOnly.length}</dd></div>
+                <div><dt>Buku kerja subjek</dt><dd>{assignedIds.size + sharedOnly.length}</dd></div>
                 <div><dt>Dicipta pada</dt><dd>{formatDate(detail.createdAt)}</dd></div>
                 {!isTeacher && detail.joinedAt && <div><dt>Anda menyertai</dt><dd>{formatDate(detail.joinedAt)}</dd></div>}
               </dl>
@@ -285,11 +321,11 @@ export function ClassDetailView({
               </section>
             ) : (
               <section className={styles.panel}>
-                <h2>Keluar kelas</h2>
-                <p>Anda akan berhenti melihat buku kerja dan bahan daripada kelas ini sehingga menyertai semula.</p>
+                <h2>Keluar subjek</h2>
+                <p>Anda akan berhenti melihat buku kerja dan bahan daripada subjek ini sehingga menyertai semula.</p>
                 <div>
                   <Button type="button" variant="white" size="sm" onClick={leaveClass} disabled={leaving}>
-                    {leaving ? "Keluar…" : "Keluar kelas"}
+                    {leaving ? "Keluar…" : "Keluar subjek"}
                   </Button>
                 </div>
               </section>
@@ -298,16 +334,16 @@ export function ClassDetailView({
         )}
 
         {tab === "assignments" && (
-          <section className={styles.tabPanel} aria-label="Buku kerja kelas">
+          <section className={styles.tabPanel} aria-label="Buku kerja subjek">
             <div className={styles.panelHead}>
               <div>
                 <h2>Buku kerja</h2>
-                <p>{isTeacher ? "Buku kerja yang ditugaskan atau dikongsi dengan kelas ini." : "Buku kerja daripada cikgu anda."}</p>
+                <p>{isTeacher ? "Buku kerja yang ditugaskan atau dikongsi dengan subjek ini." : "Buku kerja daripada cikgu anda."}</p>
               </div>
               {isTeacher && (
-                <Button size="sm" onClick={() => setAssignmentOpen(true)} disabled={ownedWorkbooks.length === 0}>
+                <button type="button" className={styles.actionButton} onClick={() => setAssignmentOpen(true)} disabled={ownedWorkbooks.length === 0}>
                   <Plus size={15} aria-hidden="true" />Tugaskan buku kerja
-                </Button>
+                </button>
               )}
             </div>
             {assignments.length === 0 && sharedOnly.length === 0 ? (
@@ -316,110 +352,96 @@ export function ClassDetailView({
                 <p>
                   {isTeacher
                     ? ownedWorkbooks.length === 0
-                      ? "Cipta buku kerja dahulu, kemudian tugaskannya kepada kelas ini."
-                      : "Klik “Tugaskan buku kerja” untuk memberikan buku kerja pertama kepada kelas ini."
+                      ? "Cipta buku kerja dahulu, kemudian tugaskannya kepada subjek ini."
+                      : "Klik “Tugaskan buku kerja” untuk memberikan buku kerja pertama kepada subjek ini."
                     : "Buku kerja daripada cikgu anda akan muncul di sini."}
                 </p>
               </div>
             ) : (
-              <div className={styles.assignmentList}>
+              <div className={styles.tileGrid}>
                 {assignments.map((assignment) => {
                   const state = dueState(assignment.dueAt, assignment.completed);
-                  return (
-                    <div key={assignment.id} className={styles.assignmentRow}>
-                      {isTeacher ? (
-                        <span className={styles.assignmentTile} aria-hidden="true"><BookOpen size={16} /></span>
-                      ) : (
-                        <span className={`${styles.assignmentState} ${assignment.completed ? styles.assignmentStateDone : ""}`} aria-hidden="true">
-                          {assignment.completed && <Check size={15} />}
-                        </span>
-                      )}
-                      <div className={styles.assignmentMain}>
-                        <strong>{assignment.title}</strong>
-                        <span>
-                          {assignment.workbookTitle}
-                          {assignment.dueAt ? ` · Tarikh akhir ${formatDue(assignment.dueAt)}` : ""}
-                        </span>
-                        <ModuleChips assignment={assignment} linkable={!isTeacher} />
-                        {!isTeacher && assignment.instructions && <span className={styles.assignmentNote}>{assignment.instructions}</span>}
-                      </div>
-                      <div className={styles.assignmentSide}>
-                        {isTeacher ? (
-                          <span className={`${styles.badge} ${assignment.completedCount >= assignment.memberCount && assignment.memberCount > 0 ? styles.badgeDone : styles.badgeMuted}`}>
-                            {assignment.completedCount}/{assignment.memberCount} selesai
+                  return isTeacher ? (
+                    <ContentTile
+                      key={assignment.id}
+                      href={`/subjects/${detail.id}/workbooks/${assignment.workbookId}`}
+                      tint={tileTint(assignment.workbookSubjectId)}
+                      art={tileArt(assignment.workbookSubjectId)}
+                      badge={<SubjectBadge subjectId={assignment.workbookSubjectId} />}
+                      title={assignment.title}
+                      description={`${assignment.workbookTitle}${assignment.dueAt ? ` · Tarikh akhir ${formatDue(assignment.dueAt)}` : ""}`}
+                      footer={<strong>{assignment.completedCount}/{assignment.memberCount} selesai</strong>}
+                      footerEnd={<ModuleChips assignment={assignment} />}
+                      menu={
+                        <button
+                          type="button"
+                          className={`${styles.tileMenuButton} ${styles.tileMenuDanger}`}
+                          disabled={deletingAssignment === assignment.id}
+                          onClick={() =>
+                            confirmDeleteAssignment === assignment.id ? deleteAssignmentRow(assignment.id) : setConfirmDeleteAssignment(assignment.id)
+                          }
+                        >
+                          <Trash2 size={12} aria-hidden="true" />
+                          {deletingAssignment === assignment.id ? "…" : confirmDeleteAssignment === assignment.id ? "Pasti?" : "Tarik balik"}
+                        </button>
+                      }
+                    />
+                  ) : (
+                    <ContentTile
+                      key={assignment.id}
+                      href={`/workbooks/${assignment.workbookId}`}
+                      tint={tileTint(assignment.workbookSubjectId)}
+                      art={tileArt(assignment.workbookSubjectId)}
+                      badge={<SubjectBadge subjectId={assignment.workbookSubjectId} />}
+                      title={assignment.title}
+                      description={`${assignment.workbookTitle}${assignment.dueAt ? ` · Tarikh akhir ${formatDue(assignment.dueAt)}` : ""}`}
+                      footer={
+                        dueLabel(assignment.dueAt, assignment.completed) ? (
+                          <span className={`${styles.badge} ${state === "done" ? styles.badgeDone : state === "overdue" ? styles.badgeWarn : styles.badgeMuted}`}>
+                            {dueLabel(assignment.dueAt, assignment.completed)}
                           </span>
                         ) : (
-                          dueLabel(assignment.dueAt, assignment.completed) && (
-                            <span
-                              className={`${styles.badge} ${
-                                state === "done" ? styles.badgeDone : state === "overdue" ? styles.badgeWarn : styles.badgeMuted
-                              }`}
-                            >
-                              {dueLabel(assignment.dueAt, assignment.completed)}
-                            </span>
-                          )
-                        )}
-                        {isTeacher ? (
-                          <>
-                            <Link href={`/classes/${detail.id}/workbooks/${assignment.workbookId}`} className={styles.analyticsLink}>Analitik</Link>
-                            {confirmDeleteAssignment === assignment.id ? (
-                              <button
-                                type="button"
-                                className={styles.removeButton}
-                                disabled={deletingAssignment === assignment.id}
-                                onClick={() => deleteAssignmentRow(assignment.id)}
-                              >
-                                {deletingAssignment === assignment.id ? "Menarik balik…" : "Pasti? Tarik balik"}
-                              </button>
-                            ) : (
-                              <button type="button" className={styles.removeButton} onClick={() => setConfirmDeleteAssignment(assignment.id)}>
-                                <Trash2 size={12} aria-hidden="true" /> Tarik balik
-                              </button>
-                            )}
-                          </>
-                        ) : (
-                          <>
-                            <Link href={`/workbooks/${assignment.workbookId}`} className={styles.rowLink}>Buka</Link>
-                            <button
-                              type="button"
-                              className={`${styles.toggleButton} ${assignment.completed ? styles.toggleButtonDone : ""}`}
-                              disabled={pendingCompletion === assignment.id}
-                              onClick={() => toggleCompletion(assignment)}
-                            >
-                              {pendingCompletion === assignment.id ? "Menyimpan…" : assignment.completed ? "Batal selesai" : "Tandakan selesai"}
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </div>
+                          <span>Tiada tarikh akhir</span>
+                        )
+                      }
+                      menu={
+                        <button
+                          type="button"
+                          className={`${styles.checkButton} ${assignment.completed ? styles.checkButtonDone : ""}`}
+                          aria-pressed={assignment.completed}
+                          aria-label={assignment.completed ? `Batal selesai ${assignment.title}` : `Tandakan ${assignment.title} selesai`}
+                          disabled={pendingCompletion === assignment.id}
+                          onClick={() => toggleCompletion(assignment)}
+                        >
+                          <Check size={15} aria-hidden="true" />
+                        </button>
+                      }
+                    />
                   );
                 })}
                 {sharedOnly.map((material) => (
-                  <div key={material.workbookId} className={styles.assignmentRow}>
-                    <span className={styles.assignmentTile} aria-hidden="true"><BookOpen size={16} /></span>
-                    <div className={styles.assignmentMain}>
-                      <strong>{material.title}</strong>
-                      <span>Dikongsi {formatDate(material.sharedAt)}</span>
-                    </div>
-                    <div className={styles.assignmentSide}>
-                      <span className={`${styles.badge} ${styles.badgeMuted}`}>Dikongsi</span>
-                      {isTeacher ? (
-                        <>
-                          <Link href={`/classes/${detail.id}/workbooks/${material.workbookId}`} className={styles.analyticsLink}>Analitik</Link>
-                          <button
-                            type="button"
-                            className={`${styles.toggleButton} ${styles.toggleButtonDone}`}
-                            disabled={materialPending === material.workbookId}
-                            onClick={() => toggleMaterial(material.workbookId, false)}
-                          >
-                            {materialPending === material.workbookId ? "Menyimpan…" : "Nyahkongsi"}
-                          </button>
-                        </>
-                      ) : (
-                        <Link href={`/workbooks/${material.workbookId}`} className={styles.rowLink}>Buka</Link>
-                      )}
-                    </div>
-                  </div>
+                  <ContentTile
+                    key={material.workbookId}
+                    href={isTeacher ? `/subjects/${detail.id}/workbooks/${material.workbookId}` : `/workbooks/${material.workbookId}`}
+                    tint={tileTint(material.subjectId)}
+                    art={tileArt(material.subjectId)}
+                    badge={<SubjectBadge subjectId={material.subjectId} />}
+                    title={material.title}
+                    description={`Dikongsi ${formatDate(material.sharedAt)}`}
+                    footer={<span className={`${styles.badge} ${styles.badgeMuted}`}>Dikongsi</span>}
+                    menu={
+                      isTeacher ? (
+                        <button
+                          type="button"
+                          className={`${styles.tileMenuButton} ${styles.tileMenuDone}`}
+                          disabled={materialPending === material.workbookId}
+                          onClick={() => toggleMaterial(material.workbookId, false)}
+                        >
+                          {materialPending === material.workbookId ? "…" : "Nyahkongsi"}
+                        </button>
+                      ) : undefined
+                    }
+                  />
                 ))}
               </div>
             )}
@@ -427,25 +449,27 @@ export function ClassDetailView({
               <div className={styles.sharePicker}>
                 <h3>Kongsi tanpa tugasan</h3>
                 <p>Berikan akses baca sahaja tanpa tarikh akhir atau modul khusus.</p>
-                <div className={styles.assignmentList}>
+                <div className={styles.tileGrid}>
                   {shareable.map((workbook) => (
-                    <div key={workbook.id} className={styles.assignmentRow}>
-                      <span className={styles.assignmentTile} aria-hidden="true"><BookOpen size={16} /></span>
-                      <div className={styles.assignmentMain}>
-                        <strong>{workbook.title}</strong>
-                        <span>Belum dikongsi dengan kelas ini</span>
-                      </div>
-                      <div className={styles.assignmentSide}>
+                    <ContentTile
+                      key={workbook.id}
+                      tint={tileTint(workbook.subjectId)}
+                      art={tileArt(workbook.subjectId)}
+                      badge={<SubjectBadge subjectId={workbook.subjectId} />}
+                      title={workbook.title}
+                      description="Belum dikongsi dengan subjek ini"
+                      footer={<span className={`${styles.badge} ${styles.badgeMuted}`}>Peribadi</span>}
+                      menu={
                         <button
                           type="button"
-                          className={styles.toggleButton}
+                          className={`${styles.tileMenuButton} ${styles.tileMenuPrimary}`}
                           disabled={materialPending === workbook.id}
                           onClick={() => toggleMaterial(workbook.id, true)}
                         >
-                          {materialPending === workbook.id ? "Menyimpan…" : "Kongsi"}
+                          {materialPending === workbook.id ? "…" : "Kongsi"}
                         </button>
-                      </div>
-                    </div>
+                      }
+                    />
                   ))}
                 </div>
               </div>
@@ -454,20 +478,20 @@ export function ClassDetailView({
         )}
 
         {tab === "materials" && (
-          <section className={styles.tabPanel} aria-label="Sumber kelas">
+          <section className={styles.tabPanel} aria-label="Sumber subjek">
             <div className={styles.panelHead}>
               <div>
                 <h2>Sumber</h2>
-                <p>{isTeacher ? "Sumber daripada buku kerja kelas ini — asas semua bahan dan kuiz." : "Sumber pembelajaran daripada cikgu anda."}</p>
+                <p>{isTeacher ? "Sumber daripada buku kerja subjek ini — asas semua bahan dan kuiz." : "Sumber pembelajaran daripada cikgu anda."}</p>
               </div>
             </div>
-            {sources.length === 0 ? (
+            {sourceGroups.length === 0 ? (
               <div className={styles.placeholder}>
                 <h3>Belum ada sumber</h3>
-                <p>{isTeacher ? "Tugaskan atau kongsi buku kerja untuk melihat sumbernya di sini." : "Sumber pembelajaran cikgu anda akan muncul di sini."}</p>
+                <p>{isTeacher ? "Tambah sumber yang sedia dalam buku kerja subjek ini untuk melihatnya di sini." : "Sumber pembelajaran cikgu anda akan muncul di sini."}</p>
               </div>
             ) : (
-              sources.map((group) => (
+              sourceGroups.map((group) => (
                 <div key={group.workbookId} className={styles.sourceGroup}>
                   <div className={styles.sourceGroupHead}>
                     <h3>{group.workbookTitle}</h3>
@@ -476,17 +500,29 @@ export function ClassDetailView({
                       <Link href={`/workbooks/${group.workbookId}?tab=sumber`} className={styles.rowLink}>Urus dalam buku kerja</Link>
                     )}
                   </div>
-                  <div className={styles.sourceRows}>
-                    {group.sources.map((source) => (
-                      <div key={source.id} className={styles.sourceRow}>
-                        <span className={styles.sourceKind}>{SOURCE_KIND_LABELS[source.kind] ?? source.kind}</span>
-                        <span className={styles.sourceTitle}>
-                          <strong>{source.title}</strong>
-                          {source.excerpt && <small>{source.excerpt.replace(/[#*_`>]/g, "")}</small>}
-                        </span>
-                        <span className={styles.sourceMeta}>{source.sizeLabel ?? ""}</span>
-                      </div>
-                    ))}
+                  <div className={styles.sourceCards}>
+                    {group.sources.map((source) => {
+                      const thumbnail =
+                        source.kind === "youtube" && source.videoId && /^[A-Za-z0-9_-]{11}$/.test(source.videoId)
+                          ? `https://i.ytimg.com/vi/${source.videoId}/hqdefault.jpg`
+                          : null;
+                      const Icon = source.kind === "youtube" ? Video : source.kind === "web" ? Globe : source.kind === "textbook" ? BookOpen : FileText;
+                      return (
+                        <article key={source.id} className={styles.sourceCard}>
+                          <span className={styles.sourceThumb} data-kind={source.kind}>
+                            {thumbnail ? <img src={thumbnail} alt="" loading="lazy" /> : <Icon size={22} aria-hidden="true" />}
+                          </span>
+                          <div className={styles.sourceBody}>
+                            <strong title={source.title}>{source.title}</strong>
+                            {source.excerpt && <small>{source.excerpt.replace(/[#*_`>]/g, "")}</small>}
+                            <span className={styles.sourceMetaRow}>
+                              <em className={styles.sourceKind}>{SOURCE_KIND_LABELS[source.kind] ?? source.kind}</em>
+                              {source.sizeLabel && <span>{source.sizeLabel}</span>}
+                            </span>
+                          </div>
+                        </article>
+                      );
+                    })}
                   </div>
                 </div>
               ))
@@ -495,37 +531,45 @@ export function ClassDetailView({
         )}
 
         {tab === "students" && isTeacher && (
-          <section className={styles.roster} aria-label="Senarai pelajar">
-            <div className={`${styles.rosterRow} ${styles.rosterHead}`}>
-              <span>Pelajar</span>
-              <span>Kelas</span>
-              <span>Menyertai</span>
-              <span />
+          <section className={styles.tabPanel} aria-label="Senarai pelajar">
+            <div className={styles.panelHead}>
+              <div>
+                <h2>Pelajar</h2>
+                <p>{members.length} pelajar menyertai subjek ini.</p>
+              </div>
             </div>
             {members.length === 0 ? (
-              <p className={styles.rosterEmpty}>Belum ada pelajar menyertai. Kongsikan kod sertai di atas.</p>
+              <div className={styles.placeholder}>
+                <h3>Belum ada pelajar</h3>
+                <p>Kongsikan kod sertai di tab Gambaran untuk menambah pelajar ke subjek ini.</p>
+              </div>
             ) : (
-              members.map((member) => (
-                <div key={member.id} className={styles.rosterRow}>
-                  <span className={styles.rosterName}>
-                    <span className={styles.rosterAvatar} aria-hidden="true">{member.name.slice(0, 1)}</span>
-                    <span><strong>{member.name}</strong><small>{member.xp} XP</small></span>
-                  </span>
-                  <span className={styles.rosterCell}>{member.className}</span>
-                  <span className={styles.rosterCell}><CalendarDays size={13} aria-hidden="true" /> {formatDate(member.joinedAt)}</span>
-                  <span>
-                    {confirmRemove === member.id ? (
-                      <button type="button" className={styles.removeButton} disabled={removing === member.id} onClick={() => removeMember(member.id)}>
-                        {removing === member.id ? "Mengeluarkan…" : "Pasti? Klik untuk keluarkan"}
-                      </button>
-                    ) : (
-                      <button type="button" className={styles.removeButton} onClick={() => setConfirmRemove(member.id)}>
-                        <UserMinus size={12} aria-hidden="true" /> Keluarkan
-                      </button>
-                    )}
-                  </span>
-                </div>
-              ))
+              <div className={styles.studentGrid}>
+                {members.map((member) => (
+                  <article key={member.id} className={styles.studentTile}>
+                    <span className={styles.studentAvatar} aria-hidden="true">{member.name.slice(0, 1)}</span>
+                    <div className={styles.studentBody}>
+                      <strong>{member.name}</strong>
+                      <small>{member.className !== "—" ? member.className : "Kelas belum ditetapkan"}</small>
+                      <span className={styles.studentMeta}>
+                        <em>{member.xp} XP</em>
+                        <em><CalendarDays size={12} aria-hidden="true" /> Menyertai {formatDate(member.joinedAt)}</em>
+                      </span>
+                    </div>
+                    <span className={styles.studentAction}>
+                      {confirmRemove === member.id ? (
+                        <button type="button" className={styles.removeButton} disabled={removing === member.id} onClick={() => removeMember(member.id)}>
+                          {removing === member.id ? "Mengeluarkan…" : "Pasti? Keluarkan"}
+                        </button>
+                      ) : (
+                        <button type="button" className={styles.removeButton} onClick={() => setConfirmRemove(member.id)}>
+                          <UserMinus size={12} aria-hidden="true" /> Keluarkan
+                        </button>
+                      )}
+                    </span>
+                  </article>
+                ))}
+              </div>
             )}
           </section>
         )}
@@ -583,7 +627,7 @@ export function ClassDetailView({
                         <span className={`${styles.badge} ${assignment.memberCount > 0 && assignment.completedCount >= assignment.memberCount ? styles.badgeDone : styles.badgeMuted}`}>
                           {assignment.completedCount}/{assignment.memberCount} selesai
                         </span>
-                        <Link href={`/classes/${detail.id}/workbooks/${assignment.workbookId}`} className={styles.analyticsLink}>Analitik</Link>
+                        <Link href={`/subjects/${detail.id}/workbooks/${assignment.workbookId}`} className={styles.analyticsLink}>Analitik</Link>
                       </div>
                     </div>
                   ))}
@@ -601,16 +645,16 @@ export function ClassDetailView({
         {isTeacher && (
           <section className={styles.dangerZone}>
             <div>
-              <strong>Padam kelas</strong>
-              <span>Semua rekod keahlian kelas ini akan dibuang. Pelajar tidak akan dapat menyertai semula dengan kod lama.</span>
+              <strong>Padam subjek</strong>
+              <span>Semua rekod keahlian subjek ini akan dibuang. Pelajar tidak akan dapat menyertai semula dengan kod lama.</span>
             </div>
             {confirmDelete ? (
               <Button type="button" variant="destructive" size="sm" onClick={deleteClass} disabled={deleting}>
-                <Trash2 size={14} aria-hidden="true" />{deleting ? "Memadam…" : "Pasti? Padam kelas"}
+                <Trash2 size={14} aria-hidden="true" />{deleting ? "Memadam…" : "Pasti? Padam subjek"}
               </Button>
             ) : (
               <Button type="button" variant="white" size="sm" onClick={() => setConfirmDelete(true)}>
-                <Trash2 size={14} aria-hidden="true" />Padam kelas
+                <Trash2 size={14} aria-hidden="true" />Padam subjek
               </Button>
             )}
           </section>

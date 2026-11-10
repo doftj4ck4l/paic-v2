@@ -17,6 +17,7 @@ export type AssignmentView = {
   className: string;
   workbookId: string;
   workbookTitle: string;
+  workbookSubjectId: string | null;
   title: string;
   instructions: string;
   /** Mapped module kinds; null means every module. */
@@ -31,22 +32,35 @@ export type AssignmentView = {
 export type ClassMaterial = {
   workbookId: string;
   title: string;
+  subjectId: string | null;
   sharedAt: string;
 };
 
-export type OwnedWorkbookOption = { id: string; title: string };
+export type OwnedWorkbookOption = { id: string; title: string; subjectId: string | null };
 
 /** Workbook titles — DB workbooks first, demo corpus as fallback. */
 export async function workbookTitles(ids: string[]): Promise<Map<string, string>> {
-  const unique = [...new Set(ids)];
   const map = new Map<string, string>();
+  for (const [id, meta] of await workbookMeta(ids)) map.set(id, meta.title);
+  return map;
+}
+
+export type WorkbookMeta = { title: string; subjectId: string | null };
+
+/** Workbook titles + subjects — DB workbooks first, demo corpus as fallback. */
+export async function workbookMeta(ids: string[]): Promise<Map<string, WorkbookMeta>> {
+  const unique = [...new Set(ids)];
+  const map = new Map<string, WorkbookMeta>();
   if (!unique.length) return map;
-  const rows = await db.select({ id: workbooks.id, title: workbooks.title }).from(workbooks).where(inArray(workbooks.id, unique));
-  for (const row of rows) map.set(row.id, row.title);
+  const rows = await db
+    .select({ id: workbooks.id, title: workbooks.title, subjectId: workbooks.subjectId })
+    .from(workbooks)
+    .where(inArray(workbooks.id, unique));
+  for (const row of rows) map.set(row.id, { title: row.title, subjectId: row.subjectId });
   for (const id of unique) {
     if (map.has(id)) continue;
     const demo = WORKBOOKS.find((w) => w.id === id) ?? SHARED_WORKBOOKS.find((w) => w.id === id);
-    if (demo) map.set(id, demo.title);
+    if (demo) map.set(id, { title: demo.title, subjectId: demo.subjectId });
   }
   return map;
 }
@@ -66,8 +80,8 @@ type AssignmentRow = {
 async function enrich(rows: AssignmentRow[], viewerId: string): Promise<AssignmentView[]> {
   const ids = rows.map((row) => row.id);
   const classIds = [...new Set(rows.map((row) => row.classId))];
-  const [titles, completions, memberCounts] = await Promise.all([
-    workbookTitles(rows.map((row) => row.workbookId)),
+  const [meta, completions, memberCounts] = await Promise.all([
+    workbookMeta(rows.map((row) => row.workbookId)),
     ids.length
       ? db
           .select({ assignmentId: assignmentCompletions.assignmentId, studentId: assignmentCompletions.studentId })
@@ -91,7 +105,8 @@ async function enrich(rows: AssignmentRow[], viewerId: string): Promise<Assignme
       classId: row.classId,
       className: row.className,
       workbookId: row.workbookId,
-      workbookTitle: titles.get(row.workbookId) ?? "Buku kerja",
+      workbookTitle: meta.get(row.workbookId)?.title ?? "Buku kerja",
+      workbookSubjectId: meta.get(row.workbookId)?.subjectId ?? null,
       title: row.title,
       instructions: row.instructions,
       moduleKinds: row.moduleKinds,
@@ -153,7 +168,7 @@ export async function createAssignment(
   classId: string,
   input: { workbookId: string; title: string; instructions: string; moduleKinds: string[]; dueAt: string | null },
 ) {
-  if (!(await isClassTeacher(user, classId))) return { error: "Kelas tidak ditemui." as const };
+  if (!(await isClassTeacher(user, classId))) return { error: "Subjek tidak ditemui." as const };
 
   const [workbook] = await db
     .select({ id: workbooks.id, title: workbooks.title })
@@ -187,8 +202,8 @@ export async function createAssignment(
     {
       type: "assignment",
       title: `Buku kerja ditugaskan: ${input.title}`,
-      body: `${classRow?.name ?? "Kelas"} · ${moduleKinds.length} modul`,
-      href: `/classes/${classId}?tab=assignments`,
+      body: `${classRow?.name ?? "Subjek"} · ${moduleKinds.length} modul`,
+      href: `/subjects/${classId}?tab=assignments`,
     },
   );
   return { id };
@@ -206,7 +221,7 @@ export async function classWorkbookIds(classId: string): Promise<string[]> {
 export type ClassSourceGroup = {
   workbookId: string;
   workbookTitle: string;
-  sources: { id: string; title: string; kind: string; status: string; sizeLabel: string | null; excerpt: string }[];
+  sources: { id: string; title: string; kind: string; status: string; sizeLabel: string | null; excerpt: string; videoId: string | null }[];
 };
 
 /** Ready sources of every workbook the class can access, grouped by workbook. */
@@ -231,6 +246,7 @@ export async function listClassSources(classId: string): Promise<ClassSourceGrou
           status: row.status,
           sizeLabel: row.sizeLabel,
           excerpt: (row.fullText ?? "").slice(0, 160),
+          videoId: ((row.meta as Record<string, unknown> | null)?.videoId as string | undefined) ?? null,
         })),
       } satisfies ClassSourceGroup;
     }),
@@ -282,7 +298,7 @@ export async function setAssignmentCompletion(user: SessionUser, assignmentId: s
         type: "completion",
         title: `${user.preferredName} menyelesaikan “${row.title}”`,
         body: row.className,
-        href: `/classes/${row.classId}?tab=progress`,
+        href: `/subjects/${row.classId}?tab=progress`,
       });
     }
   } else {
@@ -298,16 +314,16 @@ export async function setAssignmentCompletion(user: SessionUser, assignmentId: s
 /** Workbooks shared to a class as materials (Bahan tab). */
 export async function listClassMaterials(classId: string): Promise<ClassMaterial[]> {
   const rows = await db
-    .select({ workbookId: workbookClassShares.workbookId, sharedAt: workbookClassShares.sharedAt, title: workbooks.title })
+    .select({ workbookId: workbookClassShares.workbookId, sharedAt: workbookClassShares.sharedAt, title: workbooks.title, subjectId: workbooks.subjectId })
     .from(workbookClassShares)
     .innerJoin(workbooks, eq(workbooks.id, workbookClassShares.workbookId))
     .where(eq(workbookClassShares.classId, classId))
     .orderBy(desc(workbookClassShares.sharedAt));
-  return rows.map((row) => ({ workbookId: row.workbookId, title: row.title, sharedAt: row.sharedAt.toISOString() }));
+  return rows.map((row) => ({ workbookId: row.workbookId, title: row.title, subjectId: row.subjectId, sharedAt: row.sharedAt.toISOString() }));
 }
 
 export async function shareWorkbookWithClass(user: SessionUser, classId: string, workbookId: string, shared: boolean) {
-  if (!(await isClassTeacher(user, classId))) return { error: "Kelas tidak ditemui." as const };
+  if (!(await isClassTeacher(user, classId))) return { error: "Subjek tidak ditemui." as const };
 
   const [workbook] = await db
     .select({ id: workbooks.id })

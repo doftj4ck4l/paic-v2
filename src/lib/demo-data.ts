@@ -144,6 +144,12 @@ export function subjectById(id: SubjectId): DemoSubject {
   return SUBJECTS.find((s) => s.id === id) ?? SUBJECTS[0];
 }
 
+/** Tolerant lookup for ids that arrive as plain strings (DB rows). */
+export function findSubject(id: string | null | undefined): DemoSubject | undefined {
+  if (!id) return undefined;
+  return SUBJECTS.find((s) => s.id === id);
+}
+
 export type DemoWorkbook = {
   id: string;
   title: string;

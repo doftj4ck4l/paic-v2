@@ -8,7 +8,7 @@ import { listOwnedWorkbooks } from "@/lib/workbooks";
 import { CLASS_TAB_IDS, type ClassTabId } from "./class-tabs";
 import { ClassDetailView } from "./class-detail";
 
-export const metadata: Metadata = { title: "Kelas" };
+export const metadata: Metadata = { title: "Subjek" };
 
 export const dynamic = "force-dynamic";
 
@@ -43,7 +43,7 @@ export default async function ClassPage({
       assignments={assignments}
       materials={materials}
       sources={sources}
-      ownedWorkbooks={owned.map((workbook) => ({ id: workbook.id, title: workbook.title }))}
+      ownedWorkbooks={owned.map((workbook) => ({ id: workbook.id, title: workbook.title, subjectId: workbook.subjectId }))}
       progress={progress}
       initialTab={initialTab}
     />

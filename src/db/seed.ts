@@ -107,6 +107,7 @@ async function main() {
         id: demoClassId,
         schoolId: farah.schoolId,
         teacherId: farah.id,
+        subjectId: "science",
         name: "4 Bestari",
         formLevel: "Tahun 4",
         joinCode: "BESTAR",
@@ -171,7 +172,7 @@ async function main() {
           type: "join",
           title: "Aiman menyertai 4 Bestari",
           body: aiman.name,
-          href: "/classes/cls_demo_bestari?tab=students",
+          href: "/subjects/cls_demo_bestari?tab=students",
         },
         {
           id: "ntf_demo_aiman_assignment",
@@ -179,7 +180,7 @@ async function main() {
           type: "assignment",
           title: "Buku kerja ditugaskan: Kitaran Air — kuiz & slaid",
           body: "4 Bestari · 2 modul",
-          href: "/classes/cls_demo_bestari?tab=assignments",
+          href: "/subjects/cls_demo_bestari?tab=assignments",
         },
       ]);
       console.log("  + Pemberitahuan demo (penyertaan kelas + tugasan)");
