@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Check, RotateCcw, Sparkles, X } from "lucide-react";
 import { Chip, ProgressBar } from "@/components/studio/ui";
@@ -22,6 +22,7 @@ export function QuizPlayer({
   onFinishHref = "/creations",
   aiExplain = false,
   sourceWorkbookId,
+  artifactId,
   generated = false,
   onExit,
 }: {
@@ -29,6 +30,8 @@ export function QuizPlayer({
   onFinishHref?: string;
   aiExplain?: boolean;
   sourceWorkbookId?: string;
+  /** When present, each finished attempt is recorded for progress tracking. */
+  artifactId?: string;
   generated?: boolean;
   onExit?: () => void;
 }) {
@@ -37,9 +40,23 @@ export function QuizPlayer({
   const [answers, setAnswers] = useState<number[]>([]);
   const [done, setDone] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
+  const recorded = useRef(false);
 
   const question = questions[index];
   const score = answers.filter((a, i) => a === questions[i]?.answer).length;
+
+  useEffect(() => {
+    if (!done || recorded.current || !artifactId || !sourceWorkbookId) return;
+    recorded.current = true;
+    const correct = answers.filter((answer, i) => answer === questions[i]?.answer).length;
+    void fetch("/api/attempts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ workbookId: sourceWorkbookId, artifactId, score: correct, total: questions.length, answers }),
+    }).catch(() => {
+      /* attempt recording is best-effort */
+    });
+  }, [done, artifactId, sourceWorkbookId, answers, questions]);
 
   function choose(option: number) {
     if (picked !== null) return;
@@ -63,6 +80,7 @@ export function QuizPlayer({
     setAnswers([]);
     setDone(false);
     setAiOpen(false);
+    recorded.current = false;
   }
 
   if (done) {

@@ -1,3 +1,4 @@
+import { hasClassAccess } from "@/lib/class-access";
 import { getAppWorkbook, type AppWorkbook } from "@/lib/workbooks";
 import { listSources, type SourceRow } from "@/lib/sources";
 import { embeddingConfigured } from "./embeddings";
@@ -12,13 +13,15 @@ export async function editableWorkbook(id: string, userId: string): Promise<AppW
   return workbook && workbook.isDb && workbook.ownerId === userId ? workbook : null;
 }
 /**
- * Read access: the owner, any signed-in user on demo workbooks, or any viewer
- * of a published workbook. Write paths use editableWorkbook.
+ * Read access: the owner, any signed-in user on demo workbooks, any viewer of
+ * a published workbook, or a student in a class the workbook is assigned or
+ * shared to. Write paths use editableWorkbook.
  */
 export async function viewableWorkbook(id: string, userId: string): Promise<AppWorkbook | null> {
   const workbook = await getAppWorkbook(id);
   if (!workbook) return null;
   if (!workbook.isDb || workbook.ownerId === userId || workbook.visibility === "published") return workbook;
+  if (await hasClassAccess(userId, id)) return workbook;
   return null;
 }
 export function canReadSource(source: SourceRow, userId: string) {

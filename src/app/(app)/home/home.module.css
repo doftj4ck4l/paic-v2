@@ -108,6 +108,8 @@
 .cardHeading { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 15px; border-bottom: 1px solid #e7eafa; }
 .cardHeading h2 { display: flex; align-items: center; gap: 11px; font-size: 20px; font-weight: 750; letter-spacing: -.7px; }
 .cardHeading h2 > svg { width: 25px; height: 25px; color: #7453ce; filter: drop-shadow(1px 2px 0 #b9a5e344); }
+.assignments { display: flex; flex-direction: column; }
+.assignmentEmpty { margin: 14px 0 4px; font-size: 12.5px; line-height: 1.55; color: #666e95; }
 .assignment { display: flex; align-items: center; gap: 17px; min-width: 0; padding: 11px 3px; border-bottom: 1px solid #e8ebf7; }
 .assignment:last-child { border-bottom: 0; padding-bottom: 3px; }
 .assignment:hover .assignmentText > strong { color: #008b80; }

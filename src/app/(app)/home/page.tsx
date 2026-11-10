@@ -3,7 +3,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ChartNoAxesColumnIncreasing, Check, ListChecks, Play, Search, Sparkles, Zap } from "lucide-react";
 import { requireUser } from "@/lib/auth-session";
-import { ACHIEVEMENTS, QUIZZES, SUBJECTS, WORKBOOKS, subjectById } from "@/lib/demo-data";
+import { listAssignmentsForUser } from "@/lib/assignments";
+import { dueLabel, dueState } from "@/lib/assignment-status";
+import { ACHIEVEMENTS, SUBJECTS, WORKBOOKS, subjectById } from "@/lib/demo-data";
 import styles from "./home.module.css";
 import content from "@/components/studio/content-width.module.css";
 import { SubjectRollGrid } from "./subject-roll-grid";
@@ -20,6 +22,7 @@ const ACHIEVEMENT_ASSETS = {
 
 export default async function HomePage() {
   const student = await requireUser();
+  const assignments = (await listAssignmentsForUser(student)).slice(0, 4);
   const workbook = WORKBOOKS[0];
   const subject = subjectById(workbook.subjectId);
   const level = Math.floor(student.xp / student.xpPerLevel) + 1;
@@ -80,18 +83,33 @@ export default async function HomePage() {
           <SubjectRollGrid subjects={SUBJECTS} />
         </section>
 
-        <section className={styles.summaryRow} aria-label="Kuiz dan kemajuan">
+        <section className={styles.summaryRow} aria-label="Tugasan dan kemajuan">
           <section className={styles.summaryCard} aria-labelledby="assignments-title">
-            <div className={styles.cardHeading}><h2 id="assignments-title"><ListChecks />Kuiz</h2></div>
-            <div className={styles.assignments}>
-              {QUIZZES.map((quiz) => (
-                <Link key={quiz.id} href={quiz.status === "done" ? `/quizzes/${quiz.id}/hasil` : `/quizzes/${quiz.id}`} className={styles.assignment}>
-                  <span className={styles.assignmentState} data-status={quiz.status} aria-hidden="true">{quiz.status === "done" && <Check size={16} />}{quiz.status === "in-progress" && <span />}</span>
-                  <span className={styles.assignmentText}><strong>{quiz.title}</strong><span>{quiz.due} · {quiz.teacherName}</span></span>
-                  <span className={styles.statusBadge} data-tone={quiz.status === "new" ? "today" : quiz.status === "in-progress" ? "soon" : "done"}>{quiz.score ?? (quiz.status === "new" ? "Baharu" : "Dalam proses")}</span>
-                </Link>
-              ))}
-            </div>
+            <div className={styles.cardHeading}><h2 id="assignments-title"><ListChecks />Tugasan</h2><Link href="/classes" className={styles.textLink}>Kelas saya <ArrowRight size={16} /></Link></div>
+            {assignments.length === 0 ? (
+              <p className={styles.assignmentEmpty}>
+                {student.role === "teacher" ? "Belum ada tugasan diberikan kepada kelas anda." : "Tiada tugasan buat masa ini. Bersedia untuk tugasan seterusnya!"}
+              </p>
+            ) : (
+              <div className={styles.assignments}>
+                {assignments.map((assignment) => {
+                  const state = dueState(assignment.dueAt, assignment.completed);
+                  const badge = student.role === "teacher"
+                    ? `${assignment.completedCount}/${assignment.memberCount} selesai`
+                    : dueLabel(assignment.dueAt, assignment.completed) ?? "Baharu";
+                  const tone = student.role === "teacher"
+                    ? (assignment.memberCount > 0 && assignment.completedCount >= assignment.memberCount ? "done" : "soon")
+                    : state === "done" ? "done" : state === "overdue" ? "today" : "soon";
+                  return (
+                    <Link key={assignment.id} href={`/classes/${assignment.classId}?tab=assignments`} className={styles.assignment}>
+                      <span className={styles.assignmentState} data-status={student.role === "teacher" ? "in-progress" : assignment.completed ? "done" : "in-progress"} aria-hidden="true">{student.role !== "teacher" && assignment.completed && <Check size={16} />}{!assignment.completed && <span />}</span>
+                      <span className={styles.assignmentText}><strong>{assignment.title}</strong><span>{assignment.className} · {assignment.workbookTitle}</span></span>
+                      <span className={styles.statusBadge} data-tone={tone}>{badge}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
           </section>
 
           <section className={styles.summaryCard} aria-labelledby="progress-title">

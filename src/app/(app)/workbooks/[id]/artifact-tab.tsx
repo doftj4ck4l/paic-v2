@@ -113,11 +113,11 @@ export const KIND_UI: Record<ArtifactKind, KindUi> = {
     ],
     generatingLabel: "Menjana kuiz…",
     meta: (data) => `${((data as { questions?: unknown[] }).questions ?? []).length} soalan`,
-    render: ({ workbookId, data }) => {
+    render: ({ workbookId, artifactId, data }) => {
       const questions = ((data as { questions?: { question: string; options: string[]; answer: number; explanation: string; aiExplain?: string; citation?: string }[] }).questions ?? []).map(
         (q, i) => ({ ...q, id: `q${i}` }),
       );
-      return <QuizPlayer questions={questions} aiExplain generated sourceWorkbookId={workbookId} />;
+      return <QuizPlayer questions={questions} aiExplain generated sourceWorkbookId={workbookId} artifactId={artifactId} />;
     },
   },
   flashcards: {

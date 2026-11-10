@@ -1,32 +1,60 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Flame, TrendingDown, TrendingUp, Minus, Zap } from "lucide-react";
+import { ArrowRight, ClipboardCheck, Flame, ListChecks, TrendingDown, TrendingUp, Minus, Users, Zap } from "lucide-react";
 import { PageHeader, PageShell, Section } from "@/components/studio/shell";
 import { Chip, ProgressBar } from "@/components/studio/ui";
 import { ACHIEVEMENTS, SUBJECT_MASTERY, subjectById } from "@/lib/demo-data";
 import { requireUser } from "@/lib/auth-session";
+import { listUserActivity } from "@/lib/attempts";
+import { formatRelativeTime } from "@/lib/assignment-status";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Kemajuan" };
 
-const WEEK = [
-  { day: "Isn", value: 45 },
-  { day: "Sel", value: 70 },
-  { day: "Rab", value: 35 },
-  { day: "Kha", value: 85 },
-  { day: "Jum", value: 60 },
-  { day: "Sab", value: 95 },
-  { day: "Ahd", value: 40 },
-];
+export const dynamic = "force-dynamic";
 
 const TREND_ICON = { up: TrendingUp, flat: Minus, down: TrendingDown } as const;
 const TREND_CLASS = { up: "text-[#00786a]", flat: "text-muted-foreground", down: "text-[#b3383e]" } as const;
 
+const ACTIVITY_ICONS = { quiz: ListChecks, assignment: ClipboardCheck } as const;
+
 export default async function ProgressPage() {
   const student = await requireUser();
+
+  if (student.role === "teacher") {
+    return (
+      <PageShell>
+        <PageHeader
+          title="Kemajuan"
+          description="Pantau kemajuan pelajar anda melalui halaman Kelas."
+        />
+        <section className="rounded-[24px] border border-border bg-card p-6 shadow-soft">
+          <div className="flex items-center gap-4">
+            <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-secondary text-[#00786a]">
+              <Users className="size-6" aria-hidden="true" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <h2 className="text-base font-extrabold">Kemajuan pelajar</h2>
+              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                Tugasan selesai, percubaan kuiz dan aktiviti terakhir setiap pelajar ada di halaman Kelas — pilih kelas anda.
+              </p>
+            </div>
+            <Link
+              href="/classes"
+              className="inline-flex h-11 shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-[#007a66] to-[#00856f] px-5 text-sm font-semibold text-white shadow-soft"
+            >
+              Buka Kelas <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
+          </div>
+        </section>
+      </PageShell>
+    );
+  }
+
   const level = Math.floor(student.xp / student.xpPerLevel) + 1;
   const into = student.xp % student.xpPerLevel;
   const earned = ACHIEVEMENTS.filter((a) => a.earned).length;
+  const activity = await listUserActivity(student.id, 4);
 
   return (
     <PageShell>
@@ -63,18 +91,35 @@ export default async function ProgressPage() {
         </section>
 
         <section className="rounded-[24px] border border-border bg-card p-5 shadow-soft">
-          <h2 className="text-sm font-bold">XP mingguan</h2>
-          <div className="mt-4 flex h-28 gap-2" aria-hidden="true">
-            {WEEK.map((d) => (
-              <div key={d.day} className="flex h-full flex-1 flex-col items-center justify-end gap-1.5">
-                <div
-                  className="w-full rounded-t-lg bg-gradient-to-b from-[#00bf9e] to-[#8fe3d5]"
-                  style={{ height: `${d.value}%` }}
-                />
-                <span className="text-[10px] font-semibold text-muted-foreground">{d.day}</span>
-              </div>
-            ))}
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-sm font-bold">Aktiviti terkini</h2>
+            <Link href="/progress/history" className="text-xs font-semibold text-[#00786a] hover:underline">
+              Lihat semua
+            </Link>
           </div>
+          {activity.length === 0 ? (
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              Belum ada aktiviti. Main kuiz dalam buku kerja anda untuk mula mengumpul XP.
+            </p>
+          ) : (
+            <ul className="mt-3 flex flex-col gap-2.5">
+              {activity.map((item) => {
+                const Icon = ACTIVITY_ICONS[item.type] ?? ListChecks;
+                return (
+                  <li key={item.id} className="flex items-start gap-3 rounded-2xl border border-border bg-background p-3">
+                    <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-secondary text-[#00786a]">
+                      <Icon className="size-4" aria-hidden="true" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-semibold">{item.title}</span>
+                      <span className="mt-0.5 block truncate text-xs text-muted-foreground">{item.detail}</span>
+                    </span>
+                    <span className="shrink-0 text-[11px] font-semibold text-muted-foreground">{formatRelativeTime(item.at)}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </section>
       </div>
 
@@ -133,7 +178,7 @@ export default async function ProgressPage() {
         }
       >
         <p className="text-sm text-muted-foreground">
-          Setiap aktiviti pembelajaran direkodkan — buku kerja, kuiz, tugasan dan latihan.
+          Setiap percubaan kuiz dan tugasan yang diselesaikan direkodkan dalam sejarah aktiviti anda.
         </p>
       </Section>
     </PageShell>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getAppWorkbook } from "@/lib/workbooks";
+import { canViewWorkbook } from "@/lib/class-access";
 import { getCurrentUser } from "@/lib/auth-session";
 import { sourcePayload, sourcePayloadReadOnly } from "@/lib/ingestion/access";
 import type { SourceSnapshot } from "@/lib/workbook/use-sources";
@@ -24,9 +25,8 @@ export default async function WorkbookWorkspacePage({
   const user = await getCurrentUser();
 
   const isOwner = Boolean(user && workbook.isDb && workbook.ownerId === user.id);
-  const isViewer = Boolean(user && (!workbook.isDb || workbook.visibility === "published"));
-  // Unpublished DB workbooks stay private to their owner.
-  if (!isOwner && !isViewer) notFound();
+  // Unpublished DB workbooks stay private to their owner and their classes.
+  if (!(await canViewWorkbook(workbook, user?.id ?? null))) notFound();
 
   // Server-side prefetch so the Sumber tab renders instantly on first paint.
   let initialSources: SourceSnapshot | null = null;

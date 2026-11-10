@@ -1,4 +1,4 @@
-import { boolean, index, integer, jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { boolean, index, integer, jsonb, pgTable, primaryKey, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 /* ================= Schools (tenancy root) ================= */
 
@@ -237,3 +237,115 @@ export const workbookChatTurns = pgTable("workbook_chat_turns", {
   citations: jsonb("citations").$type<{ index: number; sourceId: string; title: string; excerpt: string; url?: string }[]>().notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 }, table => [index("workbook_chat_turns_scope_idx").on(table.workbookId, table.userId), index("workbook_chat_turns_session_idx").on(table.sessionId)]);
+
+/* ================= Classes (teacher rosters) ================= */
+
+/**
+ * A teacher-owned class section. Students in the same school join with the
+ * short `joinCode`; the code can be rotated at any time.
+ */
+export const classes = pgTable(
+  "classes",
+  {
+    id: text("id").primaryKey(),
+    schoolId: uuid("school_id")
+      .notNull()
+      .references(() => schools.id),
+    teacherId: text("teacher_id").notNull(),
+    name: text("name").notNull(),
+    formLevel: text("form_level").notNull().default(""),
+    joinCode: text("join_code").notNull().unique(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    archivedAt: timestamp("archived_at"),
+  },
+  (t) => [index("classes_teacher_idx").on(t.teacherId), index("classes_school_idx").on(t.schoolId)],
+);
+
+export const classMembers = pgTable(
+  "class_members",
+  {
+    classId: text("class_id")
+      .notNull()
+      .references(() => classes.id, { onDelete: "cascade" }),
+    studentId: text("student_id").notNull(),
+    joinedAt: timestamp("joined_at").notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.classId, t.studentId] }), index("class_members_student_idx").on(t.studentId)],
+);
+
+/** Workbooks a teacher shares with a class (class materials, read-only). */
+export const workbookClassShares = pgTable(
+  "workbook_class_shares",
+  {
+    workbookId: text("workbook_id").notNull(),
+    classId: text("class_id")
+      .notNull()
+      .references(() => classes.id, { onDelete: "cascade" }),
+    sharedAt: timestamp("shared_at").notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.workbookId, t.classId] })],
+);
+
+/* ================= Assignments ================= */
+
+export const assignments = pgTable(
+  "assignments",
+  {
+    id: text("id").primaryKey(),
+    classId: text("class_id")
+      .notNull()
+      .references(() => classes.id, { onDelete: "cascade" }),
+    workbookId: text("workbook_id").notNull(),
+    createdBy: text("created_by").notNull(),
+    title: text("title").notNull(),
+    instructions: text("instructions").notNull().default(""),
+    targetKind: text("target_kind"),
+    dueAt: timestamp("due_at"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => [index("assignments_class_idx").on(t.classId), index("assignments_workbook_idx").on(t.workbookId)],
+);
+
+export const assignmentCompletions = pgTable(
+  "assignment_completions",
+  {
+    assignmentId: text("assignment_id")
+      .notNull()
+      .references(() => assignments.id, { onDelete: "cascade" }),
+    studentId: text("student_id").notNull(),
+    completedAt: timestamp("completed_at").notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.assignmentId, t.studentId] }), index("assignment_completions_student_idx").on(t.studentId)],
+);
+
+/* ================= Quiz attempts + notifications ================= */
+
+export const quizAttempts = pgTable(
+  "quiz_attempts",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull(),
+    workbookId: text("workbook_id").notNull(),
+    artifactId: text("artifact_id").notNull(),
+    score: integer("score").notNull(),
+    total: integer("total").notNull(),
+    answers: jsonb("answers").$type<number[]>().notNull().default([]),
+    completedAt: timestamp("completed_at").notNull().defaultNow(),
+  },
+  (t) => [index("quiz_attempts_user_idx").on(t.userId, t.artifactId), index("quiz_attempts_workbook_idx").on(t.workbookId)],
+);
+
+export const notifications = pgTable(
+  "notifications",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull(),
+    type: text("type").notNull(),
+    title: text("title").notNull(),
+    body: text("body").notNull().default(""),
+    href: text("href"),
+    readAt: timestamp("read_at"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => [index("notifications_user_idx").on(t.userId, t.createdAt)],
+);
