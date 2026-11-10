@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, BookOpen, ChevronDown, Compass, GraduationCap, ListChecks, RotateCcw, Search, SlidersHorizontal, UsersRound, X } from "lucide-react";
 import { ContentTile, SUBJECT_ICONS } from "@/components/studio/content-tile";
 import { WorkbookTile } from "@/app/(app)/workbooks/workbook-list";
+import { Select } from "@/components/ui/select";
 import { SharedWorkbookTile } from "@/components/studio/shared-workbook-tile";
 import {
   SHARED_WORKBOOKS,
@@ -215,42 +216,18 @@ export function Explorer({ publishedWorkbooks = [], viewerId = null }: { publish
             <div className={styles.filterPanel}>
               <label className={styles.filterGroup}>
                 <span>Subjek</span>
-                <span className={styles.filterSelectWrap}>
-                  <select value={subject} onChange={(event) => setSubject(event.target.value as SubjectId | "all")} className={styles.filterSelect}>
-                    <option value="all">Semua subjek</option>
-                    {SUBJECTS.map((item) => (
-                      <option key={item.id} value={item.id}>{item.name}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className={styles.filterChevron} aria-hidden="true" />
-                </span>
+                <Select ariaLabel="Subjek" value={subject} onValueChange={(value) => setSubject(value as SubjectId | "all")} className={styles.filterSelect} options={[{ value: "all", label: "Semua subjek" }, ...SUBJECTS.map((item) => ({ value: item.id, label: item.name }))]} />
               </label>
 
               <label className={styles.filterGroup}>
                 <span>Tingkatan</span>
-                <span className={styles.filterSelectWrap}>
-                  <select value={year} onChange={(event) => setYear(event.target.value)} className={styles.filterSelect}>
-                    <option value="all">Semua tingkatan</option>
-                    {yearOptions.map((item) => (
-                      <option key={item} value={item}>{item}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className={styles.filterChevron} aria-hidden="true" />
-                </span>
+                <Select ariaLabel="Tingkatan" value={year} onValueChange={setYear} className={styles.filterSelect} options={[{ value: "all", label: "Semua tingkatan" }, ...yearOptions.map((item) => ({ value: item, label: item }))]} />
               </label>
 
               {scope !== "topik" && (
                 <label className={styles.filterGroup}>
                   <span>Pengarang</span>
-                  <span className={styles.filterSelectWrap}>
-                    <select value={author} onChange={(event) => setAuthor(event.target.value)} className={styles.filterSelect}>
-                      <option value="all">{scope === "pelajar" ? "Semua pelajar" : "Semua guru"}</option>
-                      {authorOptions.map((item) => (
-                        <option key={item} value={item}>{item}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className={styles.filterChevron} aria-hidden="true" />
-                  </span>
+                  <Select ariaLabel="Pengarang" value={author} onValueChange={setAuthor} className={styles.filterSelect} options={[{ value: "all", label: scope === "pelajar" ? "Semua pelajar" : "Semua guru" }, ...authorOptions.map((item) => ({ value: item, label: item }))]} />
                 </label>
               )}
 
@@ -260,15 +237,7 @@ export function Explorer({ publishedWorkbooks = [], viewerId = null }: { publish
             </div>
           )}
         </div>
-        <span className={styles.filterField}>
-          <label htmlFor="filter-sort" className={styles.srOnly}>Susun mengikut</label>
-          <select id="filter-sort" value={sort} onChange={(event) => setSort(event.target.value as SortId)} className={styles.filterSelect}>
-            {SORT_OPTIONS.map((item) => (
-              <option key={item.value} value={item.value}>Susun: {item.label}</option>
-            ))}
-          </select>
-          <ChevronDown className={styles.filterChevron} aria-hidden="true" />
-        </span>
+        <Select id="filter-sort" ariaLabel="Susun mengikut" value={sort} onValueChange={(value) => setSort(value as SortId)} className={styles.filterSelect} options={SORT_OPTIONS.map((item) => ({ value: item.value, label: `Susun: ${item.label}` }))} />
         <p className={styles.resultCount} role="status" aria-live="polite" aria-atomic="true">{resultLabel}</p>
       </div>
 

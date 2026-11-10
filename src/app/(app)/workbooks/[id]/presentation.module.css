@@ -1,0 +1,76 @@
+.overlay { position: fixed; inset: 0; z-index: 200; display: flex; flex-direction: column; background: #0e1013; color: #fff; overflow: hidden; }
+
+/* Ambient blurred backdrop of the current slide */
+.ambient { position: absolute; inset: -12%; z-index: 0; opacity: 0.5; filter: blur(64px) saturate(1.5); pointer-events: none; }
+.ambientCanvas { border-radius: 0; }
+
+.progress { position: absolute; top: 0; left: 0; right: 0; z-index: 6; height: 3px; background: #ffffff14; }
+.progress span { display: block; height: 100%; background: linear-gradient(90deg, #00b6a2, #7fd6a4); transition: width 320ms ease; }
+
+/* Top bar */
+.topBar { position: relative; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 20px; opacity: 1; transition: opacity 260ms; }
+.topBar[data-visible="false"] { opacity: 0; pointer-events: none; }
+.deckTitle { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #ffffffa8; font-size: 13.5px; font-weight: 650; }
+.topActions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.transitionPicker { display: inline-flex; gap: 3px; padding: 3px; border-radius: 12px; background: #ffffff12; }
+.transitionPicker button { padding: 6px 12px; border: none; border-radius: 9px; background: transparent; color: #ffffffa8; font-size: 11.5px; font-weight: 700; cursor: pointer; transition: background 140ms, color 140ms; }
+.transitionPicker button:hover { color: #fff; }
+.transitionPicker button[aria-pressed="true"] { background: #ffffff1f; color: #fff; }
+.toolButton { display: inline-flex; align-items: center; gap: 7px; height: 36px; padding: 0 13px; border: 1px solid #ffffff1f; border-radius: 12px; background: #ffffff0f; color: #ffffffb8; font-size: 11.5px; font-weight: 700; cursor: pointer; transition: background 140ms, color 140ms; }
+.toolButton:hover { background: #ffffff1c; color: #fff; }
+.toolButton[aria-pressed="true"] { background: #ffffff26; color: #fff; border-color: #ffffff33; }
+.iconButton { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid #ffffff1f; border-radius: 12px; background: #ffffff0f; color: #ffffffb8; cursor: pointer; }
+.iconButton:hover { background: #ffffff1c; color: #fff; }
+
+/* Stage */
+.body { position: relative; z-index: 2; display: flex; align-items: center; min-height: 0; flex: 1; padding: 0 66px; }
+.stageWrap { position: relative; flex: 1; min-width: 0; display: grid; place-items: center; height: 100%; perspective: 1800px; cursor: pointer; }
+.stage { width: min(100%, calc((100vh - 210px) * 16 / 9)); }
+.stageCanvas { border-radius: 14px; box-shadow: 0 40px 90px #00000059, 0 0 0 1px #ffffff12; }
+.kenburns .stageCanvas { animation: kenburns 11s ease-in-out infinite alternate; }
+.kenburns[data-dir="1"] .stageCanvas { animation-name: kenburns; }
+.kenburns[data-dir="-1"] .stageCanvas { animation-name: kenburnsAlt; }
+@keyframes kenburns { from { transform: scale(1); } to { transform: scale(1.045); } }
+@keyframes kenburnsAlt { from { transform: scale(1.045); } to { transform: scale(1); } }
+.edgeButton { display: grid; place-items: center; width: 46px; height: 46px; flex-shrink: 0; border: none; border-radius: 50%; background: #ffffff0d; color: #ffffff8f; cursor: pointer; transition: background 150ms, color 150ms, opacity 150ms; }
+.edgeButton:hover:not(:disabled) { background: #ffffff1f; color: #fff; }
+.edgeButton:disabled { opacity: 0.25; cursor: default; }
+
+/* Bottom bar */
+.bottomBar { position: relative; z-index: 5; display: flex; align-items: center; justify-content: center; gap: 18px; padding: 16px 20px 20px; opacity: 1; transition: opacity 260ms; }
+.bottomBar[data-visible="false"] { opacity: 0; }
+.counter { font-variant-numeric: tabular-nums; color: #ffffffb8; font-size: 13px; font-weight: 700; }
+.hint { display: inline-flex; align-items: center; gap: 7px; color: #ffffff66; font-size: 11.5px; font-weight: 600; }
+
+/* Presenter notes */
+.notesPanel { position: absolute; right: 0; top: 0; bottom: 0; z-index: 6; display: flex; flex-direction: column; gap: 16px; width: 340px; padding: 22px 20px; border-left: 1px solid #ffffff14; background: #101317f2; backdrop-filter: blur(12px); overflow-y: auto; }
+.notesHead { display: flex; align-items: center; justify-content: space-between; color: #ffffff8f; font-size: 11px; font-weight: 750; letter-spacing: .5px; text-transform: uppercase; }
+.notesHead span { display: inline-flex; align-items: center; gap: 7px; }
+.timer { font-variant-numeric: tabular-nums; }
+.notesText { color: #ffffffcc; font-size: 13.5px; line-height: 1.75; white-space: pre-wrap; }
+.nextPreview { display: grid; gap: 9px; margin-top: auto; }
+.nextPreview > span { color: #ffffff66; font-size: 10.5px; font-weight: 750; letter-spacing: .5px; text-transform: uppercase; }
+.nextCanvas { border-radius: 10px; box-shadow: 0 0 0 1px #ffffff1a; }
+
+/* Overview grid */
+.gridOverlay { position: absolute; inset: 0; z-index: 8; display: flex; flex-direction: column; background: #0b0d10f2; backdrop-filter: blur(10px); }
+.gridHead { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; }
+.gridHead strong { font-size: 15px; font-weight: 750; }
+.gridScroll { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; padding: 4px 22px 26px; overflow-y: auto; }
+.gridCard { position: relative; display: grid; gap: 8px; padding: 10px; border: 1px solid #ffffff17; border-radius: 16px; background: #ffffff0a; cursor: pointer; text-align: left; transition: border-color 150ms, background 150ms, transform 150ms; }
+.gridCard:hover { background: #ffffff12; transform: translateY(-2px); }
+.gridCard[data-active="true"] { border-color: #00b6a2; background: #00b6a214; }
+.gridNumber { position: absolute; left: 14px; top: 14px; z-index: 2; display: grid; place-items: center; min-width: 24px; height: 24px; padding-inline: 6px; border-radius: 8px; background: #0b0d10cc; color: #fff; font-size: 11px; font-weight: 750; }
+.gridCanvas { border-radius: 10px; pointer-events: none; }
+.gridTitle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #ffffffb8; font-size: 12px; font-weight: 650; }
+
+/* Blackout */
+.blackout { position: absolute; inset: 0; z-index: 9; border: none; background: #000; cursor: pointer; }
+
+@media (max-width: 900px) {
+  .body { padding: 0 14px; }
+  .edgeButton { display: none; }
+  .notesPanel { width: min(320px, 86vw); }
+  .toolButton span { display: none; }
+  .transitionPicker { display: none; }
+}

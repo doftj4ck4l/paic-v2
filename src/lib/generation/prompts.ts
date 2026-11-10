@@ -8,13 +8,16 @@ export function buildSlidesPrompt({
   count,
   topic,
   sourceText,
+  feedback,
 }: {
   count: number;
   topic?: string | null;
   sourceText: string;
+  feedback?: string | null;
 }): string {
   const topicLine = topic ? `\nFokus topik: ${topic}` : "";
-  return `Hasilkan dek slaid kelas ${count} slaid dalam Bahasa Melayu daripada SUMBER di bawah.${topicLine}
+  const feedbackLine = feedback?.trim() ? `\n\nArahan tambahan daripada pengguna (utamakan sepenuhnya): ${feedback.trim().slice(0, 300)}` : "";
+  return `Hasilkan dek slaid kelas ${count} slaid dalam Bahasa Melayu daripada SUMBER di bawah.${topicLine}${feedbackLine}
 
 Balas HANYA JSON dalam bentuk ini:
 {
@@ -39,6 +42,10 @@ Peraturan:
 - "notes": nota penyampai ringkas dan berguna untuk guru.
 - Semua fakta mesti berdasarkan SUMBER. Jangan reka fakta dan jangan tambah sitasi.
 - Gunakan Bahasa Melayu yang mudah dan sesuai untuk murid sekolah.
+- Bina aliran naratif: pembukaan → konsep utama → contoh → semakan → ringkasan.
+- Panduan jenis slaid: "objectives" = 3-4 objektif pembelajaran; "worked_example" = satu contoh langkah demi langkah; "check" = 3 soalan pendek untuk kuiz lisan; "summary" = 3-5 poin ulangan utama.
+- "notes" mesti praktikal untuk guru: cadangkan soalan untuk ditanya, analogi mudah atau aktiviti pantas.
+- Kekalkan istilah yang sama sepanjang dek dan huraikan gaya ilustrasi yang konsisten.
 
 SUMBER:
 ${sourceText.trim().slice(0, 12000)}`;
@@ -51,6 +58,23 @@ export function buildIllustrationPrompt(slide: DeckSlide, themeStyle: string): s
     `Subject: ${subject}. Style: ${themeStyle}. ` +
     "Do not include text, letters, numbers, people, faces, logos or watermarks. " +
     "Compose in landscape 16:9 with generous negative space."
+  );
+}
+
+/** Full-slide image prompt (paicv2 parity): the model designs the whole slide with the text baked in. */
+export function buildFullSlidePrompt(slide: { title: string; body?: string; bullets: string[]; layout?: string; type?: string }, themeStyle: string): string {
+  const isCover = slide.layout === "cover" || slide.type === "title";
+  const lines = [`Title: "${slide.title}"`];
+  if (isCover && slide.body) lines.push(`Subtitle: "${slide.body}"`);
+  if (!isCover && slide.bullets.length) {
+    lines.push("Bullet points (render each on its own line with a bullet marker):");
+    lines.push(...slide.bullets.map((bullet) => `- ${bullet}`));
+  }
+  return (
+    "Design a single presentation slide in 16:9 that looks professionally designed. " +
+    `Render this text exactly as given below, spelled correctly and clearly legible:\n${lines.join("\n")}\n` +
+    `Write the text in Bahasa Melayu. Style: ${themeStyle}. Clean flat design, strong visual hierarchy, generous margins. ` +
+    "Do not add any other text, people, logos or watermarks."
   );
 }
 

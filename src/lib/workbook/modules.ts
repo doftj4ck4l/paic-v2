@@ -36,7 +36,7 @@ export function validateModuleForSave(input: unknown): ModuleEdit {
       if (data.sections!.some(section => !section.heading.trim() || !section.bullets.some(bullet => bullet.trim()))) throw new Error("Lengkapkan tajuk dan isi setiap bahagian nota.");
       data = notesSchema.parse(data);
     } else if (body.kind === "flashcards") data = flashcardsSchema.parse(data);
-    else if (body.kind === "slides") { const slides = data.slides!; const valid = deckSchema.parse(data); data = { ...valid, slides: valid.slides.map((slide,index) => ({ ...slide, image_status: slides[index].image_status, image_key: slides[index].image_key })) }; }
+    else if (body.kind === "slides") { const slides = data.slides!; const valid = deckSchema.parse(data); const meaningful = valid.slides.filter((slide) => slide.title.trim() || (slide.elements?.length ?? 0) > 0); if (meaningful.length < 2) throw new Error("Dek sedia memerlukan sekurang-kurangnya 2 slaid dengan kandungan."); data = { ...valid, slides: valid.slides.map((slide,index) => ({ ...slide, image_status: slides[index].image_status, image_key: slides[index].image_key })) }; }
     else if (body.kind === "mindmaps") data = cleanMindmap(mindmapSchema.parse(data));
     else if (body.kind === "study-guides") data = studyGuideSchema.parse(data);
     else data = { ...audioScriptSchema.parse(data), audio_status: data.audio_status };

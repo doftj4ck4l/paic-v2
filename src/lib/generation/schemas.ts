@@ -7,10 +7,58 @@ export const SLIDE_LAYOUTS = ["cover", "text", "split_visual"] as const;
 
 const clamp = (value: string, max: number) => value.trim().slice(0, max);
 
+/** Freeform elements (visual editor). Coordinates live in the 1280×720 canvas space. */
+export const slideElementSchema = z.discriminatedUnion("type", [
+  z.object({
+    id: z.string().min(1).max(40),
+    type: z.literal("text"),
+    x: z.number().finite(), y: z.number().finite(), w: z.number().min(20).max(1600), h: z.number().min(16).max(1200),
+    z: z.number().int().min(0).max(200).default(0),
+    rotation: z.number().min(-180).max(180).optional(),
+    html: z.string().max(8000),
+    style: z.object({
+      fontSize: z.number().min(8).max(160),
+      fontWeight: z.number().min(100).max(900),
+      color: z.string().max(40),
+      align: z.enum(["left", "center", "right"]),
+      lineHeight: z.number().min(0.8).max(3),
+      italic: z.boolean().optional(),
+      underline: z.boolean().optional(),
+    }),
+  }),
+  z.object({
+    id: z.string().min(1).max(40),
+    type: z.literal("image"),
+    x: z.number().finite(), y: z.number().finite(), w: z.number().min(20).max(1600), h: z.number().min(20).max(1200),
+    z: z.number().int().min(0).max(200).default(0),
+    rotation: z.number().min(-180).max(180).optional(),
+    assetKey: z.string().min(1).max(200),
+    radius: z.number().min(0).max(400).optional(),
+    shadow: z.boolean().optional(),
+  }),
+  z.object({
+    id: z.string().min(1).max(40),
+    type: z.literal("shape"),
+    x: z.number().finite(), y: z.number().finite(), w: z.number().min(4).max(1600), h: z.number().min(4).max(1200),
+    z: z.number().int().min(0).max(200).default(0),
+    rotation: z.number().min(-180).max(180).optional(),
+    shape: z.enum(["rect", "circle", "line", "triangle"]),
+    fill: z.string().max(40),
+    radius: z.number().min(0).max(400).optional(),
+  }),
+]);
+
+export const slideBackgroundSchema = z.object({
+  kind: z.enum(["theme", "color", "image"]),
+  value: z.string().max(200).optional(),
+  assetKey: z.string().max(200).optional(),
+});
+
 export const slideSchema = z.object({
+  id: z.string().min(1).max(40).optional(),
   type: z.enum(SLIDE_TYPES).catch("concept"),
   layout: z.enum(SLIDE_LAYOUTS).catch("text"),
-  title: z.string().transform((v) => clamp(v, 140)).refine((v) => v.length > 0, "Tajuk slaid diperlukan."),
+  title: z.string().transform((v) => clamp(v, 140)),
   body: z.string().optional().default("").transform((v) => clamp(v, 600)),
   bullets: z
     .array(z.string())
@@ -19,18 +67,23 @@ export const slideSchema = z.object({
     .transform((items) => items.map((b) => clamp(b, 160)).filter(Boolean).slice(0, 6)),
   notes: z.string().optional().default("").transform((v) => clamp(v, 600)),
   visual_prompt: z.string().optional().default("").transform((v) => clamp(v, 300)),
+  elements: z.array(slideElementSchema).max(60).optional(),
+  background: slideBackgroundSchema.optional(),
 });
 
 export const deckSchema = z.object({
   title: z.string().transform((v) => clamp(v, 160)).refine((v) => v.length > 0, "Tajuk dek diperlukan."),
+  format: z.enum(["text", "images"]).optional(),
   slides: z.array(slideSchema).min(2, "Dek perlu sekurang-kurangnya dua slaid.").max(14),
 });
 
 export type GeneratedSlide = z.infer<typeof slideSchema>;
 export type GeneratedDeck = z.infer<typeof deckSchema>;
+export type SlideElement = z.infer<typeof slideElementSchema>;
+export type SlideBackground = z.infer<typeof slideBackgroundSchema>;
 
 export type DeckSlide = GeneratedSlide & { image_key?: string; image_status: "none" | "pending" | "ready" | "failed" };
-export type DeckData = { title: string; slides: DeckSlide[] };
+export type DeckData = { title: string; format?: "text" | "images"; slides: DeckSlide[] };
 
 /** Slides that receive an AI illustration: the cover + slides that asked for one, capped. */
 export function slidesNeedingIllustration(deck: GeneratedDeck, maxVisuals = 6): number[] {

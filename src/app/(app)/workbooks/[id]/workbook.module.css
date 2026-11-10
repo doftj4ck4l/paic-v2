@@ -311,3 +311,8 @@
 .heroIllustration > svg:last-child { top: 105px; left: 13px; }
 @media (max-width: 1050px) { .detailCopy { padding-right: 140px; } .heroIllustration { right: 125px; width: 205px; } .heroIllustration > img { width: 180px; } }
 @media (max-width: 760px) { .heroIllustration { display: none; } .detailCopy { padding-right: 0; } .detailHero { min-height: 160px; } }
+
+/* Deck viewer with the shared fixed canvas + presentation mode */
+.deckStage { border-radius: 20px; box-shadow: 0 14px 34px #3f40600f, 0 0 0 1px #e7ecf6; }
+.presentButton { display: inline-flex; align-items: center; gap: 7px; height: 37px; padding: 0 15px; border: none; border-radius: 19px; background: linear-gradient(110deg, #007a66, #00856f); color: #fff; font-size: 12px; font-weight: 750; cursor: pointer; box-shadow: 0 3px 7px #30776822; transition: transform 150ms, box-shadow 150ms; }
+.presentButton:hover { transform: translateY(-1px); box-shadow: 0 6px 14px #3077682e; }

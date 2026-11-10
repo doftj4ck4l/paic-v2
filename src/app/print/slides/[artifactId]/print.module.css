@@ -1,0 +1,16 @@
+.sheet { display: grid; gap: 20px; justify-items: center; padding: 24px 16px 40px; background: #eef1f7; min-height: 100vh; }
+.toolbar { position: sticky; top: 12px; z-index: 5; display: flex; align-items: center; gap: 16px; padding: 10px 16px; border: 1px solid #e0e6f2; border-radius: 15px; background: #fff; box-shadow: 0 6px 18px #23284d14; }
+.toolbar span { max-width: 420px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #4a5670; font-size: 12.5px; font-weight: 700; }
+.toolbar button { display: inline-flex; align-items: center; gap: 7px; height: 37px; padding: 0 15px; border: none; border-radius: 19px; background: linear-gradient(110deg, #007a66, #00856f); color: #fff; font-size: 12px; font-weight: 750; cursor: pointer; }
+.page { width: 1280px; max-width: 100%; background: #fff; border-radius: 12px; box-shadow: 0 10px 30px #23284d1a; overflow: hidden; }
+.canvas { border-radius: 12px; }
+
+@page { size: 338mm 190mm; margin: 0; }
+
+@media print {
+  .sheet { display: block; padding: 0; gap: 0; background: #fff; }
+  .toolbar { display: none; }
+  .page { width: 338mm; height: 190mm; border-radius: 0; box-shadow: none; page-break-after: always; break-inside: avoid; }
+  .page:last-child { page-break-after: auto; }
+  .canvas { border-radius: 0; }
+}

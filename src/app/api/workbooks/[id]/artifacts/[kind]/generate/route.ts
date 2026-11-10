@@ -1,6 +1,7 @@
 import { randomBytes } from "crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { artifacts } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth-session";
@@ -15,6 +16,9 @@ const bodySchema = z.object({
   focus: z.string().trim().max(200).optional(),
   difficulty: z.enum(["easy", "medium", "hard"]).optional(),
   sourceIds: z.array(z.string()).optional(),
+  format: z.enum(["text", "images"]).optional(),
+  feedback: z.string().trim().max(300).optional(),
+  artifactId: z.string().min(1).max(60).optional(),
 });
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string; kind: string }> }) {
@@ -46,6 +50,24 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   if (!selected.length || selected.some(sourceId => !ready.some(row => row.id === sourceId))) return NextResponse.json({ error: "Pilih sumber yang telah siap diembed dalam tab Sumber dahulu." }, { status: 422 });
   parsed.data.sourceIds = selected;
 
+  const jobParams = {
+    ...parsed.data,
+    itemCount: countFor(kind, parsed.data.count),
+    job: "generate",
+    leaseUntil: null,
+  };
+
+  // Regenerate an existing deck in place (owner-confirmed from the UI).
+  if (parsed.data.artifactId) {
+    const [existing] = await db.select().from(artifacts).where(and(eq(artifacts.id, parsed.data.artifactId), eq(artifacts.userId, user.id)));
+    if (!existing || existing.workbookId !== id || existing.kind !== kind) {
+      return NextResponse.json({ error: "Artifak tidak dijumpai." }, { status: 404 });
+    }
+    await db.update(artifacts).set({ status: "generating", error: null, updatedAt: new Date(), params: { ...jobParams, artifactId: undefined } }).where(eq(artifacts.id, existing.id));
+    startArtifactWorker();
+    return NextResponse.json({ id: existing.id, status: "generating" }, { status: 202 });
+  }
+
   const artifactId = `art_${randomBytes(8).toString("hex")}`;
   await db.insert(artifacts).values({
     id: artifactId,
@@ -54,12 +76,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     kind,
     title: "Menjana…",
     status: "generating",
-    params: {
-      ...parsed.data,
-      itemCount: countFor(kind, parsed.data.count),
-      job: "generate",
-      leaseUntil: null,
-    },
+    params: jobParams,
   });
 
   startArtifactWorker();

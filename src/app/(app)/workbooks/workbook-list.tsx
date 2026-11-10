@@ -7,6 +7,7 @@ import { ContentTile, SUBJECT_ICONS } from "@/components/studio/content-tile";
 import { SUBJECTS, subjectById, type DemoWorkbook, type SubjectId } from "@/lib/demo-data";
 import type { AppWorkbook } from "@/lib/workbooks";
 import { toggleSavedWorkbook, useSavedWorkbooks } from "@/lib/saved-workbooks";
+import { Select } from "@/components/ui/select";
 import styles from "./workbooks.module.css";
 
 const COVER_ART: Partial<Record<SubjectId, string>> = {
@@ -161,15 +162,7 @@ export function WorkbookList({ workbooks, published }: { workbooks: AppWorkbook[
             <div className={styles.filterPanel}>
               <label className={styles.filterGroup}>
                 <span>Subjek</span>
-                <span className={styles.filterSelectWrap}>
-                  <select value={subject} onChange={(event) => setSubject(event.target.value as SubjectId | "all")} className={styles.filterSelect}>
-                    <option value="all">Semua subjek</option>
-                    {SUBJECTS.map((item) => (
-                      <option key={item.id} value={item.id}>{item.name}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className={styles.filterChevron} aria-hidden="true" />
-                </span>
+                <Select ariaLabel="Subjek" value={subject} onValueChange={(value) => setSubject(value as SubjectId | "all")} className={styles.filterSelect} options={[{ value: "all", label: "Semua subjek" }, ...SUBJECTS.map((item) => ({ value: item.id, label: item.name }))]} />
               </label>
               <button type="button" className={styles.filterReset} onClick={resetFilters} disabled={subject === "all" && !query.trim()}>
                 <RotateCcw size={13} aria-hidden="true" /> Set semula tapisan
@@ -177,15 +170,7 @@ export function WorkbookList({ workbooks, published }: { workbooks: AppWorkbook[
             </div>
           )}
         </div>
-        <span className={styles.sortField}>
-          <label htmlFor="workbook-sort" className={styles.srOnly}>Susun buku kerja</label>
-          <select id="workbook-sort" value={sort} onChange={(event) => setSort(event.target.value as SortId)} className={styles.sortSelect}>
-            <option value="recent">Susun: Terbaharu</option>
-            <option value="complete">Susun: Paling lengkap</option>
-            <option value="az">Susun: A–Z</option>
-          </select>
-          <ChevronDown size={14} className={styles.sortChevron} aria-hidden="true" />
-        </span>
+        <Select id="workbook-sort" ariaLabel="Susun buku kerja" value={sort} onValueChange={(value) => setSort(value as SortId)} className={styles.sortSelect} options={[{ value: "recent", label: "Susun: Terbaharu" }, { value: "complete", label: "Susun: Paling lengkap" }, { value: "az", label: "Susun: A–Z" }]} />
       </div>
 
       {showingMine ? (

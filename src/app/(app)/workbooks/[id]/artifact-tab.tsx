@@ -53,6 +53,7 @@ type KindUi = {
   icon: typeof Presentation;
   countOptions: CountOption[];
   showTheme?: boolean;
+  showFormat?: boolean;
   generatingLabel: string;
   meta: (data: Record<string, unknown>) => string;
   render: (props: { artifactId: string; workbookId: string; data: Record<string, unknown> }) => React.ReactNode;
@@ -79,6 +80,7 @@ export const KIND_UI: Record<ArtifactKind, KindUi> = {
       { value: "more", label: "Banyak", hint: "12 slaid" },
     ],
     showTheme: true,
+    showFormat: true,
     generatingLabel: "Menjana slaid…",
     meta: (data) => {
       const deck = data as DeckData;

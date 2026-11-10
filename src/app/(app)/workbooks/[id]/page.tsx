@@ -8,12 +8,17 @@ import { WorkbookWorkspace } from "./workspace";
 
 export const metadata: Metadata = { title: "Ruang Kerja Buku Kerja" };
 
+const TAB_IDS = ["sumber", "sembang", "notes", "quizzes", "flashcards", "slides", "mindmaps", "audio", "study-guides"] as const;
+
 export default async function WorkbookWorkspacePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ tab?: string }>;
 }) {
   const { id } = await params;
+  const { tab } = await searchParams;
   const workbook = await getAppWorkbook(id);
   if (!workbook) notFound();
   const user = await getCurrentUser();
@@ -30,7 +35,9 @@ export default async function WorkbookWorkspacePage({
     initialSources = { sources: payload.sources, draftCount: payload.draftCount, available: payload.embeddingAvailable };
   }
 
+  const initialTab = TAB_IDS.includes(tab as (typeof TAB_IDS)[number]) ? (tab as (typeof TAB_IDS)[number]) : undefined;
+
   return (
-    <WorkbookWorkspace workbook={workbook} viewerId={user?.id ?? null} initialSources={initialSources} />
+    <WorkbookWorkspace workbook={workbook} viewerId={user?.id ?? null} initialSources={initialSources} initialTab={initialTab} />
   );
 }

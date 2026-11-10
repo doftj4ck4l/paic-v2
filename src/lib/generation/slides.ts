@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { artifacts } from "@/db/schema";
-import { SLIDE_THEME_STYLE, buildIllustrationPrompt, buildSlidesPrompt, SLIDES_SYSTEM_PROMPT } from "./prompts";
+import { SLIDE_THEME_STYLE, buildFullSlidePrompt, buildIllustrationPrompt, buildSlidesPrompt, SLIDES_SYSTEM_PROMPT } from "./prompts";
 import { chatJSON, generateImage, isGenerationMock, textModel } from "./router";
 import { deckSchema, slidesNeedingIllustration, type DeckData, type GeneratedDeck } from "./schemas";
 import { corpusForWorkbook } from "./corpus";
@@ -50,7 +50,8 @@ export async function runSlidesGeneration(artifactId: string) {
   const [artifact] = await db.select().from(artifacts).where(eq(artifacts.id, artifactId));
   if (!artifact) return;
 
-  const params = (artifact.params ?? {}) as { count?: string; theme?: string; focus?: string; sourceIds?: string[] };
+  const params = (artifact.params ?? {}) as { count?: string; theme?: string; focus?: string; sourceIds?: string[]; format?: string; feedback?: string };
+  const format = params.format === "images" ? "images" : "text";
   const count = slideCountFor(params.count ?? "standard");
   const themeStyle = SLIDE_THEME_STYLE[params.theme ?? "clean"] ?? SLIDE_THEME_STYLE.clean;
 
@@ -63,12 +64,13 @@ export async function runSlidesGeneration(artifactId: string) {
       if (!corpus.trim()) {
         throw new Error("Tiada kandungan sumber untuk dijana. Tambah sumber dahulu.");
       }
-      deck = await generateDeckWithRetry(buildSlidesPrompt({ count, sourceText: corpus }) + (params.focus ? `\nFokus: ${JSON.stringify(params.focus)}. Semua fakta mesti berdasarkan sumber.` : ""));
+      deck = await generateDeckWithRetry(buildSlidesPrompt({ count, sourceText: corpus, feedback: params.feedback }) + (params.focus ? `\nFokus: ${JSON.stringify(params.focus)}. Semua fakta mesti berdasarkan sumber.` : ""));
     }
 
-    const visualIndexes = slidesNeedingIllustration(deck);
+    const visualIndexes = format === "images" ? deck.slides.map((_, index) => index) : slidesNeedingIllustration(deck);
     const data: DeckData = {
       title: deck.title,
+      format,
       slides: deck.slides.map((slide, index) => ({
         ...slide,
         image_status: visualIndexes.includes(index) ? "pending" : "none",
@@ -108,7 +110,7 @@ export async function runSlidesGeneration(artifactId: string) {
             return;
           }
           const slide = data.slides[index];
-          const bytes = await generateImage(buildIllustrationPrompt(slide, themeStyle));
+          const bytes = await generateImage(format === "images" ? buildFullSlidePrompt(slide, themeStyle) : buildIllustrationPrompt(slide, themeStyle));
           await putAsset(assetKey(artifactId, `slide-${index}.png`), bytes);
           await patchArtifactData(artifactId, (current) => {
             const slides = ((current as unknown as DeckData).slides ?? []).map((s, i) => (i === index ? { ...s, image_status: "ready" as const } : s));
