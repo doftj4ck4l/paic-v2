@@ -1,0 +1,92 @@
+.wrap { display: grid; gap: 10px; }
+
+.stage { position: relative; }
+
+.canvasWrap {
+  overflow: auto;
+  border: 1px solid #e2e7f4;
+  border-radius: 20px;
+  background-color: #fbfcff;
+  background-image: radial-gradient(#e3e7f5 1.1px, transparent 1.1px);
+  background-size: 22px 22px;
+  min-height: 360px;
+  max-height: 62vh;
+  overscroll-behavior: contain;
+  cursor: grab;
+  touch-action: pan-x pan-y;
+}
+.canvasWrap[data-dragging] { cursor: grabbing; }
+.canvasWrap[data-dragging] * { user-select: none; }
+
+.canvas { position: relative; }
+
+.canvasInner { position: relative; transform-origin: top left; }
+
+.edges { position: absolute; left: 0; top: 0; pointer-events: none; }
+
+.node {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 7px 14px;
+  border: 1px solid #e2e7f4;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.06);
+}
+.nodeLabel {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #353a5c;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+.node[data-depth="0"] { background: linear-gradient(110deg, #007a66, #00856f); border-color: transparent; box-shadow: 0 4px 14px rgb(0 122 102 / 0.28); }
+.node[data-depth="0"] .nodeLabel { color: #fff; font-weight: 800; font-size: 12.5px; }
+.node[data-depth="1"] { background: #f2fbf9; border-color: #bfe9e2; }
+.node[data-depth="1"] .nodeLabel { color: #046b69; font-weight: 700; }
+
+.toggle {
+  position: absolute;
+  right: -13px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  border: 1px solid #dfe4f3;
+  border-radius: 50%;
+  background: #fff;
+  color: #6d7292;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgb(15 23 42 / 0.14);
+  transition: color 140ms, border-color 140ms;
+  z-index: 2;
+}
+.toggle:hover { color: #00786a; border-color: #b9ddd1; }
+.toggleIcon { transition: transform 150ms ease; }
+.toggleOpen .toggleIcon { transform: rotate(90deg); }
+
+.controls { position: absolute; right: 12px; bottom: 12px; display: flex; gap: 6px; z-index: 3; }
+.controls button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e2e7f4;
+  border-radius: 10px;
+  background: #fff;
+  color: #61678b;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgb(15 23 42 / 0.1);
+  transition: color 140ms, border-color 140ms;
+}
+.controls button:hover { color: #00786a; border-color: #b9ddd1; }
+
+.hint { margin: 0; font-size: 11.5px; color: #9aa0bd; }

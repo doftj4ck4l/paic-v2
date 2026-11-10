@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, BookOpen, CalendarDays, Check, FileText, Globe, Plus, RefreshCw, Trash2, UserMinus, Users, Video, type LucideIcon } from "lucide-react";
+import { ArrowLeft, BookOpen, CalendarDays, Check, FileText, Globe, Plus, RefreshCw, Trash2, UserMinus, Users, Video, Zap, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ContentTile, SUBJECT_ICONS } from "@/components/studio/content-tile";
 import { WORKBOOK_COVER_ART } from "@/app/(app)/workbooks/workbook-list";
@@ -87,6 +87,14 @@ function tileArt(subjectId: string | null) {
   const subject = findSubject(subjectId);
   if (!subject) return "/assets/thiings/graduation.png";
   return WORKBOOK_COVER_ART[subject.id] ?? subject.asset;
+}
+
+const AVATAR_TONES = ["teal", "purple", "amber", "blue", "pink"] as const;
+
+function avatarTone(name: string) {
+  let sum = 0;
+  for (const character of name) sum += character.charCodeAt(0);
+  return AVATAR_TONES[sum % AVATAR_TONES.length];
 }
 
 export function ClassDetailView({
@@ -270,6 +278,17 @@ export function ClassDetailView({
             <span className={styles.detailBlob} />
             <Image src={subject?.asset ?? "/assets/thiings/graduation.png"} alt="" width={150} height={150} />
           </div>
+          {isTeacher && (
+            <button
+              type="button"
+              className={`${styles.heroDelete} ${confirmDelete ? styles.heroDeleteConfirm : ""}`}
+              disabled={deleting}
+              onClick={() => (confirmDelete ? deleteClass() : setConfirmDelete(true))}
+            >
+              <Trash2 size={13} aria-hidden="true" />
+              {deleting ? "Memadam…" : confirmDelete ? "Pasti? Padam subjek" : "Padam subjek"}
+            </button>
+          )}
         </header>
 
         <div className={styles.tabBar} role="tablist" aria-label="Bahagian subjek">
@@ -547,16 +566,24 @@ export function ClassDetailView({
               <div className={styles.studentGrid}>
                 {members.map((member) => (
                   <article key={member.id} className={styles.studentTile}>
-                    <span className={styles.studentAvatar} aria-hidden="true">{member.name.slice(0, 1)}</span>
-                    <div className={styles.studentBody}>
-                      <strong>{member.name}</strong>
-                      <small>{member.className !== "—" ? member.className : "Kelas belum ditetapkan"}</small>
-                      <span className={styles.studentMeta}>
-                        <em>{member.xp} XP</em>
-                        <em><CalendarDays size={12} aria-hidden="true" /> Menyertai {formatDate(member.joinedAt)}</em>
+                    <header className={styles.studentHead}>
+                      <span className={styles.studentAvatar} data-tone={avatarTone(member.name)} aria-hidden="true">{member.name.slice(0, 1)}</span>
+                      <div className={styles.studentHeadBody}>
+                        <strong>{member.name}</strong>
+                        <span className={styles.studentChip}>{member.className !== "—" ? member.className : "Kelas belum ditetapkan"}</span>
+                      </div>
+                    </header>
+                    <div className={styles.studentStats}>
+                      <span className={styles.studentStat}>
+                        <Zap size={14} aria-hidden="true" />
+                        <span><strong>{member.xp} XP</strong><small>XP terkumpul</small></span>
+                      </span>
+                      <span className={styles.studentStat}>
+                        <CalendarDays size={14} aria-hidden="true" />
+                        <span><strong>{formatDate(member.joinedAt)}</strong><small>Menyertai</small></span>
                       </span>
                     </div>
-                    <span className={styles.studentAction}>
+                    <footer className={styles.studentFoot}>
                       {confirmRemove === member.id ? (
                         <button type="button" className={styles.removeButton} disabled={removing === member.id} onClick={() => removeMember(member.id)}>
                           {removing === member.id ? "Mengeluarkan…" : "Pasti? Keluarkan"}
@@ -566,7 +593,7 @@ export function ClassDetailView({
                           <UserMinus size={12} aria-hidden="true" /> Keluarkan
                         </button>
                       )}
-                    </span>
+                    </footer>
                   </article>
                 ))}
               </div>
@@ -642,23 +669,7 @@ export function ClassDetailView({
           )
         )}
 
-        {isTeacher && (
-          <section className={styles.dangerZone}>
-            <div>
-              <strong>Padam subjek</strong>
-              <span>Semua rekod keahlian subjek ini akan dibuang. Pelajar tidak akan dapat menyertai semula dengan kod lama.</span>
-            </div>
-            {confirmDelete ? (
-              <Button type="button" variant="destructive" size="sm" onClick={deleteClass} disabled={deleting}>
-                <Trash2 size={14} aria-hidden="true" />{deleting ? "Memadam…" : "Pasti? Padam subjek"}
-              </Button>
-            ) : (
-              <Button type="button" variant="white" size="sm" onClick={() => setConfirmDelete(true)}>
-                <Trash2 size={14} aria-hidden="true" />Padam subjek
-              </Button>
-            )}
-          </section>
-        )}
+
 
         {assignmentOpen && (
           <AssignmentDialog

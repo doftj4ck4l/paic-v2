@@ -187,15 +187,33 @@
 .checkButtonDone:hover:not(:disabled) { background: #0aa98f; color: #fff; }
 
 /* ---------- student tiles ---------- */
-.studentGrid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); }
-.studentTile { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 13px; padding: 17px 18px; border: 1px solid #e2e7f4; border-radius: 20px; background: #fff; box-shadow: 0 1px 3px rgb(15 23 42 / 0.05), 0 10px 28px -14px rgb(15 23 42 / 0.14); }
-.studentAvatar { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 50%; background: #eafaf6; font-size: 16px; font-weight: 800; color: #00786a; }
-.studentBody { display: grid; gap: 3px; min-width: 0; }
-.studentBody strong { font-size: 14px; font-weight: 800; color: #10112f; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.studentBody small { font-size: 11.5px; color: #61678b; }
-.studentMeta { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 3px; }
-.studentMeta em { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-style: normal; font-weight: 600; color: #9aa0bd; }
-.studentAction { grid-column: 2; justify-self: start; }
+.studentGrid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.studentTile { display: grid; gap: 14px; padding: 20px 22px; border: 1px solid #e2e7f4; border-radius: 24px; background: #fff; box-shadow: 0 1px 3px rgb(15 23 42 / 0.05), 0 10px 28px -14px rgb(15 23 42 / 0.14); transition: transform 0.16s ease, box-shadow 0.16s ease; }
+.studentTile:hover { transform: translateY(-2px); box-shadow: 0 2px 6px rgb(15 23 42 / 0.06), 0 24px 48px -24px rgb(15 23 42 / 0.24); }
+.studentHead { display: flex; align-items: center; gap: 13px; min-width: 0; }
+.studentAvatar { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 16px; font-size: 17px; font-weight: 800; flex-shrink: 0; }
+.studentAvatar[data-tone="teal"] { background: #eafaf6; color: #00786a; }
+.studentAvatar[data-tone="purple"] { background: #f1ecff; color: #7957a2; }
+.studentAvatar[data-tone="amber"] { background: #fff6e6; color: #aa6800; }
+.studentAvatar[data-tone="blue"] { background: #e9f4ff; color: #3e6da8; }
+.studentAvatar[data-tone="pink"] { background: #ffeef4; color: #b35a7d; }
+.studentHeadBody { display: grid; gap: 4px; min-width: 0; }
+.studentHeadBody strong { font-size: 14.5px; font-weight: 800; color: #10112f; line-height: 1.25; }
+.studentChip { width: fit-content; padding: 3px 10px; border-radius: 999px; background: #eef0f9; font-size: 10.5px; font-weight: 700; color: #5d6890; }
+.studentStats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.studentStat { display: flex; align-items: center; gap: 9px; padding: 10px 12px; border-radius: 14px; background: #f7f8fe; min-width: 0; }
+.studentStat > svg { color: #8a90b8; flex-shrink: 0; }
+.studentStat > span { display: grid; gap: 1px; min-width: 0; }
+.studentStat strong { font-size: 12.5px; font-weight: 800; color: #10112f; white-space: nowrap; }
+.studentStat small { font-size: 9.5px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: #9aa0bd; }
+.studentFoot { display: flex; justify-content: flex-end; padding-top: 12px; border-top: 1px solid #eef0f9; }
+
+/* ---------- hero delete (teacher) ---------- */
+.heroDelete { position: absolute; z-index: 3; top: 16px; right: 18px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border: 1px solid #e9e2fb; border-radius: 12px; background: #ffffffd9; font-size: 11px; font-weight: 700; color: #8a8fa8; cursor: pointer; box-shadow: 0 3px 10px rgb(79 58 115 / 0.08); backdrop-filter: blur(4px); transition: color 140ms, border-color 140ms, background 140ms; }
+.heroDelete:hover:not(:disabled) { color: #c04a4a; border-color: #f3d5d5; background: #fff; }
+.heroDelete:disabled { opacity: 0.65; cursor: default; }
+.heroDeleteConfirm { color: #b03030; border-color: #f3d5d5; background: #fff5f5; }
+.heroDeleteConfirm:hover:not(:disabled) { color: #962626; border-color: #eec2c2; background: #ffefef; }
 .moduleChipLink { padding: 2px 9px; border-radius: 999px; background: #eafaf6; font-size: 10px; font-weight: 700; color: #00786a; text-decoration: none; }
 .moduleChipLink:hover { background: #d9f6ef; text-decoration: underline; }
 
@@ -323,11 +341,6 @@
 .placeholder h3 { margin: 0; font-size: 14.5px; font-weight: 800; color: #10112f; }
 .placeholder p { margin: 0; max-width: 380px; font-size: 12.5px; line-height: 1.55; color: #61678b; }
 
-.dangerZone { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 20px; border: 1px solid #f3d5d5; border-radius: 20px; background: #fffafa; }
-.dangerZone div { display: grid; gap: 3px; }
-.dangerZone strong { font-size: 13px; font-weight: 800; color: #b03030; }
-.dangerZone span { font-size: 11.5px; color: #9a6a6a; }
-
 @media (max-width: 1000px) {
   .heroCopy { padding-left: 28px; }
   .hero h1 { font-size: 36px; }
@@ -361,7 +374,9 @@
   .hero h1 { font-size: 32px; }
   .detailHero { padding: 22px 20px; border-radius: 24px 24px 34px 24px; }
   .detailHeroArt { display: none; }
+  .detailHeroCopy { padding-right: 118px; }
   .detailTitleRow h1 { font-size: 26px; }
+  .heroDelete { top: 14px; right: 14px; padding: 6px 10px; }
   .rosterRow { grid-template-columns: minmax(0, 1fr) auto; }
   .rosterCell { display: none; }
   .rosterHead { display: none; }
