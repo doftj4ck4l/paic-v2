@@ -1,10 +1,22 @@
 "use client";
 
+import { createContext, useContext, type ReactNode } from "react";
 import { Select as RadixSelect } from "radix-ui";
 import { Check, ChevronDown } from "lucide-react";
 import styles from "./select.module.css";
 
 export type SelectOption = { value: string; label: string };
+
+/**
+ * Radix portals mount at <body>, which paints BELOW a native modal <dialog>
+ * (top layer). Dialogs provide themselves as the portal container so their
+ * Selects stay clickable above the dialog surface.
+ */
+const SelectPortalContext = createContext<HTMLElement | null>(null);
+
+export function SelectPortalProvider({ container, children }: { container: HTMLElement | null; children: ReactNode }) {
+  return <SelectPortalContext.Provider value={container}>{children}</SelectPortalContext.Provider>;
+}
 
 /** Design-system dropdown built on Radix Select — replaces native <select> menus. */
 export function Select({
@@ -26,6 +38,7 @@ export function Select({
   id?: string;
   className?: string;
 }) {
+  const portalContainer = useContext(SelectPortalContext);
   return (
     <RadixSelect.Root value={value} onValueChange={onValueChange} disabled={disabled}>
       <RadixSelect.Trigger id={id} className={`${styles.trigger} ${className ?? ""}`} aria-label={ariaLabel}>
@@ -34,7 +47,7 @@ export function Select({
           <ChevronDown size={15} aria-hidden="true" />
         </RadixSelect.Icon>
       </RadixSelect.Trigger>
-      <RadixSelect.Portal>
+      <RadixSelect.Portal container={portalContainer ?? undefined}>
         <RadixSelect.Content className={styles.content} position="popper" sideOffset={7} collisionPadding={12}>
           <RadixSelect.Viewport className={styles.viewport}>
             {options.map((option) => (

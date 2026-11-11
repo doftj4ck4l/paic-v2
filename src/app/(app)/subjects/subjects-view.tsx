@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowDown, ArrowRight, Check, Copy, Plus, Users, X, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import { Select, SelectPortalProvider } from "@/components/ui/select";
 import { ContentTile, SUBJECT_ICONS } from "@/components/studio/content-tile";
 import type { SessionUser } from "@/lib/auth-session";
 import type { ClassSummary } from "@/lib/classes";
@@ -69,6 +69,7 @@ function SubjectTile({
 
 function CreateClassDialog({ onClose, onCreated }: { onClose: () => void; onCreated: (id: string) => void }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const [container, setContainer] = useState<HTMLElement | null>(null);
   const [subjectId, setSubjectId] = useState("");
   const [name, setName] = useState("");
   const [formLevel, setFormLevel] = useState("");
@@ -82,6 +83,8 @@ function CreateClassDialog({ onClose, onCreated }: { onClose: () => void; onCrea
     document.body.style.overflow = "hidden";
     return () => { dialog?.close(); document.body.style.overflow = overflow; };
   }, []);
+
+  const attach = useCallback((element: HTMLDialogElement | null) => { ref.current = element; setContainer(element); }, []);
 
   function pickSubject(next: string) {
     setSubjectId(next);
@@ -112,7 +115,7 @@ function CreateClassDialog({ onClose, onCreated }: { onClose: () => void; onCrea
 
   return (
     <dialog
-      ref={ref}
+      ref={attach}
       className={styles.dialog}
       aria-label="Subjek baharu"
       onCancel={(event) => { event.preventDefault(); onClose(); }}
@@ -120,6 +123,7 @@ function CreateClassDialog({ onClose, onCreated }: { onClose: () => void; onCrea
     >
       <div className={styles.dialogInner}>
         <button type="button" className={styles.closeDialog} aria-label="Tutup" onClick={onClose}><X size={17} /></button>
+        <SelectPortalProvider container={container}>
         <form className={styles.dialogBody} onSubmit={submit}>
           <h2>Subjek baharu</h2>
           <p>Pelajar di sekolah anda menyertai subjek ini menggunakan kod unik yang dijana selepas ia dicipta.</p>
@@ -148,6 +152,7 @@ function CreateClassDialog({ onClose, onCreated }: { onClose: () => void; onCrea
             <Button type="submit" disabled={busy || !subjectId || name.trim().length < 2}>{busy ? "Mencipta…" : "Cipta subjek"}</Button>
           </div>
         </form>
+        </SelectPortalProvider>
       </div>
     </dialog>
   );

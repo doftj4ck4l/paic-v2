@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import { Select, SelectPortalProvider } from "@/components/ui/select";
 import type { OwnedWorkbookOption } from "@/lib/assignments";
 import styles from "../classes.module.css";
 
@@ -23,6 +23,7 @@ export function AssignmentDialog({
   onCreated: () => void;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const [container, setContainer] = useState<HTMLElement | null>(null);
   const [workbookId, setWorkbookId] = useState(workbooks[0]?.id ?? "");
   const [modules, setModules] = useState<ModuleOption[] | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -40,6 +41,8 @@ export function AssignmentDialog({
     document.body.style.overflow = "hidden";
     return () => { dialog?.close(); document.body.style.overflow = overflow; };
   }, []);
+
+  const attach = useCallback((element: HTMLDialogElement | null) => { ref.current = element; setContainer(element); }, []);
 
   useEffect(() => {
     if (!workbookId) return;
@@ -103,7 +106,7 @@ export function AssignmentDialog({
 
   return (
     <dialog
-      ref={ref}
+      ref={attach}
       className={styles.dialog}
       aria-label="Tugaskan buku kerja"
       onCancel={(event) => { event.preventDefault(); onClose(); }}
@@ -111,6 +114,7 @@ export function AssignmentDialog({
     >
       <div className={styles.dialogInner}>
         <button type="button" className={styles.closeDialog} aria-label="Tutup" onClick={onClose}><X size={17} /></button>
+        <SelectPortalProvider container={container}>
         <form className={styles.dialogBody} onSubmit={submit}>
           <h2>Tugaskan buku kerja</h2>
           <p>Pilih buku kerja dan modul yang perlu disiapkan pelajar. Pelajar membukanya secara baca sahaja, dan kemajuan mereka muncul dalam Analitik subjek.</p>
@@ -173,6 +177,7 @@ export function AssignmentDialog({
             <Button type="submit" disabled={!canSubmit}>{busy ? "Menugaskan…" : "Tugaskan"}</Button>
           </div>
         </form>
+        </SelectPortalProvider>
       </div>
     </dialog>
   );
