@@ -81,6 +81,17 @@
 .detailHeroCopy { position: relative; z-index: 2; display: grid; gap: 9px; min-width: 0; }
 .detailTitleRow { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .detailTitleRow h1 { margin: 0; font-size: 31px; font-weight: 800; letter-spacing: -1.2px; color: #10112f; }
+.titleEditButton { display: grid; place-items: center; width: 30px; height: 30px; border: 1px solid #e9e2fb; border-radius: 10px; background: #ffffffb0; color: #8a7fae; cursor: pointer; transition: color 140ms, border-color 140ms; }
+.titleEditButton:hover { color: #6b4fa0; border-color: #d9cff0; }
+.titleEditRow { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+.titleInput { width: min(420px, 100%); padding: 5px 14px; border: 1px solid #d9cff0; border-radius: 14px; background: #ffffffcc; font: inherit; font-size: 29px; font-weight: 800; letter-spacing: -1.1px; color: #10112f; box-shadow: 0 4px 14px rgb(79 58 115 / 0.08); outline: none; }
+.titleInput:focus { border-color: #b39ddb; box-shadow: 0 0 0 3px rgb(138 101 189 / 0.14); }
+.titleSave, .titleCancel { display: grid; place-items: center; width: 34px; height: 34px; flex-shrink: 0; border-radius: 11px; cursor: pointer; }
+.titleSave { border: 0; background: linear-gradient(110deg, #007a66, #00856f); color: #fff; box-shadow: 0 3px 8px rgb(0 122 102 / 0.25); }
+.titleSave:hover:not(:disabled) { transform: translateY(-1px); }
+.titleSave:disabled { opacity: 0.6; cursor: default; }
+.titleCancel { border: 1px solid #e9e2fb; background: #ffffffd9; color: #776099; }
+.titleCancel:hover { color: #4d3d6b; }
 .detailSub { margin: 0; font-size: 13px; color: #686588; }
 .detailSub strong { color: #4c4a68; }
 .detailHeroArt { position: relative; flex-shrink: 0; display: grid; place-items: center; width: 148px; height: 122px; }
@@ -376,6 +387,7 @@
   .detailHeroArt { display: none; }
   .detailHeroCopy { padding-right: 118px; }
   .detailTitleRow h1 { font-size: 26px; }
+  .titleInput { font-size: 23px; width: 100%; }
   .heroDelete { top: 14px; right: 14px; padding: 6px 10px; }
   .rosterRow { grid-template-columns: minmax(0, 1fr) auto; }
   .rosterCell { display: none; }

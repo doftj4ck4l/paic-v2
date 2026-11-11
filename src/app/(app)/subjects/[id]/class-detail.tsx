@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, BookOpen, CalendarDays, Check, FileText, Globe, Plus, RefreshCw, Trash2, UserMinus, Users, Video, Zap, type LucideIcon } from "lucide-react";
+import { ArrowLeft, BookOpen, CalendarDays, Check, FileText, Globe, Pencil, Plus, RefreshCw, Trash2, UserMinus, Users, Video, X, Zap, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ContentTile, SUBJECT_ICONS } from "@/components/studio/content-tile";
 import { WORKBOOK_COVER_ART } from "@/app/(app)/workbooks/workbook-list";
@@ -120,6 +120,9 @@ export function ClassDetailView({
   const isTeacher = user.role === "teacher";
   const [tab, setTab] = useState<TabKey>(initialTab ?? "overview");
   const [code, setCode] = useState(detail.joinCode);
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [titleDraft, setTitleDraft] = useState(detail.name);
+  const [savingTitle, setSavingTitle] = useState(false);
   const [rotating, setRotating] = useState(false);
   const [removing, setRemoving] = useState<string | null>(null);
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
@@ -145,6 +148,31 @@ export function ClassDetailView({
     if (item.key === "students" || item.key === "progress") return isTeacher;
     return true;
   });
+
+  async function saveTitle() {
+    const name = titleDraft.trim();
+    if (savingTitle) return;
+    if (name.length < 2 || name === detail.name) {
+      setEditingTitle(false);
+      setTitleDraft(detail.name);
+      return;
+    }
+    setSavingTitle(true);
+    setError(null);
+    const response = await fetch(`/api/subjects/${detail.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    }).catch(() => null);
+    if (!response?.ok) {
+      setError("Nama subjek tidak dapat dikemas kini. Cuba lagi.");
+      setSavingTitle(false);
+      return;
+    }
+    setSavingTitle(false);
+    setEditingTitle(false);
+    router.refresh();
+  }
 
   async function rotateCode() {
     if (rotating) return;
@@ -266,7 +294,48 @@ export function ClassDetailView({
           <div className={styles.detailHeroCopy}>
             <Link href="/subjects" className={styles.back}><ArrowLeft size={14} aria-hidden="true" />Semua subjek</Link>
             <div className={styles.detailTitleRow}>
-              <h1>{detail.name}</h1>
+              {isTeacher && editingTitle ? (
+                <span className={styles.titleEditRow}>
+                  <input
+                    className={styles.titleInput}
+                    value={titleDraft}
+                    onChange={(event) => setTitleDraft(event.target.value)}
+                    maxLength={60}
+                    autoFocus
+                    aria-label="Nama subjek"
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") { event.preventDefault(); void saveTitle(); }
+                      if (event.key === "Escape") { setEditingTitle(false); setTitleDraft(detail.name); }
+                    }}
+                  />
+                  <button type="button" className={styles.titleSave} onClick={saveTitle} disabled={savingTitle} aria-label="Simpan nama subjek">
+                    <Check size={15} aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.titleCancel}
+                    onClick={() => { setEditingTitle(false); setTitleDraft(detail.name); }}
+                    aria-label="Batal sunting nama"
+                  >
+                    <X size={15} aria-hidden="true" />
+                  </button>
+                </span>
+              ) : (
+                <>
+                  <h1>{detail.name}</h1>
+                  {isTeacher && (
+                    <button
+                      type="button"
+                      className={styles.titleEditButton}
+                      onClick={() => { setTitleDraft(detail.name); setEditingTitle(true); }}
+                      aria-label="Sunting nama subjek"
+                      title="Sunting nama subjek"
+                    >
+                      <Pencil size={14} aria-hidden="true" />
+                    </button>
+                  )}
+                </>
+              )}
               {subject && <span className={styles.chip}>{subject.name}</span>}
               {detail.formLevel && <span className={styles.chip}>{detail.formLevel}</span>}
             </div>

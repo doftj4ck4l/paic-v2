@@ -32,6 +32,7 @@
 .filterSelect { appearance: none; height: 37px; padding: 0 34px 0 14px; border: 1px solid #dfe4f3; border-radius: 20px; background: #fff; color: #3c4160; font-size: 12.5px; font-weight: 650; letter-spacing: -.2px; cursor: pointer; box-shadow: 0 3px 7px #4f3a7307; outline: none; transition: border-color 140ms; }
 .filterSelect:hover { border-color: #b9ddd1; }
 .filterSelect:focus-visible { border-color: #00a58d; box-shadow: 0 0 0 3px #00a58d18; }
+.searchRow > .filterSelect { width: auto; }
 .filterChevron { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: #6d7292; pointer-events: none; }
 .filterMenu { position: relative; display: inline-flex; }
 .filterTrigger { display: inline-flex; align-items: center; gap: 7px; height: 37px; padding: 0 13px; border: 1px solid #dfe4f3; border-radius: 20px; background: #fff; color: #3c4160; font-size: 12.5px; font-weight: 650; letter-spacing: -.2px; cursor: pointer; box-shadow: 0 3px 7px #4f3a7307; transition: border-color 140ms; }
@@ -129,7 +130,7 @@
   .sectionHeading h2 { font-size: 21px; }
   .sectionHeading p { font-size: 11px; }
   .filterField { flex: 0 0 auto; width: 100%; }
-  .filterSelect { width: 100%; }
+  .searchRow > .filterSelect { width: 100%; }
   .filterMenu { flex: 0 0 auto; width: 100%; }
   .filterTrigger { width: 100%; justify-content: center; }
   .topicsSection, .workbooksSection { margin-top: 28px; }
